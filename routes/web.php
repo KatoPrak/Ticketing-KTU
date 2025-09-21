@@ -8,8 +8,8 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
-use App\Http\Middleware\RememberMeMiddleware;
 use App\Http\Controllers\Staff\TicketController as StaffTicketController;
+use App\Http\Middleware\RememberMeMiddleware;
 
 // ============================
 // Login routes
@@ -19,7 +19,7 @@ Route::post('/', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // ============================
-// User routes (staff)
+// Dashboard routes
 // ============================
 Route::middleware([RememberMeMiddleware::class])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
@@ -27,24 +27,26 @@ Route::middleware([RememberMeMiddleware::class])->group(function () {
     Route::get('/staff/dashboard', [DashboardController::class, 'staff'])->name('staff.dashboard');
 });
 
+// ============================
 // Laporan staff
+// ============================
 Route::post('/report/submit', [ReportController::class, 'submit'])->name('report.submit');
-Route::get('/list-tiket', [StaffTicketController::class, 'index'])->name('tickets.list');
 
-
+// ============================
 // Edit user (admin)
+// ============================
 Route::get('/users/{id}/edit', [AdminController::class, 'edit'])->name('users.edit');
 
 // ============================
 // Staff Tickets
 // ============================
-Route::middleware(['auth'])->group(function () {
-    Route::post('/tickets/store', [StaffTicketController::class, 'store'])->name('tickets.store');
+Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () {
+    // List tiket
+    Route::get('/tickets', [StaffTicketController::class, 'index'])->name('tickets.index');
+
+    // Simpan tiket
+    Route::post('/tickets', [StaffTicketController::class, 'store'])->name('tickets.store');
 });
-Route::get('/tickets/create', [StaffTicketController::class, 'create'])->name('tickets.create');
-Route::post('/tickets', [StaffTicketController::class, 'store'])->name('tickets.store');
-
-
 
 // ============================
 // Admin routes

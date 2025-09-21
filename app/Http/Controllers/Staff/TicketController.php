@@ -5,9 +5,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Category;
 
 class TicketController extends Controller
 {
+    // Simpan tiket
     public function store(Request $request)
     {
         $request->validate([
@@ -31,24 +33,38 @@ class TicketController extends Controller
             'status'      => 'waiting',
         ]);
 
-        // ✅ Balikin JSON supaya cocok sama fetch di user.js
         return response()->json([
             'success' => true,
             'message' => 'Tiket berhasil dibuat dengan ID: #' . $ticket->id,
             'ticket'  => $ticket
         ], 201);
     }
-    public function index()
+
+    // Tampilkan daftar tiket
+    public function index(Request $request)
     {
-        // kalau cuma mau tampilin view aja
-        return view('staff.list-tiket'); 
-        // pastikan file ada di resources/views/staff/list-tiket.blade.php
+        $categories = Category::all(); // untuk dropdown kategori
+
+        $query = Ticket::with('category'); // ambil relasi category
+       
+        // Filter status
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter kategori
+        if ($request->category_id) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Search berdasarkan description atau id tiket
+        if ($request->search) {
+            $query->where('description', 'like', '%' . $request->search . '%')
+                  ->orWhere('id', $request->search);
+        }
+
+        $tickets = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('staff.list-tiket', compact('categories', 'tickets'));
     }
-
-    public function create()
-{
-    // tampilkan form ticket
-    return view('staff.form-tiket'); // pastikan ada file blade ini
-}
-
 }

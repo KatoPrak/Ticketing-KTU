@@ -200,11 +200,15 @@ body {
     font-size: 1.1rem;
 }
 
+/* ============================= */
+/* 🔹 Ticket Item - Compact Style */
+/* ============================= */
 .ticket-item {
     border-bottom: 1px solid #e9ecef;
-    padding: 25px 30px;
+    padding: 15px 20px;
     transition: all 0.3s ease;
     cursor: pointer;
+    font-size: 0.9rem;
 }
 
 .ticket-item:hover {
@@ -219,7 +223,7 @@ body {
 .ticket-row {
     display: grid;
     grid-template-columns: auto 1fr auto auto auto;
-    gap: 20px;
+    gap: 12px;
     align-items: center;
 }
 
@@ -227,9 +231,9 @@ body {
     font-family: 'Courier New', monospace;
     font-weight: 700;
     color: #495057;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     background: #f8f9fa;
-    padding: 5px 10px;
+    padding: 3px 8px;
     border-radius: 8px;
 }
 
@@ -238,18 +242,18 @@ body {
 }
 
 .ticket-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #2c3e50;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     line-height: 1.4;
 }
 
 .ticket-meta {
     color: #6c757d;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     display: flex;
-    gap: 20px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
@@ -260,9 +264,9 @@ body {
 }
 
 .status-badge {
-    padding: 6px 15px;
+    padding: 4px 10px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -293,9 +297,9 @@ body {
 }
 
 .priority-badge {
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 15px;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
 }
@@ -317,9 +321,11 @@ body {
 
 .ticket-date {
     color: #6c757d;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     text-align: right;
 }
+
+/* ============================= */
 
 .empty-state {
     text-align: center;

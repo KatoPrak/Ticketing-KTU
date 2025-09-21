@@ -2,6 +2,7 @@
 
 @section('title', 'Daftar Tiket')
 @vite(['resources/css/list-tiket.css','resources/js/list-tiket.js'])
+
 @section('content')
 <div class="container">
     <!-- Filters Section -->
@@ -24,7 +25,9 @@
                 <option value="medium">Sedang</option>
                 <option value="low">Rendah</option>
             </select>
-            <button class="create-btn" onclick="createNewTicket()">
+
+            <!-- ✅ tombol ini sekarang langsung buka modal -->
+            <button type="button" class="create-btn" data-bs-toggle="modal" data-bs-target="#createTicketModal">
                 <i class="fas fa-plus"></i>
                 Buat Tiket Baru
             </button>
@@ -50,7 +53,9 @@
                 </div>
                 <h3 class="empty-title">Tidak ada tiket ditemukan</h3>
                 <p class="empty-text">Belum ada tiket yang sesuai</p>
-                <button class="create-btn" onclick="createNewTicket()">
+
+                <!-- ✅ tombol empty state juga buka modal -->
+                <button type="button" class="quick-action-btn" data-bs-toggle="modal" data-bs-target="#createTicketModal">
                     <i class="fas fa-plus"></i>
                     Buat Tiket Pertama
                 </button>
@@ -75,4 +80,8 @@
         </div>
     </div>
 </div>
+
+{{-- ✅ Include modal form-ticket --}}
+@include('staff.modals.form-ticket')
+
 @endsection

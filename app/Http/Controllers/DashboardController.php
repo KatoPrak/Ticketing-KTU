@@ -22,4 +22,11 @@ class DashboardController extends Controller
         $categories = Category::all(); // ✅ ambil data kategori
         return view('Dashboard.staff', compact('categories')); // ✅ kirim ke blade
     }
+
+    public function index()
+{
+    $categories = \App\Models\Category::all();
+    return view('Dashboard.staff', compact('categories'));
+}
+
 }

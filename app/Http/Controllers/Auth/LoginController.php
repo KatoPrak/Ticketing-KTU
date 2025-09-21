@@ -81,6 +81,6 @@ class LoginController extends Controller
 
         session()->flash('success', 'Anda berhasil logout. Sampai jumpa!');
 
-        return redirect('/login');
+        return redirect('/');
     }
 }
