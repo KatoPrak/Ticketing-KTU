@@ -3,21 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use App\Models\Category; // ✅ perbaikan namespace
 
 class DashboardController extends Controller
 {
     public function admin()
     {
-        return view('dashboard.admin');
+        return view('Dashboard.Admin');
     }
 
     public function it()
     {
-        return view('dashboard.it');
+        return view('Dashboard.IT');
     }
 
-    public function user()
+    public function staff()
     {
-        return view('dashboard.user');
+        $categories = Category::all(); // ✅ ambil data kategori
+        return view('Dashboard.staff', compact('categories')); // ✅ kirim ke blade
     }
 }

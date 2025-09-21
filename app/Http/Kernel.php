@@ -16,6 +16,8 @@ class Kernel extends HttpKernel
 
     protected $routeMiddleware =[
         'role.redirect' => \App\Http\Middleware\RoleRedirect::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'auth' => \App\Http\Middleware\Authenticate::class,
     ];
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
@@ -68,5 +70,6 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'remember' => \App\Http\Middleware\RememberMeMiddleware::class,
     ];
 }
