@@ -15,7 +15,6 @@
             <a href="{{ route('staff.tickets.index') }}" class="{{ Request::is('list-tiket') ? 'active' : '' }}">
                 <i class="fas fa-ticket-alt"></i>
                 Tiket Saya
-                <span class="menu-badge">12</span>
             </a>
         </li>
         <li>

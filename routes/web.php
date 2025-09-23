@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Staff\TicketController as StaffTicketController;
+use App\Http\Controllers\It\TicketController as ItTicketController;
 use App\Http\Middleware\RememberMeMiddleware;
 
 // ============================
@@ -31,7 +32,7 @@ Route::middleware([RememberMeMiddleware::class])->group(function () {
 // Laporan staff
 // ============================
 Route::post('/report/submit', [ReportController::class, 'submit'])->name('report.submit');
-
+Route::get('/tickets/{id}', [StaffTicketController::class, 'show'])->name('tickets.show');
 // ============================
 // Edit user (admin)
 // ============================
@@ -46,6 +47,19 @@ Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () 
 
     // Simpan tiket
     Route::post('/tickets', [StaffTicketController::class, 'store'])->name('tickets.store');
+});
+
+// ============================
+// IT Tickets
+// ============================
+Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () {
+    Route::get('/tickets', [StaffTicketController::class, 'index'])->name('tickets.index');
+    // route staff lain...
+});
+
+Route::middleware(['auth'])->prefix('it')->name('it.')->group(function () {
+    Route::get('/riwayat-ticket', [ItTicketController::class, 'riwayat'])->name('riwayat-ticket');
+    // route it lain...
 });
 
 // ============================

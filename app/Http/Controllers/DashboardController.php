@@ -9,24 +9,24 @@ class DashboardController extends Controller
 {
     public function admin()
     {
-        return view('Dashboard.Admin');
+        return view('admin.Admin');
     }
 
     public function it()
     {
-        return view('Dashboard.IT');
+        return view('it.IT');
     }
 
     public function staff()
     {
         $categories = Category::all(); // ✅ ambil data kategori
-        return view('Dashboard.staff', compact('categories')); // ✅ kirim ke blade
+        return view('staff.staff', compact('categories')); // ✅ kirim ke blade
     }
 
     public function index()
 {
     $categories = \App\Models\Category::all();
-    return view('Dashboard.staff', compact('categories'));
+    return view('staff.staff', compact('categories'));
 }
 
 }
