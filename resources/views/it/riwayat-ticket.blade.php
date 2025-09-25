@@ -1,81 +1,55 @@
-@extends('layouts.staff')
+@extends('layouts.it')
 
-@section('title', 'Daftar Tiket')
+@section('title', 'Riwayat Tiket IT')
 @vite(['resources/css/list-tiket.css','resources/js/list-tiket.js'])
 
 @section('content')
-<div class="container">
-    <!-- Filters Section -->
-    <div class="filters-section fade-in">
-        <div class="filters-row">
-            <div class="search-box">
-                <input type="text" class="search-input" placeholder="Cari tiket..." id="searchInput">
-                <i class="fas fa-search search-icon"></i>
-            </div>
-            <select class="filter-select" id="statusFilter">
-                <option value="">Semua Status</option>
-                <option value="open">Terbuka</option>
-                <option value="progress">Dalam Proses</option>
-                <option value="resolved">Selesai</option>
-                <option value="closed">Ditutup</option>
-            </select>
-            <select class="filter-select" id="priorityFilter">
-                <option value="">Semua Prioritas</option>
-                <option value="high">Tinggi</option>
-                <option value="medium">Sedang</option>
-                <option value="low">Rendah</option>
-            </select>
-        </div>
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title">
+            <i class="fas fa-history me-2 text-primary"></i> Riwayat Tiket IT
+        </h2>
     </div>
 
-    <!-- Tickets List -->
-    <div class="tickets-container fade-in">
-        <div class="tickets-header">
-            <i class="fas fa-list"></i>
-            Daftar Tiket (12 tiket ditemukan)
+    <!-- Table Tickets -->
+    <div class="card shadow-sm">
+        <div class="card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Deskripsi</th>
+                        <th>Kategori</th>
+                        <th>Status</th>
+                        <th>Prioritas</th>
+                        <th>Dibuat Oleh</th>
+                        <th>Terakhir Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($tickets as $ticket)
+                    <tr>
+                        <td>#{{ $ticket->id }}</td>
+                        <td>{{ $ticket->description }}</td>
+                        <td>{{ $ticket->category->name ?? '-' }}</td>
+                        <td><span class="badge bg-secondary">{{ ucfirst($ticket->status) }}</span></td>
+                        <td>{{ ucfirst($ticket->priority) }}</td>
+                        <td>{{ $ticket->user->name ?? 'Unknown' }}</td>
+                        <td>{{ $ticket->updated_at->format('d M Y H:i') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Belum ada riwayat tiket</td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
         </div>
-        
-        <div id="ticketsContent">
-            <div class="loading" id="loadingState" style="display: none;">
-                <div class="spinner"></div>
-                <p>Memuat tiket...</p>
-            </div>
-            <div id="ticketsList"></div>
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <div class="empty-icon">
-                    <i class="fas fa-ticket-alt"></i>
-                </div>
-                <h3 class="empty-title">Tidak ada tiket ditemukan</h3>
-                <p class="empty-text">Belum ada tiket yang sesuai</p>
-
-                <!-- ✅ tombol empty state juga buka modal -->
-                <button type="button" class="quick-action-btn" data-bs-toggle="modal" data-bs-target="#createTicketModal">
-                    <i class="fas fa-plus"></i>
-                    Buat Tiket Pertama
-                </button>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination">
-            <div class="pagination-info">
-                Menampilkan 1-10 dari 12 tiket
-            </div>
-            <div class="pagination-controls">
-                <button class="page-btn" disabled>
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
+        <div class="card-footer">
+            {{ $tickets->links() }}
         </div>
     </div>
 </div>
-
-{{-- ✅ Include modal form-ticket --}}
-@include('staff.modals.form-ticket')
-
 @endsection

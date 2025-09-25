@@ -46,7 +46,7 @@ class AdminController extends Controller
         $departmentStats = $this->getDepartmentStatsData();
 
         // Mengubah jalur tampilan agar sesuai dengan file Anda yang ada
-        return view('Dashboard.Admin', compact(
+        return view('admin.Admin', compact(
             'totalUsers',
             'newUsersThisMonth', 
             'totalTickets',

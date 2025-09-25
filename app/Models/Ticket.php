@@ -36,6 +36,10 @@ class Ticket extends Model
     {
         return $query->where('status', 'pending');
     }
+public function attachments()
+{
+    return $this->hasMany(TicketAttachment::class); // atau nama model attachment kamu
+}
 
     public function scopeResolved($query)
     {

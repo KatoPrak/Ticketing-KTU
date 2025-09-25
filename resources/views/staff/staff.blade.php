@@ -1,7 +1,7 @@
 @extends('layouts.staff')
 
 @section('title', 'Dashboard Staff')
-
+<meta name="csrf-token" content="{{ csrf_token() }}">
 @section('content')
 <div class="welcome-banner">
     <h2>Selamat Datang, <strong>{{ Auth::user()->name }}</strong></h2>

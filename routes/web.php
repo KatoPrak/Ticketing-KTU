@@ -32,41 +32,41 @@ Route::middleware([RememberMeMiddleware::class])->group(function () {
 // Laporan staff
 // ============================
 Route::post('/report/submit', [ReportController::class, 'submit'])->name('report.submit');
-Route::get('/tickets/{id}', [StaffTicketController::class, 'show'])->name('tickets.show');
+
 // ============================
 // Edit user (admin)
 // ============================
 Route::get('/users/{id}/edit', [AdminController::class, 'edit'])->name('users.edit');
 
 // ============================
-// Staff Tickets
+// Staff routes
 // ============================
 Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () {
     // List tiket
     Route::get('/tickets', [StaffTicketController::class, 'index'])->name('tickets.index');
-
     // Simpan tiket
     Route::post('/tickets', [StaffTicketController::class, 'store'])->name('tickets.store');
 });
 
 // ============================
-// IT Tickets
+// IT routes
 // ============================
-Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () {
-    Route::get('/tickets', [StaffTicketController::class, 'index'])->name('tickets.index');
-    // route staff lain...
-});
-
 Route::middleware(['auth'])->prefix('it')->name('it.')->group(function () {
+    Route::get('/index-ticket', [ItTicketController::class, 'index'])->name('index-ticket');
+    
+    // Detail tiket untuk modal (return partial)
+    Route::get('/it/tickets/{ticket}', [ItTicketController::class, 'show'])->name('it.tickets.show');
+
+    // Update status / priority
+    Route::put('/tickets/{id}', [ItTicketController::class, 'update'])->name('tickets.update');
     Route::get('/riwayat-ticket', [ItTicketController::class, 'riwayat'])->name('riwayat-ticket');
-    // route it lain...
+
 });
 
 // ============================
 // Admin routes
 // ============================
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 

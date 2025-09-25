@@ -1,34 +1,29 @@
-
-
-let filteredTickets = [...sampleTickets];
+let tickets = [];        // Data asli dari server
+let filteredTickets = []; 
 let currentPage = 1;
 const itemsPerPage = 10;
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
-    renderTickets();
-    updateStats();
+    fetchTickets(); // ambil data dari backend
     setupEventListeners();
-
-    // Animasi masuk untuk card statistik
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach((card, index) => {
-        setTimeout(() => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.offsetHeight; // Trigger reflow
-            card.style.transition = 'all 0.5s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 100);
-    });
 });
 
-function setupEventListeners() {
-    // Search functionality
-    document.getElementById('searchInput')?.addEventListener('input', handleSearch);
+function fetchTickets() {
+    fetch('/staff/tickets') // pastikan route sesuai
+        .then(response => response.json())
+        .then(data => {
+            // Laravel paginate return ada .data
+            tickets = data.data ?? data;  
+            filteredTickets = [...tickets];
+            renderTickets();
+            updateStats();
+            updateHeader();
+        })
+}
 
-    // Filter functionality
+function setupEventListeners() {
+    document.getElementById('searchInput')?.addEventListener('input', handleSearch);
     document.getElementById('statusFilter')?.addEventListener('change', handleFilter);
     document.getElementById('priorityFilter')?.addEventListener('change', handleFilter);
 }
@@ -38,10 +33,9 @@ function handleSearch() {
     const statusFilter = document.getElementById('statusFilter').value;
     const priorityFilter = document.getElementById('priorityFilter').value;
 
-    filteredTickets = sampleTickets.filter(ticket => {
-        const matchesSearch = ticket.title.toLowerCase().includes(searchTerm) || 
-                            ticket.id.toLowerCase().includes(searchTerm) ||
-                            ticket.description.toLowerCase().includes(searchTerm);
+    filteredTickets = tickets.filter(ticket => {
+        const matchesSearch = ticket.description.toLowerCase().includes(searchTerm) ||
+                              ticket.ticket_id.toLowerCase().includes(searchTerm);
         const matchesStatus = !statusFilter || ticket.status === statusFilter;
         const matchesPriority = !priorityFilter || ticket.priority === priorityFilter;
 
@@ -54,7 +48,7 @@ function handleSearch() {
 }
 
 function handleFilter() {
-    handleSearch(); // Reuse search logic as it handles all filters
+    handleSearch();
 }
 
 function renderTickets() {
@@ -66,7 +60,6 @@ function renderTickets() {
         if (emptyState) emptyState.style.display = 'block';
         return;
     }
-
     if (emptyState) emptyState.style.display = 'none';
 
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -76,22 +69,12 @@ function renderTickets() {
     ticketsList.innerHTML = ticketsToShow.map(ticket => `
         <div class="ticket-item" onclick="viewTicketDetail('${ticket.id}')">
             <div class="ticket-row">
-                <div class="ticket-id">${ticket.id}</div>
+                <div class="ticket-id">${ticket.ticket_id}</div>
                 <div class="ticket-info">
-                    <div class="ticket-title">${ticket.title}</div>
+                    <div class="ticket-title">${ticket.category?.name ?? '-'}</div>
                     <div class="ticket-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-tag"></i>
-                            ${ticket.category}
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-user"></i>
-                            ${ticket.assignedTo}
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-clock"></i>
-                            ${formatDate(ticket.updatedDate)}
-                        </div>
+                        <div class="meta-item"><i class="fas fa-tag"></i>${ticket.category?.name ?? '-'}</div>
+                        <div class="meta-item"><i class="fas fa-clock"></i>${ticket.created_at}</div>
                     </div>
                 </div>
                 <div class="priority-badge priority-${ticket.priority}">
@@ -100,10 +83,6 @@ function renderTickets() {
                 <div class="status-badge status-${ticket.status}">
                     ${getStatusText(ticket.status)}
                 </div>
-                <div class="ticket-date">
-                    <div style="font-weight: 600;">${formatDate(ticket.createdDate)}</div>
-                    <div style="font-size: 0.8rem;">Dibuat</div>
-                </div>
             </div>
         </div>
     `).join('');
@@ -111,21 +90,16 @@ function renderTickets() {
 
 function updateStats() {
     const stats = {
-        open: sampleTickets.filter(t => t.status === 'open').length,
-        progress: sampleTickets.filter(t => t.status === 'progress').length,
-        resolved: sampleTickets.filter(t => t.status === 'resolved').length,
-        closed: sampleTickets.filter(t => t.status === 'closed').length
+        waiting: tickets.filter(t => t.status === 'waiting').length,
+        progress: tickets.filter(t => t.status === 'progress').length,
+        resolved: tickets.filter(t => t.status === 'resolved').length,
+        closed: tickets.filter(t => t.status === 'closed').length
     };
 
-    const openEl = document.getElementById('openCount');
-    const progressEl = document.getElementById('progressCount');
-    const resolvedEl = document.getElementById('resolvedCount');
-    const closedEl = document.getElementById('closedCount');
-
-    if (openEl) openEl.textContent = stats.open;
-    if (progressEl) progressEl.textContent = stats.progress;
-    if (resolvedEl) resolvedEl.textContent = stats.resolved;
-    if (closedEl) closedEl.textContent = stats.closed;
+    document.getElementById('openCount').textContent = stats.waiting;
+    document.getElementById('progressCount').textContent = stats.progress;
+    document.getElementById('resolvedCount').textContent = stats.resolved;
+    document.getElementById('closedCount').textContent = stats.closed;
 }
 
 function updateHeader() {
@@ -137,7 +111,7 @@ function updateHeader() {
 
 function getStatusText(status) {
     const statusMap = {
-        'open': 'Terbuka',
+        'waiting': 'Menunggu',
         'progress': 'Dalam Proses',
         'resolved': 'Selesai',
         'closed': 'Ditutup'
@@ -154,27 +128,6 @@ function getPriorityText(priority) {
     return priorityMap[priority] || priority;
 }
 
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-}
-
 function viewTicketDetail(ticketId) {
-    // Simulate navigation to ticket detail page
-    alert(`Membuka detail tiket: ${ticketId}\n\nFitur ini akan mengarahkan ke halaman detail tiket.`);
-}
-
-function createNewTicket() {
-    // Show modal form tiket
-    const modalEl = document.getElementById('createTicketModal');
-    if (modalEl) {
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
-    } else {
-        alert('Modal form tiket belum ada di halaman ini.');
-    }
+    alert(`Membuka detail tiket: ${ticketId}`);
 }

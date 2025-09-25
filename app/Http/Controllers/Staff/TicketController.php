@@ -14,48 +14,62 @@ class TicketController extends Controller
      * Simpan tiket baru ke database dan buat ID kustom.
      */
     public function store(Request $request)
-    {
-        // MODIFIKASI: Validasi disederhanakan, tidak lagi memerlukan ticket_id dari form
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'required|string',
-            'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,heif,pdf,doc,docx',
-        ]);
+{
+    $validated = $request->validate([
+        'category_id'   => 'required|exists:categories,id',
+        'description'   => 'required|string',
+        'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,heif,',
+    ]);
 
-        $filePaths = [];
-        if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $file) {
-                $filePaths[] = $file->store('tickets', 'public');
-            }
+    // 🚀 Simpan file lampiran
+    $filePaths = [];
+    if ($request->hasFile('attachments')) {
+        foreach ($request->file('attachments') as $file) {
+            $filePaths[] = $file->store('tickets', 'public');
         }
-
-        // --- MULAI LOGIKA BARU ---
-
-        // 1. Buat tiket dengan data awal (kolom ticket_id masih kosong)
-        $ticket = Ticket::create([
-            'user_id'     => Auth::id(),
-            'category_id' => $request->category_id,
-            'description' => $request->description,
-            'attachments' => json_encode($filePaths),
-            'status'      => 'waiting',
-            'priority'    => $request->priority ?? 'medium',
-        ]);
-
-        // 2. Buat ticket_id kustom berdasarkan ID auto-increment yang baru saja didapat
-        $formattedId = 'T-KTU-' . str_pad($ticket->id, 3, '0', STR_PAD_LEFT);
-
-        // 3. Update kembali tiket yang baru dibuat untuk menyimpan ID kustom
-        $ticket->ticket_id = $formattedId;
-        $ticket->save();
-
-        // --- SELESAI LOGIKA BARU ---
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Tiket berhasil dibuat dengan ID: ' . $ticket->ticket_id,
-            'ticket'  => $ticket
-        ], 201);
     }
+
+    // 🚀 Buat tiket baru
+   // 🚀 Buat tiket baru
+$ticket = Ticket::create([
+    'user_id'     => Auth::id(),
+    'category_id' => $validated['category_id'],
+    'description' => $validated['description'],
+    'attachments' => json_encode($filePaths),
+    'status'      => 'waiting', // tetap waiting
+    'priority'    => 'low',     // selalu otomatis Low
+]);
+
+    // 🚀 Format ticket_id (misal: T-KTU-001)
+    $formattedId = 'T-KTU-' . str_pad($ticket->id, 3, '0', STR_PAD_LEFT);
+    $ticket->ticket_id = $formattedId;
+    $ticket->save();
+
+    // 🚀 Load relasi kategori & decode attachments jadi array
+    $ticket->load('category');
+    $ticket->attachments = $filePaths;
+
+    // 🚀 Return JSON
+    return response()->json([
+        'success' => true,
+        'message' => 'Tiket berhasil dibuat dengan ID: ' . $ticket->ticket_id,
+        'ticket'  => [
+            'id'          => $ticket->id,
+            'ticket_id'   => $ticket->ticket_id,
+            'category'    => $ticket->category ? [
+                'id'   => $ticket->category->id,
+                'name' => $ticket->category->name,
+            ] : null,
+            'description' => $ticket->description,
+            'status'      => $ticket->status,
+            'priority'    => $ticket->priority,
+            'created_at'  => $ticket->created_at->format('d M Y H:i'),
+            'attachments' => $filePaths,
+        ]
+    ], 201);
+}
+
+
 
     /**
      * Tampilkan daftar tiket.
@@ -64,37 +78,54 @@ class TicketController extends Controller
 {
     $categories = Category::all();
 
-    $query = Ticket::with('category')
-        ->where('user_id', Auth::id());
+    // ==================== QUERY TIKET AKTIF ====================
+    $activeQuery = Ticket::with('category')
+        ->where('user_id', Auth::id())
+        ->whereNotIn('status', ['resolved', 'closed']); // exclude yg selesai
 
-    // Filter status
     if ($request->status) {
-        $query->where('status', $request->status);
+        $activeQuery->where('status', $request->status);
     }
 
-    // Filter kategori
     if ($request->category_id) {
-        $query->where('category_id', $request->category_id);
+        $activeQuery->where('category_id', $request->category_id);
     }
 
-    // Search berdasarkan description atau id tiket
     if ($request->search) {
-        $query->where(function ($q) use ($request) {
+        $activeQuery->where(function ($q) use ($request) {
             $q->where('description', 'like', '%' . $request->search . '%')
                 ->orWhere('id', 'like', '%' . $request->search . '%')
                 ->orWhere('ticket_id', 'like', '%' . $request->search . '%');
         });
     }
 
-    // Ambil tiket, decode attachments JSON
-    $tickets = $query->orderBy('created_at', 'desc')
-                        ->paginate(10)
-                        ->through(function ($ticket) {
-                        $ticket->attachments = json_decode($ticket->attachments, true) ?? [];
-                        return $ticket;
-                    });
+    // aktif → paginate 5
+    $tickets = $activeQuery->orderBy('created_at', 'desc')
+        ->paginate(5)
+        ->through(function ($ticket) {
+            $ticket->attachments = json_decode($ticket->attachments, true) ?? [];
+            return $ticket;
+        });
 
-    return view('staff.list-tiket', compact('categories', 'tickets'));
+    // ==================== QUERY TIKET RIWAYAT ====================
+    $historyTickets = Ticket::with('category')
+        ->where('user_id', Auth::id())
+        ->whereIn('status', ['resolved', 'closed'])
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function ($ticket) {
+            $ticket->attachments = json_decode($ticket->attachments, true) ?? [];
+            return $ticket;
+        });
+
+    // ==================== RESPONSE AJAX ====================
+    if ($request->ajax()) {
+        return response()->json([
+            'tickets' => $tickets,
+            'historyTickets' => $historyTickets,
+        ], 200);
+    }
+
+    return view('staff.list-tiket', compact('categories', 'tickets', 'historyTickets'));
 }
-
 }
