@@ -11,6 +11,9 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Staff\TicketController as StaffTicketController;
 use App\Http\Controllers\It\TicketController as ItTicketController;
 use App\Http\Middleware\RememberMeMiddleware;
+use App\Http\Controllers\Admin\TicketController;
+
+Route::get('/admin/tickets', [TicketController::class, 'index'])->name('admin.tickets.index');
 
 // ============================
 // Login routes
@@ -97,4 +100,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Chart Data
     Route::get('/chart-data', [AdminController::class, 'getChartData'])->name('chart.data');
+    Route::get('/admin/reports', [AdminReportController::class, 'index'])
+    ->middleware(['auth', 'admin'])
+    ->name('reports.index');
+
 });

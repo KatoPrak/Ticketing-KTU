@@ -28,7 +28,7 @@ class AdminController extends Controller
         $newUsersThisMonth = User::whereMonth('created_at', now()->month)
                                   ->whereYear('created_at', now()->year)
                                   ->count();
-        
+
         $totalTickets = Ticket::count();
 
         $pendingTickets = Ticket::where('status', 'pending')->count();
@@ -38,17 +38,17 @@ class AdminController extends Controller
 
         $totalCategories = Category::count();
         $categories = Category::withCount('tickets')->get();
-        
+
         $users = User::orderBy('created_at', 'desc')->paginate(10);
-        
+
         $monthlyTickets = $this->getMonthlyTicketsData();
         $categoryStats = $this->getCategoryStatsData();
         $departmentStats = $this->getDepartmentStatsData();
 
         // Mengubah jalur tampilan agar sesuai dengan file Anda yang ada
-        return view('Dashboard.Admin', compact(
+        return view('admin.Admin', compact(
             'totalUsers',
-            'newUsersThisMonth', 
+            'newUsersThisMonth',
             'totalTickets',
             'pendingTickets',
             'inProgressTickets',
@@ -78,7 +78,7 @@ class AdminController extends Controller
             'role' => 'required|string',
             'department' => 'required|string',
         ]);
-    
+
         $user = new User();
         $user->name = $validated['name'];
         $user->id_staff = $validated['id_staff'];
@@ -87,14 +87,14 @@ class AdminController extends Controller
         $user->department = $validated['department'];
         $user->password = Hash::make($request->input('password', 'STAFFKTU123'));
         $user->save();
-    
+
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan!');
     }
 
     public function updateUser(Request $request, $id)
     {
         $user = User::findOrFail($id);
-    
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'id_staff' => 'required|string|max:50|unique:users,id_staff,' . $user->id,
@@ -102,7 +102,7 @@ class AdminController extends Controller
             'role' => 'required|string',
             'department' => 'required|string',
         ]);
-    
+
         $user->update([
             'name' => $validated['name'],
             'id_staff' => $validated['id_staff'],
@@ -110,14 +110,14 @@ class AdminController extends Controller
             'role' => $validated['role'],
             'department' => $validated['department'],
         ]);
-    
+
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui!');
     }
 
     public function deleteUser($id)
     {
         $user = User::findOrFail($id);
-        
+
         if ($user->tickets()->count() > 0) {
             return response()->json([
                 'success' => false,
@@ -181,7 +181,7 @@ class AdminController extends Controller
     public function deleteCategory($id)
     {
         $category = Category::findOrFail($id);
-        
+
         if ($category->tickets()->count() > 0) {
             return response()->json([
                 'success' => false,
@@ -206,7 +206,7 @@ class AdminController extends Controller
     public function exportExcel(Request $request)
     {
         $data = $this->prepareExportData($request);
-        
+
         $filename = 'admin_data_' . now()->format('Y-m-d') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
@@ -215,7 +215,7 @@ class AdminController extends Controller
 
         $callback = function() use ($data) {
             $file = fopen('php://output', 'w');
-            
+
             if (isset($data['users'])) {
                 fputcsv($file, ['=== USERS ===']);
                 fputcsv($file, ['Name', 'Email', 'Department', 'Role', 'Employee ID', 'Status', 'Created At']);
@@ -291,7 +291,7 @@ class AdminController extends Controller
         ];
 
         $html = view('admin.reports.pdf', $data)->render();
-        
+
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
@@ -299,22 +299,22 @@ class AdminController extends Controller
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
-        
+
         return $dompdf->stream('admin_report_' . now()->format('Y-m-d') . '.pdf');
     }
 
     private function prepareExportData(Request $request)
     {
         $data = [];
-        
+
         if ($request->include_users) {
             $data['users'] = User::orderBy('name')->get();
         }
-        
+
         if ($request->include_tickets) {
             $data['tickets'] = Ticket::with(['user', 'category'])->orderBy('created_at', 'desc')->get();
         }
-        
+
         if ($request->include_categories) {
             $data['categories'] = Category::withCount('tickets')->orderBy('name')->get();
         }
@@ -326,7 +326,7 @@ class AdminController extends Controller
     {
         $months = [];
         $data = [];
-        
+
         for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
             $months[] = $date->format('M Y');
@@ -383,4 +383,27 @@ class AdminController extends Controller
             'departments' => $this->getDepartmentStatsData($startDate, $endDate),
         ]);
     }
+}
+{
+    $totalUsers = \App\Models\User::count();
+    $totalTickets = Ticket::count();
+    $pendingTickets = Ticket::where('status', 'waiting')->count();
+
+    // Ambil jumlah tiket per bulan (12 bulan terakhir)
+    $ticketsByMonth = Ticket::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+        ->whereYear('created_at', Carbon::now()->year)
+        ->groupBy('month')
+        ->pluck('total', 'month');
+
+    // Siapin label & data
+    $months = collect(range(1, 12))->map(function ($m) {
+        return Carbon::create()->month($m)->format('F'); // Januari, Februari, dst
+    });
+
+    $ticketData = [];
+    foreach ($months as $i => $name) {
+        $ticketData[] = $ticketsByMonth[$i + 1] ?? 0; // kalau gak ada data isi 0
+    }
+
+    return view('admin.Admin', compact('totalUsers', 'totalTickets', 'pendingTickets', 'months', 'ticketData'));
 }

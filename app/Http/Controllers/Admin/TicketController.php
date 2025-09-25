@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Ticket;
 
 class TicketController extends Controller
 {
@@ -14,10 +14,11 @@ class TicketController extends Controller
      */
     public function index()
     {
-        // Di sini Anda akan mengambil data tiket dari database
-        // dan mengirimkannya ke tampilan.
-        $tickets = []; // Ganti dengan logika untuk mengambil data tiket
-        
+        // Ambil semua data tiket dari database, urutkan terbaru
+        $tickets = Ticket::with('user')->latest()->get();
+
+        // Kirim ke view
         return view('admin.tickets', compact('tickets'));
     }
+    
 }
