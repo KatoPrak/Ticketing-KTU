@@ -11,11 +11,11 @@
             </button>
         </div>
         <div class="table-responsive">
-            <table id="ticketsTable">
+            <table id="ticketsTable" class="table table-bordered">
                 <thead>
                     <tr>
                         <th>Ticket ID</th>
-                        <th>Subject</th>
+                        <th>Description</th>
                         <th>User</th>
                         <th>Category</th>
                         <th>Priority</th>
@@ -24,25 +24,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{-- Data will be populated from the controller --}}
-                    <tr>
-                        <td>#TK001</td>
-                        <td>Network Issue</td>
-                        <td>John Doe</td>
-                        <td>IT Support</td>
-                        <td><span class="badge badge-danger">High</span></td>
-                        <td><span class="badge badge-warning">In Progress</span></td>
-                        <td>2024-01-15</td>
-                    </tr>
-                    <tr>
-                        <td>#TK002</td>
-                        <td>Software Installation</td>
-                        <td>Jane Smith</td>
-                        <td>IT Support</td>
-                        <td><span class="badge badge-warning">Medium</span></td>
-                        <td><span class="badge badge-success">Resolved</span></td>
-                        <td>2024-01-14</td>
-                    </tr>
+                    @foreach($tickets as $ticket)
+                        <tr>
+                            <td>#TK{{ str_pad($ticket->id, 3, '0', STR_PAD_LEFT) }}</td>
+                            <td>{{ $ticket->description }}</td>
+                            <td>{{ $ticket->user->name ?? 'N/A' }}</td>
+                            <td>{{ $ticket->category->name ?? 'N/A' }}</td>
+                            <td>
+                                <span class="badge
+                                    @if($ticket->priority === 'high') badge-danger
+                                    @elseif($ticket->priority === 'medium') badge-warning
+                                    @else badge-success @endif">
+                                    {{ ucfirst($ticket->priority) }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge
+                                    @if($ticket->status === 'in_progress') badge-warning
+                                    @elseif($ticket->status === 'resolved') badge-success
+                                    @elseif($ticket->status === 'pending') badge-warning
+                                    @elseif($ticket->status === 'waiting') badge-success
+                                    @elseif($ticket->status === 'closed') badge-secondary
+                                    @else badge-primary @endif">
+                                    {{ str_replace('_', ' ', ucfirst($ticket->status)) }}
+                                </span>
+                            </td>
+                            <td>{{ $ticket->created_at->format('Y-m-d') }}</td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
