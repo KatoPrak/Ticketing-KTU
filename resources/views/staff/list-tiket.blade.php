@@ -167,7 +167,7 @@
 {{-- ========================================================================= --}}
 
 <div class="modal fade" id="createTicketModal" tabindex="-1" aria-labelledby="createTicketModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered custom-modal">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow-lg border-0">
             <form id="createTicketForm" action="{{ route('staff.tickets.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf

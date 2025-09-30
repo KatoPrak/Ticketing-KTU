@@ -27,6 +27,12 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.*') ? 'active' : '' }}">
+    <i class="fas fa-newspaper me-2"></i> News
+</a>
+
+            </li>
+            <li>
                 <a href="#" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
                     <i class="fas fa-users me-2"></i> Users
                 </a>
@@ -36,11 +42,7 @@
                     <i class="fas fa-laptop me-2"></i> Assets
                 </a>
             </li>
-            <li>
-                <a href="#" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}">
-                    <i class="fas fa-chart-bar me-2"></i> Reports
-                </a>
-            </li>
+            
             <li>
                 <a href="#" class="{{ request()->routeIs('settings.*') ? 'active' : '' }}">
                     <i class="fas fa-cog me-2"></i> Settings

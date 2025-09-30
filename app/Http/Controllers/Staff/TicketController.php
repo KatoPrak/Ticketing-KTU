@@ -99,13 +99,14 @@ $ticket = Ticket::create([
         });
     }
 
-    // aktif → paginate 5
     $tickets = $activeQuery->orderBy('created_at', 'desc')
-        ->paginate(5)
-        ->through(function ($ticket) {
-            $ticket->attachments = json_decode($ticket->attachments, true) ?? [];
-            return $ticket;
-        });
+    ->paginate(5);
+
+$tickets->getCollection()->transform(function ($ticket) {
+    $ticket->attachments = json_decode($ticket->attachments, true) ?? [];
+    return $ticket;
+});
+
 
     // ==================== QUERY TIKET RIWAYAT ====================
     $historyTickets = Ticket::with('category')
@@ -128,4 +129,16 @@ $ticket = Ticket::create([
 
     return view('staff.list-tiket', compact('categories', 'tickets', 'historyTickets'));
 }
+
+public function fetchDashboardTickets()
+{
+    $tickets = Ticket::where('user_id', auth()->id())
+        ->latest()
+        ->take(3) // ambil 5 tiket terbaru
+        ->get();
+
+    return response()->json($tickets);
+}
+
+
 }

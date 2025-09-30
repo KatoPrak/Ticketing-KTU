@@ -12,7 +12,7 @@ class Ticket extends Model
     protected $fillable = ['user_id','category_id','description','attachments','status'];
 
 
-    protected $casts = [
+    protected $casts = [ 
     'attachments' => 'array',
 ];
 

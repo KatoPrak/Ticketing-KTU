@@ -12,6 +12,7 @@ use App\Http\Controllers\Staff\TicketController as StaffTicketController;
 use App\Http\Controllers\It\TicketController as ItTicketController;
 use App\Http\Middleware\RememberMeMiddleware;
 use App\Http\Controllers\Admin\TicketController;
+use App\Http\Controllers\NewsController;
 
 Route::get('/admin/tickets', [TicketController::class, 'index'])->name('admin.tickets.index');
 
@@ -49,6 +50,13 @@ Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () 
     Route::get('/tickets', [StaffTicketController::class, 'index'])->name('tickets.index');
     // Simpan tiket
     Route::post('/tickets', [StaffTicketController::class, 'store'])->name('tickets.store');
+
+    // ✅ TAMBAHKAN ROUTE INI
+    Route::get('/fetch-dashboard-tickets', [StaffTicketController::class, 'fetchDashboardTickets'])->name('tickets.fetchDashboard');
+
+    // ✅ Route untuk ambil tiket terbaru di dashboard
+    Route::get('/fetch-dashboard-tickets', [StaffTicketController::class, 'fetchDashboardTickets'])
+        ->name('tickets.fetchDashboard');
 });
 
 // ============================
@@ -57,14 +65,32 @@ Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () 
 Route::middleware(['auth'])->prefix('it')->name('it.')->group(function () {
     Route::get('/index-ticket', [ItTicketController::class, 'index'])->name('index-ticket');
     
-    // Detail tiket untuk modal (return partial)
-    Route::get('/it/tickets/{ticket}', [ItTicketController::class, 'show'])->name('it.tickets.show');
+    // Buat tiket (store)
+    Route::post('/tickets', [ItTicketController::class, 'store'])->name('tickets.store');
 
     // Update status / priority
     Route::put('/tickets/{id}', [ItTicketController::class, 'update'])->name('tickets.update');
+
+    // Riwayat tiket
     Route::get('/riwayat-ticket', [ItTicketController::class, 'riwayat'])->name('riwayat-ticket');
 
+    
 });
+
+
+// ============================
+// News routes (global)
+// ============================
+Route::middleware(['auth'])->prefix('news')->name('news.')->group(function () {
+    Route::get('/', [NewsController::class, 'index'])->name('index');     // list semua news
+    Route::get('/create', [NewsController::class, 'create'])->name('create'); // form create
+    Route::post('/', [NewsController::class, 'store'])->name('store');   // simpan baru
+    Route::get('/{id}', [NewsController::class, 'show'])->name('show');  // detail news
+    Route::get('/{id}/edit', [NewsController::class, 'edit'])->name('edit'); // form edit
+    Route::put('/{id}', [NewsController::class, 'update'])->name('update');  // update data
+    Route::delete('/{id}', [NewsController::class, 'destroy'])->name('destroy'); // hapus
+});
+
 
 // ============================
 // Admin routes
