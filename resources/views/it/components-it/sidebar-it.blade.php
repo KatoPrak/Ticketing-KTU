@@ -23,14 +23,13 @@
             </li>
             <li>
                 <a href="{{ route('it.riwayat-ticket') }}" class="{{ request()->routeIs('it.riwayat-ticket') ? 'active' : '' }}">
-                    <i class="fas fa-history me-2"></i> Riwayat Tiket
+                    <i class="fas fa-history me-2"></i> Ticket History
                 </a>
             </li>
             <li>
-                <a href="{{ route('news.index') }}" class="{{ request()->routeIs('news.*') ? 'active' : '' }}">
-    <i class="fas fa-newspaper me-2"></i> News
-</a>
-
+                <a href="{{ route('news.index') }}" class="{{ request()->routeIs('it.index-news') ? 'active' : '' }}">
+                    <i class="fas fa-newspaper me-2"></i> News
+                </a>
             </li>
             <li>
                 <a href="#" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">

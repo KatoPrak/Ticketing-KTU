@@ -1,7 +1,7 @@
 @extends('layouts.it')
 
 @section('title', 'Riwayat Tiket IT')
-@vite(['resources/css/list-tiket.css','resources/js/list-tiket.js'])
+@vite(['resources/css/list-tiket.css','resources/js/it.js'])
 
 @section('content')
 <div class="container py-4">
@@ -19,7 +19,7 @@
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>ID</th>
+                        <th>Ticket ID</th>
                         <th>Deskripsi</th>
                         <th>Kategori</th>
                         <th>Status</th>
@@ -28,10 +28,10 @@
                         <th>Terakhir Update</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="riwayatTbody">
                 @forelse($tickets as $ticket)
                     <tr>
-                        <td>#{{ $ticket->id }}</td>
+                        <td>#{{ $ticket->ticket_id }}</td>
                         <td>{{ $ticket->description }}</td>
                         <td>{{ $ticket->category->name ?? '-' }}</td>
                         <td><span class="badge bg-secondary">{{ ucfirst($ticket->status) }}</span></td>

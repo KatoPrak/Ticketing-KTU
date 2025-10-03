@@ -19,13 +19,13 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--secondary-color);
     overflow-x: hidden;
-    transform: scale(0.9);   /* perkecil 10% */
-    transform-origin: top left;
-    width: 111.11%; /* supaya tidak ada ruang kosong kanan */
-    padding-top: var(--navbar-height); /* ✅ biar konten turun sejajar navbar */
+    margin: 0;
+    zoom: 0.9; /* perkecil 90% */
+    padding-top: var(--navbar-height);
 }
 
-/* Navbar */
+
+/* ===== NAVBAR ===== */
 .navbar-custom {
     background: linear-gradient(135deg, var(--primary-color), #6366f1);
     height: var(--navbar-height);
@@ -37,7 +37,6 @@ body {
     right: 0;
     z-index: 1030 !important;
 }
-
 
 .navbar-brand {
     color: white !important;
@@ -69,21 +68,15 @@ body {
     box-shadow: none;
 }
 
-/* ===== MODAL STYLING ===== */
+/* ===== MODAL ===== */
+.custom-modal { max-width: 60% !important; }
 
-/* Batasan modal agar tidak terlalu besar */
-.custom-modal {
-    max-width: 60% !important;
-}
-
-/* Biar modal tidak keluar layar */
 .modal-content {
     border-radius: 12px;
     border: 1px solid #e5e7eb;
     overflow: hidden;
 }
 
-/* Header modal */
 .modal-header {
     background: linear-gradient(135deg, var(--info-color), #60a5fa);
     color: white;
@@ -100,29 +93,24 @@ body {
 }
 
 .modal-header .btn-close {
-    filter: brightness(0) invert(1); /* biar tombol X putih */
+    filter: brightness(0) invert(1);
     opacity: 0.8;
 }
-.modal-header .btn-close:hover {
-    opacity: 1;
-}
+.modal-header .btn-close:hover { opacity: 1; }
 
-/* Body modal scrollable */
 .modal-dialog-scrollable .modal-body {
     max-height: 70vh;
     overflow-y: auto;
     padding: 1.25rem;
 }
 
-/* Bodi modal scroll penuh */
 .modal-body {
-    max-height: calc(100vh - 200px); /* menyesuaikan tinggi layar */
-    overflow-y: auto; 
-    padding: 1.25rem; /* cukup, jangan terlalu besar */
-    margin-bottom: 0; /* hilangkan jarak ekstra */
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding: 1.25rem;
+    margin-bottom: 0;
 }
 
-/* Footer modal */
 .modal-footer {
     position: sticky;
     bottom: 0;
@@ -130,8 +118,6 @@ body {
     z-index: 10;
 }
 
-
-/* Input dalam modal */
 .modal-body .form-control,
 .modal-body .form-select {
     border-radius: 8px;
@@ -139,49 +125,29 @@ body {
     padding: 0.6rem 0.8rem;
     font-size: 0.95rem;
 }
-
 .modal-body .form-control:focus,
 .modal-body .form-select:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
 }
 
-/* Pastikan modal selalu center */
 .modal.show .modal-dialog {
     display: flex;
     align-items: center;
     min-height: calc(100% - 1rem);
+    transform: translateY(-10%) !important;
 }
 
-/* Biar modal benar-benar center */
 .modal-dialog-centered {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Atur lebar maksimum biar proporsional */
 .custom-modal {
-    max-width: 800px;  /* bisa disesuaikan */
+    max-width: 800px;
     width: 100%;
 }
-
-/* Jika isi terlalu panjang tetap scroll di body */
-.modal-dialog-scrollable .modal-body {
-    max-height: 70vh;
-    overflow-y: auto;
-}
-
-.modal-dialog {
-    margin-top: 40px !important; /* geser ke atas */
-}
-
-
-/* kalau mau lebih fleksibel pakai transform */
-.modal.show .modal-dialog {
-    transform: translateY(-10%) !important; /* naik 10% dari posisi tengah */
-}
-
 
 .modal-backdrop {
     position: fixed !important;
@@ -189,15 +155,14 @@ body {
     left: 0;
     width: 100% !important;
     height: 100% !important;
-    background-color: rgb(0, 0, 0); /* bisa atur transparansi */
-    z-index: 1050; /* lebih tinggi dari sidebar tapi di bawah modal */
+    background-color: rgb(0, 0, 0);
+    z-index: 1050;
 }
 
-
-
+/* ===== DROPDOWN ===== */
 .dropdown-menu {
     z-index: 2000 !important;
-    background: #fff; /* biar gak transparan */
+    background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.1);
@@ -213,10 +178,7 @@ body {
     color: var(--primary-color) !important;
 }
 
-.dropdown-menu[data-bs-popper] {
-    margin-top: 0.5rem;
-}
-
+.dropdown-menu[data-bs-popper] { margin-top: 0.5rem; }
 
 .notification-badge {
     position: absolute;
@@ -234,23 +196,22 @@ body {
     font-weight: 600;
 }
 
-/* Sidebar */
+/* ===== SIDEBAR ===== */
 .sidebar {
     position: fixed;
-    top: var(--navbar-height); /* mulai setelah navbar */
+    top: var(--navbar-height);
     left: 0;
     width: var(--sidebar-width);
-    bottom: 0; /* nempel ke bawah */
-    height: auto; /* biar otomatis hitung dari atas sampai bawah */
+    bottom: 0;
     background: linear-gradient(180deg, #ffffff, #f8f9fa);
     border-right: 1px solid #e5e7eb;
     box-shadow: 3px 0 15px rgba(0, 0, 0, 0.08);
-    overflow-y: auto; /* sidebar bisa discroll kalau menu lebih panjang */
-    transition: left 0.3s ease;
+    overflow-y: auto;
+    transition: left 0.3s ease, width 0.3s ease;
     z-index: 1025;
 }
 
-
+.sidebar.collapsed { width: 80px; }
 .sidebar.show { left: 0; }
 
 .sidebar-header {
@@ -258,7 +219,6 @@ body {
     border-bottom: 1px solid #e5e7eb;
     background: white;
 }
-
 .sidebar-header h5 {
     color: var(--dark-color);
     margin: 0;
@@ -273,7 +233,6 @@ body {
     margin: 0;
     list-style: none;
 }
-
 .sidebar-menu li { margin: 0.25rem 0.75rem; }
 
 .sidebar-menu a {
@@ -287,19 +246,16 @@ body {
     font-weight: 500;
     position: relative;
 }
-
 .sidebar-menu a:hover {
     background: linear-gradient(90deg, rgba(79, 70, 229, 0.1), transparent);
     color: var(--primary-color);
     transform: translateX(3px);
 }
-
 .sidebar-menu a.active {
     background: linear-gradient(90deg, rgba(79, 70, 229, 0.15), rgba(79, 70, 229, 0.05));
     color: var(--primary-color);
     font-weight: 600;
 }
-
 .sidebar-menu a.active::before {
     content: '';
     position: absolute;
@@ -311,14 +267,12 @@ body {
     background: var(--primary-color);
     border-radius: 2px;
 }
-
 .sidebar-menu i {
     width: 20px;
     margin-right: 12px;
     font-size: 1.1rem;
     text-align: center;
 }
-
 .sidebar-menu .menu-badge {
     background: var(--danger-color);
     color: white;
@@ -329,7 +283,7 @@ body {
     margin-left: auto;
 }
 
-/* Sidebar Overlay */
+/* ===== SIDEBAR OVERLAY ===== */
 .sidebar-overlay {
     position: fixed;
     top: 0;
@@ -342,29 +296,27 @@ body {
     visibility: hidden;
     transition: all 0.3s ease;
 }
-
 .sidebar-overlay.show {
     opacity: 1;
     visibility: visible;
 }
 
-/* untuk konten utama */
+/* ===== MAIN CONTENT ===== */
 .main-content {
-    margin-left: var(--sidebar-width); /* biar geser sejajar */
+    margin-left: var(--sidebar-width);
     padding: 1.5rem;
     transition: margin-left 0.3s ease;
 }
+.main-content.collapsed { margin-left: 80px; }
 
-
-
-.sidebar.collapsed {
-    width: 80px;
+/* ===== FOOTER ===== */
+footer.footer {
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s ease;
 }
+footer.footer.collapsed { margin-left: 80px; }
 
-.main-content.collapsed {
-    margin-left: 80px;
-}
-
+/* ===== CARDS ===== */
 .dashboard-card {
     background: white;
     border-radius: 12px;
@@ -373,13 +325,12 @@ body {
     border: 1px solid #e5e7eb;
     overflow: hidden;
 }
-
 .dashboard-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-/* Welcome Banner */
+/* ===== WELCOME BANNER ===== */
 .welcome-banner {
     background: linear-gradient(135deg, var(--primary-color), #6366f1);
     color: white;
@@ -389,7 +340,6 @@ body {
     position: relative;
     overflow: hidden;
 }
-
 .welcome-banner::before {
     content: '';
     position: absolute;
@@ -400,7 +350,6 @@ body {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
 }
-
 .welcome-banner::after {
     content: '';
     position: absolute;
@@ -412,7 +361,7 @@ body {
     border-radius: 50%;
 }
 
-/* Quick Action */
+/* ===== QUICK ACTION BUTTONS ===== */
 .quick-action-btn {
     background: white;
     border: 2px solid #e5e7eb;
@@ -426,14 +375,12 @@ body {
     height: 100%;
     width: 100%;
 }
-
 .quick-action-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     color: var(--primary-color);
     border-color: var(--primary-color);
 }
-
 .quick-action-icon {
     width: 50px;
     height: 50px;
@@ -445,14 +392,13 @@ body {
     font-size: 1.3rem;
     transition: all 0.3s ease;
 }
-
 .quick-action-btn:hover .quick-action-icon {
     background: var(--primary-color) !important;
     color: white !important;
     transform: scale(1.1);
 }
 
-/* Buttons */
+/* ===== BUTTONS ===== */
 .btn-primary-custom,
 .btn-primary {
     background: linear-gradient(135deg, var(--primary-color), #6366f1);
@@ -463,11 +409,6 @@ body {
     transition: all 0.3s ease;
     color: white;
 }
-
-.custom-modal {
-  max-width: 60% !important; /* 100% - 20% = 80% */
-}
-
 .btn-primary-custom:hover,
 .btn-primary:hover {
     transform: translateY(-2px);
@@ -480,4 +421,71 @@ body {
     border-radius: 12px;
     padding: 0.75rem 2rem;
     font-weight: 600;
+}
+/* ===== RESPONSIVE LAYOUT ===== */
+@media (max-width: 992px) {
+    /* Sidebar jadi overlay di tablet/hp */
+    .sidebar {
+        left: -100%;
+        width: var(--sidebar-width);
+    }
+    .sidebar.show {
+        left: 0;
+    }
+
+    /* Overlay aktif pas sidebar muncul */
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Konten full tanpa sidebar */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 1rem;
+    }
+
+    footer.footer {
+        margin-left: 0 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Navbar lebih rapat */
+    .navbar-custom {
+        padding: 0.5rem 0.75rem;
+    }
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    /* Quick action jadi grid 2 kolom */
+    .quick-action-btn {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    .quick-action-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Banner lebih kecil di HP */
+    .welcome-banner {
+        padding: 1rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    /* Card padding kecil */
+    .dashboard-card {
+        padding: 0.75rem;
+    }
+
+    /* Modal biar full layar di HP */
+    .custom-modal {
+        max-width: 95% !important;
+        margin: 0 auto;
+    }
 }

@@ -9,94 +9,136 @@ use App\Models\Category;
 
 class TicketController extends Controller
 {
-    /**
-     * Menampilkan daftar tiket IT dengan filter.
-     */
     public function index(Request $request)
+{
+    $categories = Category::all();
+
+    $tickets = Ticket::with(['category', 'user'])
+        // 🚀 hanya ambil tiket yang masih aktif
+        ->whereNotIn('status', ['closed'])
+        ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
+        ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->category_id))
+        ->when($request->filled('search'), function ($q) use ($request) {
+            $search = $request->search;
+            $q->where(fn($q2) => $q2
+                ->where('description', 'like', "%{$search}%")
+                ->orWhere('ticket_id', 'like', "%{$search}%")
+                ->orWhere('id', 'like', "%{$search}%")
+            );
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+    $recentTickets = Ticket::with(['category', 'user'])
+        ->orderBy('created_at', 'desc')
+        ->take(5)
+        ->get();
+
+    return view('it.index-ticket', compact('categories', 'tickets', 'recentTickets'));
+}
+
+
+    public function show(Ticket $ticket)
     {
-        $categories = Category::all();
-
-        $tickets = Ticket::with(['category', 'user'])
-            ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
-            ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->category_id))
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $search = $request->search;
-                $q->where(function ($q2) use ($search) {
-                    $q2->where('description', 'like', "%{$search}%")
-                       ->orWhere('ticket_id', 'like', "%{$search}%")
-                       ->orWhere('id', 'like', "%{$search}%");
-                });
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        // tiket terbaru untuk sidebar/recent activity
-        $recentTickets = Ticket::with(['category', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
-
-        return view('it.index-ticket', compact('categories', 'tickets', 'recentTickets'));
+        $ticket->load(['category', 'user', 'attachments']);
+        return response()->json($ticket);
     }
 
-    /**
-     * Update status atau prioritas tiket.
-     */
     public function update(Request $request, $id)
     {
-        // ✅ enum di DB: waiting, in_progress, pending, resolve
         $validated = $request->validate([
-            'status'   => 'nullable|in:waiting,in_progress,pending,resolve',
+            'status'   => 'nullable|in:waiting,in_progress,pending,resolved,closed',
             'priority' => 'nullable|in:low,medium,high,urgent',
         ]);
 
         $ticket = Ticket::findOrFail($id);
         $ticket->update($validated);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tiket berhasil diperbarui.',
+                'ticket'  => $ticket
+            ]);
+        }
+
         return back()->with('success', 'Tiket berhasil diperbarui.');
     }
 
     /**
-     * Menampilkan riwayat tiket (status resolve).
+     * ✅ Update field tunggal via AJAX (status / priority)
      */
-    public function riwayat(Request $request)
-    {
-        $categories = Category::all();
+    public function updateField(Request $request, $id)
+{
+    try {
+        $request->validate([
+            'field' => 'required|in:status,priority',
+            'value' => 'required|string'
+        ]);
 
-        $tickets = Ticket::with(['category', 'user'])
-            ->where('status', 'resolve') // ✅ sesuai enum DB
-            ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->category_id))
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $search = $request->search;
-                $q->where(function ($q2) use ($search) {
-                    $q2->where('description', 'like', "%{$search}%")
-                       ->orWhere('ticket_id', 'like', "%{$search}%")
-                       ->orWhere('id', 'like', "%{$search}%");
-                });
-            })
-            ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+        $ticket = Ticket::findOrFail($id);
 
-        // ✅ tambahkan recentTickets biar bisa dipakai juga
-        $recentTickets = Ticket::with(['category', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        // cek value valid sesuai enum
+        if ($request->field === 'status' && !in_array($request->value, ['waiting','in_progress','pending','resolved','closed'])) {
+            return response()->json(['success' => false, 'message' => 'Invalid status value.'], 422);
+        }
+        if ($request->field === 'priority' && !in_array($request->value, ['low','medium','high','urgent'])) {
+            return response()->json(['success' => false, 'message' => 'Invalid priority value.'], 422);
+        }
 
-        return view('it.riwayat-ticket', compact('categories', 'tickets', 'recentTickets'));
+        $ticket->{$request->field} = $request->value;
+        $ticket->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => ucfirst($request->field).' updated successfully.',
+            'ticket' => $ticket->load('category','user') // kirim data lengkap untuk JS
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Server error: ' . $e->getMessage()
+        ], 500);
     }
+}
 
-    /**
-     * Menampilkan halaman dashboard IT.
-     */
+
+    public function riwayat(Request $request)
+{
+    $categories = Category::all();
+
+    $tickets = Ticket::with(['category', 'user'])
+    ->whereIn('status', ['closed'])
+    ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
+    ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->category_id))
+    ->when($request->filled('search'), function ($q) use ($request) {
+        $search = $request->search;
+        $q->where(fn($q2) => $q2
+            ->where('description', 'like', "%{$search}%")
+            ->orWhere('ticket_id', 'like', "%{$search}%")
+            ->orWhere('id', 'like', "%{$search}%")
+        );
+    })
+    ->orderBy('updated_at', 'desc')
+    ->paginate(10);
+
+
+    $recentTickets = Ticket::with(['category', 'user'])
+        ->orderBy('created_at', 'desc')
+        ->take(5)
+        ->get();
+
+    return view('it.riwayat-ticket', compact('categories', 'tickets', 'recentTickets'));
+}
+
+
     public function dashboard()
     {
         $activeTickets    = Ticket::whereIn('status', ['waiting','in_progress'])->count();
         $pendingTickets   = Ticket::where('status', 'pending')->count();
-        $completedTickets = Ticket::where('status', 'resolve')->count();
-        $urgentTickets    = Ticket::where('priority', 'urgent')
-                                ->where('status', '!=', 'resolve')
-                                ->count();
+        $completedTickets = Ticket::where('status', 'resolved')->count();
+        $urgentTickets    = Ticket::where('priority', 'urgent')->where('status', '!=', 'resolved')->count();
 
         $recentTickets = Ticket::with(['category', 'user'])
             ->orderBy('created_at', 'desc')
@@ -112,9 +154,6 @@ class TicketController extends Controller
         ));
     }
 
-    /**
-     * Simpan tiket baru dari IT.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([

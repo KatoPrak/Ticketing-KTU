@@ -6,16 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up()
     {
         Schema::create('news', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('content');
-            $table->unsignedBigInteger('created_by'); // id user yang buat berita
+            $table->foreignId('category_id')->constrained()->onDelete('cascade');
+            $table->text('message');
             $table->timestamps();
-
-            $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

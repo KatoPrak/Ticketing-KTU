@@ -13,12 +13,6 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             
-            // TAMBAHKAN KOLOM-KOLOM INI
-            $table->text('description')->nullable();
-            $table->string('icon')->nullable();
-            $table->string('color')->nullable();
-            $table->string('status')->default('active');
-            
             $table->timestamps();
         });
     }

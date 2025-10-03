@@ -116,8 +116,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Quick Actions -->
         <!-- Quick Actions -->
 <div class="col-lg-4 col-12">
     <div class="dashboard-card p-3">
@@ -129,8 +127,6 @@
         </div>
     </div>
 </div>
-
-
     <!-- Modal Detail Tiket -->
     <div class="modal fade" id="ticketDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">

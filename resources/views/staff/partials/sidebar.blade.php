@@ -18,12 +18,6 @@
             </a>
         </li>
         <li>
-            <a href="#" class="{{ Request::is('riwayat-tiket') ? 'active' : '' }}">
-                <i class="fas fa-history"></i>
-                Riwayat Tiket
-            </a>
-        </li>
-        <li>
             <a href="#" class="{{ Request::is('knowledge-base') ? 'active' : '' }}">
                 <i class="fas fa-book"></i>
                 Knowledge Base

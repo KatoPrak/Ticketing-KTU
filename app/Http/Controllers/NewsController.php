@@ -3,80 +3,65 @@
 namespace App\Http\Controllers;
 
 use App\Models\News;
+use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class NewsController extends Controller
 {
-    public function store(Request $request)
+    public function index()
     {
-        $validated = $request->validate([
-            'title'   => 'required|string|max:255',
-            'content' => 'required|string',
-        ]);
-
-        News::create([
-            'title'      => $validated['title'],
-            'content'    => $validated['content'],
-            'created_by' => Auth::id(),
-        ]);
-
-        return redirect()->route('it.dashboard')->with('success', 'News berhasil dibuat!');
+        $news = News::with('category')->latest()->paginate(10);
+        return view('it.news.index', compact('news'));
     }
-
-    public function index(Request $request)
-{
-    // Ambil query search dari URL, default kosong jika tidak ada
-    $search = $request->query('search', '');
-
-    // Ambil data berita, filter jika ada search
-    $news = News::when($search, function($query, $search) {
-                return $query->where('title', 'like', "%{$search}%");
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString(); // supaya pagination tetap membawa query search
-
-    // Kirim data ke view
-    return view('it.news.index-news', compact('news', 'search'));
-}
 
     public function create()
     {
-        return view('it.news.create');
+        $categories = Category::all();
+        return view('it.news.create', compact('categories'));
     }
 
-// Halaman detail berita
-    public function show($id)
-    {
-        $newsItem = News::findOrFail($id);
-        return view('it.news.show', compact('newsItem'));
-    }
-
-    // Halaman edit berita
-public function edit($id)
-{
-    $newsItem = News::findOrFail($id); // ambil berita berdasarkan id
-    return view('it.news.edit', compact('newsItem')); // kirim $newsItem ke blade
-}
-    public function update(Request $request, $id)
+    public function store(Request $request)
     {
         $request->validate([
-            'title'   => 'required|string|max:255',
-            'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'message' => 'required|string'
         ]);
 
-        $news = News::findOrFail($id);
-        $news->update($request->only('title', 'content'));
+        News::create($request->all());
 
-        return redirect()->route('news.index')->with('success', 'News berhasil diperbarui.');
+        return redirect()->route('news.index')
+            ->with('success', 'News berhasil ditambahkan!');
     }
 
-    public function destroy($id)
+    // public function show(News $news)
+    // {
+    //     return view('it.news.show', compact('news'));
+    // }
+
+    public function edit(News $news)
     {
-        $news = News::findOrFail($id);
+        $categories = Category::all();
+        return view('it.news.edit', compact('news', 'categories'));
+    }
+
+    public function update(Request $request, News $news)
+    {
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'message' => 'required|string'
+        ]);
+
+        $news->update($request->all());
+
+        return redirect()->route('news.index')
+            ->with('success', 'News berhasil diupdate!');
+    }
+
+    public function destroy(News $news)
+    {
         $news->delete();
 
-        return redirect()->route('news.index')->with('success', 'News berhasil dihapus.');
+        return redirect()->route('news.index')
+            ->with('success', 'News berhasil dihapus!');
     }
 }
