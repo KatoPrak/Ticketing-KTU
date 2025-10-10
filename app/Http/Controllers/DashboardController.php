@@ -37,10 +37,12 @@ class DashboardController extends Controller
 }
 
     public function staff()
-    {
-        $categories = Category::all(); // ✅ ambil data kategori
-        return view('staff.staff', compact('categories')); // ✅ kirim ke blade
-    }
+{
+    $categories = \App\Models\Category::all();
+    $news = \App\Models\News::latest()->take(3)->get(); // 📰 ambil 3 berita terbaru
+    return view('staff.staff', compact('categories', 'news'));
+}
+
 
     public function index()
 {

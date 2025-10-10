@@ -3,65 +3,49 @@
 namespace App\Http\Controllers;
 
 use App\Models\News;
-use App\Models\Category;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
-    public function index()
+    /**
+     * READ: Menampilkan semua data news.
+     */
+    public function index(Request $request)
     {
-        $news = News::with('category')->latest()->paginate(10);
+        $news = News::latest()->get();
         return view('it.news.index', compact('news'));
     }
 
+    /**
+     * Menampilkan form untuk membuat news baru.
+     */
     public function create()
     {
-        $categories = Category::all();
-        return view('it.news.create', compact('categories'));
+        return view('it.news.create');
     }
 
+    /**
+     * CREATE: Menyimpan news baru.
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'message' => 'required|string'
+            'message' => 'required|string|min:10'
         ]);
 
-        News::create($request->all());
+        News::create($request->only('message'));
 
-        return redirect()->route('news.index')
-            ->with('success', 'News berhasil ditambahkan!');
+        return redirect()->route('it.news.index')->with('success', 'News berhasil ditambahkan!');
     }
+    /**
+     * DELETE: Menghapus data news.
+     */
+public function destroy(News $news)
+{
+    // Laravel sudah otomatis menemukan data 'news' berdasarkan ID dari URL.
+    // Kita tinggal panggil delete().
+    $news->delete();
 
-    // public function show(News $news)
-    // {
-    //     return view('it.news.show', compact('news'));
-    // }
-
-    public function edit(News $news)
-    {
-        $categories = Category::all();
-        return view('it.news.edit', compact('news', 'categories'));
-    }
-
-    public function update(Request $request, News $news)
-    {
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'message' => 'required|string'
-        ]);
-
-        $news->update($request->all());
-
-        return redirect()->route('news.index')
-            ->with('success', 'News berhasil diupdate!');
-    }
-
-    public function destroy(News $news)
-    {
-        $news->delete();
-
-        return redirect()->route('news.index')
-            ->with('success', 'News berhasil dihapus!');
-    }
+    return redirect()->route('it.news.index')->with('success', 'News berhasil dihapus!');
+}
 }

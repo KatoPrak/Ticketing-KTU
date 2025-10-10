@@ -145,7 +145,7 @@ body {
 }
 
 .custom-modal {
-    max-width: 800px;
+    max-width: 600px;
     width: 100%;
 }
 
@@ -485,7 +485,23 @@ footer.footer.collapsed { margin-left: 80px; }
 
     /* Modal biar full layar di HP */
     .custom-modal {
-        max-width: 95% !important;
+        max-width: 90% !important;
         margin: 0 auto;
     }
+    /* Perbaikan untuk posisi dropdown di layar kecil */
+@media (max-width: 768px) {
+    .navbar-nav .dropdown-menu {
+        position: absolute !important; /* Paksa posisi agar absolut terhadap navbar */
+        right: 5px; /* Beri sedikit jarak dari tepi kanan layar */
+        left: auto; /* Nonaktifkan posisi dari kiri */
+        margin-top: 8px; /* Beri sedikit jarak dari navbar */
+    }
+}
+/* Atur ulang ukuran modal 'Create Ticket' di layar HP */
+@media (max-width: 576px) {
+    #createTicketModal .modal-dialog {
+        max-width: 90%; /* Ubah dari default menjadi 90% */
+        margin: auto; /* Pastikan tetap di tengah */
+    }
+}
 }

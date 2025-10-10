@@ -1,51 +1,57 @@
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h5><i class="fas fa-tachometer-alt me-2"></i>Menu Utama</h5>
+        <h5><i class="fas fa-tachometer-alt me-2"></i>Main Menu</h5>
     </div>
 
     <ul class="sidebar-menu">
         <li>
-            <a href="{{ route('staff.dashboard') }}" class="{{ Request::is('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('staff.dashboard') }}" 
+               class="{{ Request::is('staff/dashboard') ? 'active' : '' }}">
                 <i class="fas fa-home"></i>
                 Dashboard
             </a>
         </li>
         <li>
-            <a href="{{ route('staff.tickets.index') }}" class="{{ Request::is('list-tiket') ? 'active' : '' }}">
+            <a href="{{ route('staff.tickets.index') }}" 
+               class="{{ Request::is('staff/tickets') ? 'active' : '' }}">
                 <i class="fas fa-ticket-alt"></i>
-                Tiket Saya
+                My Tickets
             </a>
         </li>
-        <li>
-            <a href="#" class="{{ Request::is('knowledge-base') ? 'active' : '' }}">
-                <i class="fas fa-book"></i>
-                Knowledge Base
-            </a>
-        </li>
-        <li>
-            <a href="#" class="{{ Request::is('faq') ? 'active' : '' }}">
-                <i class="fas fa-question-circle"></i>
-                FAQ
-            </a>
-        </li>
-        <li>
-            <a href="#" class="{{ Request::is('profile') ? 'active' : '' }}">
-                <i class="fas fa-user"></i>
-                Profil Saya
-            </a>
-        </li>
-        <li>
-            <a href="#" class="{{ Request::is('settings') ? 'active' : '' }}">
+
+        <!-- 🔧 Tambahan Menu Pengaturan -->
+        <li class="dropdown">
+            <a href="#settingsMenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                 <i class="fas fa-cog"></i>
                 Pengaturan
             </a>
-        </li>
-        <li>
-            <a href="#" class="{{ Request::is('help') ? 'active' : '' }}">
-                <i class="fas fa-life-ring"></i>
-                Bantuan & Dukungan
-            </a>
+            <ul class="collapse list-unstyled ms-3" id="settingsMenu">
+                <li>
+                    <a href="{{ route('password.form') }}">
+                        <i class="fas fa-key me-2"></i>Change Password
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('logout') }}" 
+                       onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) document.getElementById('logout-form').submit();">
+                        <i class="fas fa-sign-out-alt me-2 text-danger"></i>Logout
+                    </a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        @csrf
+                    </form>
+                </li>
+            </ul>
         </li>
     </ul>
 </div>
+
+
+<style>
+    /* Tambahkan warna aktif sederhana tanpa ubah layout */
+    .sidebar-menu a.active {
+        color: #fff;
+        background-color: #0d6efd;
+        border-radius: 5px;
+    }
+</style>

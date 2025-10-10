@@ -7,15 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ticket extends Model
 {
+    // Gunakan use HasFactory; jika ada
     use HasFactory;
+    
+    // Pastikan semua kolom yang diisi ada di sini
+    protected $fillable = [
+        'user_id',
+        'category_id',
+        'description',
+        'attachments',
+        'status',
+        'ticket_id', // tambahkan ticket_id dan priority jika perlu
+        'priority',
+    ];
 
-    protected $fillable = ['user_id','category_id','description','attachments','status'];
-
-
-    protected $casts = [ 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
     'attachments' => 'array',
 ];
-
 
     public function user()
     {
@@ -36,10 +49,6 @@ class Ticket extends Model
     {
         return $query->where('status', 'pending');
     }
-public function attachments()
-{
-    return $this->hasMany(TicketAttachment::class); // atau nama model attachment kamu
-}
 
     public function scopeResolved($query)
     {

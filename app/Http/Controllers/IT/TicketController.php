@@ -38,11 +38,29 @@ class TicketController extends Controller
 }
 
 
-    public function show(Ticket $ticket)
-    {
-        $ticket->load(['category', 'user', 'attachments']);
-        return response()->json($ticket);
-    }
+  public function show($id)
+{
+    $ticket = Ticket::with(['user', 'category'])->findOrFail($id);
+
+    return response()->json([
+        'id' => $ticket->id,
+        'ticket_id' => $ticket->ticket_id,
+        'description' => $ticket->description,
+        'priority' => $ticket->priority,
+        'status' => $ticket->status,
+        'attachments' => $ticket->attachments ?? [],
+        'created_at' => $ticket->created_at->format('d-m-Y H:i'),
+        'user' => [
+            'name' => $ticket->user->name ?? 'Unknown',
+            'department' => $ticket->user->department ?? '-',
+        ],
+        'category' => [
+            'name' => $ticket->category->name ?? '-',
+        ],
+    ]);
+}
+
+
 
     public function update(Request $request, $id)
     {
@@ -155,37 +173,42 @@ class TicketController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'category_id'   => 'required|exists:categories,id',
-            'description'   => 'required|string|max:1000',
-            'priority'      => 'nullable|in:low,medium,high,urgent',
-            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,docx|max:2048',
-        ]);
+{
+    $validated = $request->validate([
+        'category_id' => 'required|exists:categories,id',
+        'description' => 'required|string|max:1000',
+        'priority'    => 'nullable|in:low,medium,high,urgent',
+        'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,docx|max:2048',
+    ]);
 
-        $lastTicket = Ticket::orderBy('id', 'desc')->first();
-        $nextId = $lastTicket ? $lastTicket->id + 1 : 1;
-        $ticketId = 'IT-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+    // Bagian ini untuk generate Ticket ID (sudah oke)
+    $lastTicket = Ticket::orderBy('id', 'desc')->first();
+    $nextId = $lastTicket ? $lastTicket->id + 1 : 1;
+    $ticketId = 'IT-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
 
-        $ticket = Ticket::create([
-            'ticket_id'   => $ticketId,
-            'user_id'     => auth()->id(),
-            'category_id' => $validated['category_id'],
-            'description' => $validated['description'],
-            'priority'    => $validated['priority'] ?? 'medium',
-            'status'      => 'waiting',
-        ]);
-
-        if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $file) {
-                $path = $file->store('tickets', 'public');
-                $ticket->attachments()->create([
-                    'file_path' => $path,
-                    'file_name' => $file->getClientOriginalName(),
-                ]);
-            }
+    // Siapkan array untuk menampung path file
+    $attachmentPaths = [];
+    if ($request->hasFile('attachments')) {
+        foreach ($request->file('attachments') as $file) {
+            // Simpan file ke 'storage/app/public/tickets' dan kumpulkan path-nya
+            $path = $file->store('tickets', 'public');
+            $attachmentPaths[] = $path;
         }
-
-        return back()->with('success', 'Tiket berhasil dibuat dengan ID: ' . $ticketId);
     }
+
+    // Buat tiket dan langsung masukkan array path ke kolom 'attachments'
+    $ticket = Ticket::create([
+        'ticket_id'   => $ticketId,
+        'user_id'     => auth()->id(),
+        'category_id' => $validated['category_id'],
+        'description' => $validated['description'],
+        'priority'    => $validated['priority'] ?? 'medium',
+        'status'      => 'waiting',
+        'attachments' => $attachmentPaths, // Simpan array path ke kolom JSON
+    ]);
+
+    // BLOK KODE YANG DUPLIKAT SUDAH DIHAPUS DARI SINI
+
+    return back()->with('success', 'Tiket berhasil dibuat dengan ID: ' . $ticketId);
+}
 }

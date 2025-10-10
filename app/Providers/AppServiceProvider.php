@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Providers;
-use App\Models\Category;
 
+use App\Models\Category;
+use App\Models\News; // 📰 tambahkan ini
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,8 +22,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // 🔧 Inject variabel global ke semua view IT & Staff
         View::composer(['it.*', 'staff.*'], function ($view) {
-        $view->with('categories', Category::all());
-    });
+            $view->with([
+                'categories' => Category::all(),
+                'news' => News::latest()->take(5)->get(), // 📰 ambil 5 berita terbaru
+            ]);
+        });
     }
 }

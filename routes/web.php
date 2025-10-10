@@ -11,6 +11,21 @@ use App\Http\Controllers\Staff\TicketController as StaffTicketController;
 use App\Http\Controllers\It\TicketController as ItTicketController;
 use App\Http\Middleware\RememberMeMiddleware;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\ChangePasswordController;
+use App\Http\Controllers\It\ManageUserController;
+
+
+// ============================
+// IT Manage Staff routes
+// ============================
+Route::middleware(['auth'])->prefix('it')->name('it.')->group(function () {
+    Route::get('/staff', [ManageUserController::class, 'index'])->name('staff.index');
+    Route::get('/staff/{id}', [ManageUserController::class, 'show'])->name('staff.show');
+    Route::post('/staff', [ManageUserController::class, 'store'])->name('staff.store');
+    Route::put('/staff/{id}', [ManageUserController::class, 'update'])->name('staff.update');
+    Route::delete('/staff/{id}', [ManageUserController::class, 'destroy'])->name('staff.destroy');
+});
+
 
 // ============================
 // Login routes
@@ -18,6 +33,8 @@ use App\Http\Controllers\NewsController;
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/change-password', [ChangePasswordController::class, 'showForm'])->name('password.form');
+Route::post('/change-password', [ChangePasswordController::class, 'update'])->name('password.update');
 
 // ============================
 // Dashboard routes
@@ -46,27 +63,19 @@ Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () 
 // IT routes
 // ============================
 Route::middleware(['auth'])->prefix('it')->name('it.')->group(function () {
+    // === NEWS ROUTE DIPINDAHKAN KE SINI ===
+    Route::resource('news', NewsController::class);
+    // ======================================
+
     Route::get('/index-ticket', [ItTicketController::class, 'index'])->name('index-ticket');
     Route::get('/tickets', [ItTicketController::class, 'index'])->name('it.tickets.index');
     Route::post('/tickets/{id}/update-field', [ItTicketController::class, 'updateField'])->name('it.tickets.update-field');
     Route::post('/tickets', [ItTicketController::class, 'store'])->name('tickets.store');
     Route::put('/tickets/{id}', [ItTicketController::class, 'update'])->name('tickets.update');
     Route::get('/riwayat-ticket', [ItTicketController::class, 'riwayat'])->name('riwayat-ticket');
-    // ✅ detail tiket IT (pindahan dari group news)
+    Route::get('/it/tickets/{ticket}', [App\Http\Controllers\It\TicketController::class, 'show'])->name('it.tickets.show');
+    Route::get('/it/tickets/{id}', [App\Http\Controllers\It\TicketController::class, 'show'])->name('it.ticket.show');
     Route::get('/tickets/{ticket}', [ItTicketController::class, 'show'])->name('tickets.show');
-});
-
-// ============================
-// News routes
-// ============================
-Route::middleware(['auth'])->prefix('news')->name('news.')->group(function () {
-    Route::get('/', [NewsController::class, 'index'])->name('index');
-    Route::get('/create', [NewsController::class, 'create'])->name('create');
-    Route::post('/', [NewsController::class, 'store'])->name('store');
-    Route::get('/{news}', [NewsController::class, 'show'])->name('show');
-    Route::get('/{news}/edit', [NewsController::class, 'edit'])->name('edit');
-    Route::put('/{news}', [NewsController::class, 'update'])->name('update');
-    Route::delete('/{news}', [NewsController::class, 'destroy'])->name('destroy');
 });
 
 // ============================
@@ -85,7 +94,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Tickets
     Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
 
-    // Reports (hapus duplikasi, hanya pakai ini)
+    // Reports
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
 
     // Categories

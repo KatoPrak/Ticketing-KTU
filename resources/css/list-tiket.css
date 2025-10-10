@@ -286,3 +286,45 @@ body {
 /* ANIMATION */
 .fade-in { animation: fadeIn 0.5s ease-in; }
 @keyframes fadeIn { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+
+@media (max-width: 576px) {
+    .tickets-header {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .filters-section .btn {
+        width: 100%;
+    }
+
+    .table th, .table td {
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .search-input {
+        font-size: 0.9rem;
+    }
+    /* === Responsive Table Enhancement === */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    min-width: 700px; /* biar tabel nggak mepet di layar kecil */
+}
+
+/* Tabel lebih rapi di layar kecil */
+@media (max-width: 576px) {
+    #ticketsTableWrapper, 
+    #historyTicketsTableWrapper {
+        margin-bottom: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background-color: #fff;
+    }
+}
+
+}

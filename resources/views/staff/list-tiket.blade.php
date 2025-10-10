@@ -1,45 +1,49 @@
 @extends('layouts.staff')
 
-@section('title', 'Daftar Tiket')
+@section('title', 'Ticket List')
 @vite(['resources/css/list-tiket.css','resources/js/list-tiket.js'])
 
 @section('content')
-<div class="container my-2"><!-- tambahin margin atas-bawah -->
-    
-    {{-- ================== FILTER SECTION ================== --}}
-    <div class="filters-section fade-in small-container mb-4"><!-- tambahin jarak bawah -->
-        <div class="filters-row d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <form method="GET" action="{{ route('staff.tickets.index') }}" id="filterForm" class="flex-grow-1" style="max-width:1000px;">
-                <div class="search-box">
-                    <input type="text" name="search" value="{{ request('search') }}" 
-                           class="search-input form-control" 
-                           placeholder="Cari tiket..." id="searchInput">
-                    <i class="fas fa-search search-icon"></i>
+<div class="container my-2">
+
+    <div class="filters-section fade-in small-container mb-4">
+    <div class="row g-2 align-items-center">
+        <div class="col-12 col-md-8">
+            <form method="GET" action="{{ route('staff.tickets.index') }}" id="filterForm">
+                <div class="search-box position-relative">
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        class="search-input form-control pe-5"
+                        placeholder="Search tickets..." id="searchInput">
+                    <i class="fas fa-search search-icon position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
                 </div>
             </form>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTicketModal">
-                <i class="fas fa-plus"></i> Buat Tiket Baru
+        </div>
+        <div class="col-12 col-md-4 text-md-end">
+            <button type="button" class="btn btn-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#createTicketModal">
+                <i class="fas fa-plus"></i> Create New Ticket
             </button>
         </div>
     </div>
+</div>
 
-    {{-- ================== DAFTAR TIKET (AKTIF) ================== --}}
-    <div class="tickets-container fade-in mb-5"><!-- tambahin margin bawah -->
+
+    {{-- ================== ACTIVE TICKET LIST ================== --}}
+    <div class="tickets-container fade-in mb-5">
         <div class="tickets-header mb-3">
-            <i class="fas fa-list"></i> Daftar Tiket
+            <i class="fas fa-list"></i> Ticket List
         </div>
         <div id="ticketsContent">
             <div class="table-responsive" id="ticketsTableWrapper">
                 <table class="table table-hover align-middle" id="ticketsTable">
                     <thead class="table-light">
                         <tr>
-                            <th>ID Tiket</th>
-                            <th>Kategori</th>
-                            <th>Deskripsi</th>
+                            <th>Ticket ID</th>
+                            <th>Category</th>
+                            <th>Description</th>
                             <th>Status</th>
-                            <th>Prioritas</th>
-                            <th>Dibuat</th>
-                            <th>Aksi</th>
+                            <th>Priority</th>
+                            <th>Created</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,7 +53,7 @@
                                 <td>{{ $ticket->category->name ?? '-' }}</td>
                                 <td>{{ Str::limit($ticket->description, 50) }}</td>
                                 <td>
-                                    <span class="badge 
+                                    <span class="badge
                                         @if($ticket->status == 'open') bg-success
                                         @elseif($ticket->status == 'progress') bg-warning text-dark
                                         @elseif($ticket->status == 'resolved') bg-primary
@@ -59,7 +63,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge 
+                                    <span class="badge
                                         @if($ticket->priority == 'high') bg-danger
                                         @elseif($ticket->priority == 'medium') bg-warning text-dark
                                         @elseif($ticket->priority == 'low') bg-success
@@ -83,7 +87,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">Belum ada tiket aktif.</td>
+                                <td colspan="7" class="text-center py-4">No active tickets found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -95,23 +99,23 @@
             </div>
         </div>
     </div>
-    {{-- ================== RIWAYAT TIKET ================== --}}
+    {{-- ================== TICKET HISTORY ================== --}}
     <div class="tickets-container fade-in mb-5">
         <div class="tickets-header mb-1">
-            <i class="fas fa-archive"></i> Riwayat Tiket
+            <i class="fas fa-archive"></i> Ticket History
         </div>
         <div id="historyTicketsContent">
             <div class="table-responsive" id="historyTicketsTableWrapper">
                 <table class="table table-hover align-middle" id="historyTicketsTable">
                     <thead class="table-light">
                         <tr>
-                            <th>ID Tiket</th>
-                            <th>Kategori</th>
-                            <th>Deskripsi</th>
+                            <th>Ticket ID</th>
+                            <th>Category</th>
+                            <th>Description</th>
                             <th>Status</th>
-                            <th>Prioritas</th>
-                            <th>Dibuat</th>
-                            <th>Aksi</th>
+                            <th>Priority</th>
+                            <th>Created</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,7 +125,7 @@
                                 <td>{{ $ticket->category->name ?? '-' }}</td>
                                 <td>{{ Str::limit($ticket->description, 50) }}</td>
                                 <td>
-                                    <span class="badge 
+                                    <span class="badge
                                         @if($ticket->status == 'resolved') bg-primary
                                         @elseif($ticket->status == 'closed') bg-danger
                                         @else bg-secondary @endif">
@@ -129,7 +133,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge 
+                                    <span class="badge
                                         @if($ticket->priority == 'high') bg-danger
                                         @elseif($ticket->priority == 'medium') bg-warning text-dark
                                         @elseif($ticket->priority == 'low') bg-success
@@ -153,7 +157,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">Belum ada riwayat tiket.</td>
+                                <td colspan="7" class="text-center py-4">No ticket history found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -167,45 +171,44 @@
 {{-- ========================================================================= --}}
 
 <div class="modal fade" id="createTicketModal" tabindex="-1" aria-labelledby="createTicketModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered custom-modal">
         <div class="modal-content shadow-lg border-0">
             <form id="createTicketForm" action="{{ route('staff.tickets.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                {{-- Input tersembunyi ini tidak lagi wajib karena controller sudah handle, tapi boleh ada sebagai fallback --}}
                 <input type="hidden" name="priority" value="low">
                 <div class="modal-header border-0">
-                    <h1 class="modal-title fs-4 fw-bold text-primary" id="createTicketModalLabel">
-                        <i class="fas fa-ticket-alt me-2"></i> Buat Tiket Baru
+                    <h1 class="modal-title fs-4 fw-bold text-white" id="createTicketModalLabel">
+                        <i class="fas fa-ticket-alt me-2"></i> Create New Ticket
                     </h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
-                        <div class="col-md-6"><label class="form-label">Nama</label><input type="text" class="form-control" value="{{ Auth::user()->name }}" disabled></div>
-                        <div class="col-md-6"><label class="form-label">Departemen</label><input type="text" class="form-control" value="{{ Auth::user()->department ?? 'Belum diatur' }}" disabled></div>
+                        <div class="col-md-6"><label class="form-label">Name</label><input type="text" class="form-control" value="{{ Auth::user()->name }}" disabled></div>
+                        <div class="col-md-6"><label class="form-label">Department</label><input type="text" class="form-control" value="{{ Auth::user()->department ?? 'Not set' }}" disabled></div>
                         <div class="col-md-6">
-                            <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                            <label class="form-label">Category <span class="text-danger">*</span></label>
                             <select class="form-select" name="category_id" required>
-                                <option value="">Pilih Kategori</option>
+                                <option value="">Select Category</option>
                                 @foreach($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6"><label class="form-label">Email Kontak</label><input type="email" class="form-control" value="{{ Auth::user()->email }}" disabled></div>
-                        <div class="col-12"><label class="form-label">Deskripsi <span class="text-danger">*</span></label><textarea class="form-control" name="description" style="height: 120px" required></textarea></div>
+                        <div class="col-md-6"><label class="form-label">Contact Email</label><input type="email" class="form-control" value="{{ Auth::user()->email }}" disabled></div>
+                        <div class="col-12"><label class="form-label">Description <span class="text-danger">*</span></label><textarea class="form-control" name="description" style="height: 120px" required></textarea></div>
                         <div class="col-12">
                             <label class="form-label fw-semibold">
-                                <i class="fas fa-paperclip me-1 text-secondary"></i> Lampiran File
-                                <small class="text-muted">(opsional)</small>
+                                <i class="fas fa-paperclip me-1 text-secondary"></i> File Attachments
+                                <small class="text-muted">(optional)</small>
                             </label>
                             <input type="file" name="attachments[]" multiple class="form-control">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i> Batal</button>
-                    <button type="submit" id="submitTicketBtn" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i> Kirim Tiket</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i> Cancel</button>
+                    <button type="submit" id="submitTicketBtn" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i> Submit Ticket</button>
                 </div>
             </form>
         </div>
@@ -216,21 +219,21 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="showTicketModalLabel"><i class="fas fa-ticket-alt"></i> Detail Tiket</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                <h5 class="modal-title" id="showTicketModalLabel"><i class="fas fa-ticket-alt"></i> Ticket Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <table class="table table-borderless">
-                    <tr><th width="25%">ID Tiket</th><td id="show-ticket-id"></td></tr>
-                    <tr><th>Kategori</th><td id="show-ticket-category"></td></tr>
-                    <tr><th>Deskripsi</th><td id="show-ticket-description" style="white-space: pre-wrap;"></td></tr>
+                    <tr><th width="25%">Ticket ID</th><td id="show-ticket-id"></td></tr>
+                    <tr><th>Category</th><td id="show-ticket-category"></td></tr>
+                    <tr><th>Description</th><td id="show-ticket-description" style="white-space: pre-wrap;"></td></tr>
                     <tr><th>Status</th><td><span class="badge" id="show-ticket-status"></span></td></tr>
-                    <tr><th>Prioritas</th><td><span class="badge" id="show-ticket-priority"></span></td></tr>
-                    <tr><th>Dibuat</th><td id="show-ticket-created"></td></tr>
-                    <tr id="row-ticket-files" style="display: none;"><th>Lampiran</th><td id="show-ticket-files"></td></tr>
+                    <tr><th>Priority</th><td><span class="badge" id="show-ticket-priority"></span></td></tr>
+                    <tr><th>Created</th><td id="show-ticket-created"></td></tr>
+                    <tr id="row-ticket-files" style="display: none;"><th>Attachments</th><td id="show-ticket-files"></td></tr>
                 </table>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
         </div>
     </div>
 </div>
@@ -246,7 +249,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     // =====================================================================
-    // HELPER FUNCTIONS
+    // HELPER FUNCTIONS (Fungsi Bantuan)
     // =====================================================================
     const getStatusBadgeClass = (status) => {
         if (!status) return 'bg-secondary';
@@ -257,7 +260,6 @@ document.addEventListener("DOMContentLoaded", function() {
         if (status === 'closed') return 'bg-danger';
         return 'bg-secondary';
     };
-
     const getPriorityBadgeClass = (priority) => {
         if (!priority) return 'bg-secondary';
         priority = priority.toLowerCase();
@@ -266,39 +268,29 @@ document.addEventListener("DOMContentLoaded", function() {
         if (priority === 'low') return 'bg-success';
         return 'bg-secondary';
     };
-
-    // Fungsi untuk escape string
-    const escape = (str = '') =>
+    const escapeHTML = (str = '') =>
         String(str).replace(/[&<>"']/g, (m) => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[m]));
 
-    // Fungsi terpusat untuk membuat <tr>
     const createTicketRow = (ticket) => {
-        const statusClass = getStatusBadgeClass(ticket.status);
-        const priorityClass = getPriorityBadgeClass(ticket.priority);
         const description = ticket.description
-            ? ticket.description.substring(0, 50) + (ticket.description.length > 50 ? '...' : '')
+            ? (ticket.description.length > 50 ? ticket.description.substring(0, 50) + '...' : ticket.description)
             : '-';
-        const categoryName = ticket.category ? ticket.category.name : '-';
-
         return `
             <tr>
-                <td>${escape(ticket.ticket_id)}</td>
-                <td>${escape(categoryName)}</td>
-                <td>${escape(description)}</td>
-                <td><span class="badge ${statusClass}">${escape(ticket.status)}</span></td>
-                <td><span class="badge ${priorityClass}">${escape(ticket.priority)}</span></td>
-                <td>${escape(ticket.created_at)}</td>
-                <td>
+                <td data-label="Ticket ID">${escapeHTML(ticket.ticket_id)}</td>
+                <td data-label="Category">${escapeHTML(ticket.category.name ?? '-')}</td>
+                <td data-label="Description">${escapeHTML(description)}</td>
+                <td data-label="Status"><span class="badge ${getStatusBadgeClass(ticket.status)}">${escapeHTML(ticket.status)}</span></td>
+                <td data-label="Priority"><span class="badge ${getPriorityBadgeClass(ticket.priority)}">${escapeHTML(ticket.priority)}</span></td>
+                <td data-label="Created">${escapeHTML(ticket.created_at_formatted)}</td>
+                <td data-label="Action">
                     <button class="btn btn-sm btn-info view-ticket-btn"
-                        data-id="${escape(ticket.ticket_id)}"
-                        data-category="${escape(categoryName)}"
-                        data-description="${escape(ticket.description)}"
-                        data-status="${escape(ticket.status)}"
-                        data-priority="${escape(ticket.priority)}"
-                        data-created="${escape(ticket.created_at)}"
-                        data-attachments='${escape(JSON.stringify(ticket.attachments))}'>
+                        data-id="${escapeHTML(ticket.ticket_id)}" data-category="${escapeHTML(ticket.category.name ?? '-')}"
+                        data-description="${escapeHTML(ticket.description)}" data-status="${escapeHTML(ticket.status)}"
+                        data-priority="${escapeHTML(ticket.priority)}" data-created="${escapeHTML(ticket.created_at_formatted)}"
+                        data-attachments='${escapeHTML(JSON.stringify(ticket.attachments))}'>
                         <i class="fas fa-eye"></i>
                     </button>
                 </td>
@@ -307,66 +299,39 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     // =====================================================================
+    // FUNGSI UTAMA UNTUK MENGUPDATE TAMPILAN
+    // =====================================================================
+    function updateTable(data) {
+        const tableBody = document.querySelector("#ticketsTable tbody");
+        const paginationWrapper = document.querySelector('.pagination-wrapper');
+        tableBody.innerHTML = ""; // Kosongkan tabel
+
+        if (data.data && data.data.length > 0) {
+            data.data.forEach(ticket => {
+                tableBody.innerHTML += createTicketRow(ticket);
+            });
+        } else {
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">No matching tickets found.</td></tr>`;
+        }
+        
+        paginationWrapper.innerHTML = data.links; // Update link pagination
+        bindViewButtonEvents(); // Pasang ulang event listener untuk tombol "View"
+    }
+    
+    // =====================================================================
     // EVENT LISTENERS
     // =====================================================================
 
-    // 1. Submit Form Buat Tiket (AJAX)
-    const createTicketForm = document.getElementById("createTicketForm");
-    if (createTicketForm) {
-        createTicketForm.addEventListener("submit", function(e) {
-            e.preventDefault();
-            const form = e.target;
-            const submitButton = document.getElementById('submitTicketBtn');
-            const originalButtonHtml = submitButton.innerHTML;
-            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Mengirim...`;
-            submitButton.disabled = true;
-
-            fetch(form.action, {
-                method: "POST",
-                headers: { "Accept": "application/json" },
-                body: new FormData(form)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const newRowHtml = createTicketRow(data.ticket);
-                    const tableBody = document.querySelector("#ticketsTable tbody");
-                    const emptyRow = tableBody.querySelector('td[colspan="7"]');
-                    if (emptyRow) emptyRow.parentElement.remove();
-                    tableBody.insertAdjacentHTML("afterbegin", newRowHtml);
-                    form.reset();
-                    bootstrap.Modal.getInstance(form.closest('.modal')).hide();
-                    alert(data.message);
-                } else {
-                    let errorMessages = "Gagal membuat tiket:\n" + (data.message || '');
-                    if (data.errors) {
-                        for (const error in data.errors) {
-                            errorMessages += `\n- ${data.errors[error][0]}`;
-                        }
-                    }
-                    alert(errorMessages);
-                }
-            })
-            .catch(err => {
-                console.error('Fetch Error:', err);
-                alert("Terjadi kesalahan saat mengirim tiket.\n\nDetail: " + err.message);
-            })
-            .finally(() => {
-                submitButton.innerHTML = originalButtonHtml;
-                submitButton.disabled = false;
-
-                // 🚀 Apapun yang terjadi, reload halaman setelah 1 detik
-                setTimeout(() => location.reload(), 500);
-            });
-        });
-    }
-
-    // 2. Tampilkan Modal Detail Tiket
+    // 1. Fungsi untuk Modal Detail Tiket
     function bindViewButtonEvents() {
-        const showModal = new bootstrap.Modal(document.getElementById('showTicketModal'));
+        const showModalEl = document.getElementById('showTicketModal');
+        if (!showModalEl) return;
+        const showModal = new bootstrap.Modal(showModalEl);
+        
         document.querySelectorAll('.view-ticket-btn').forEach(button => {
             const newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
+            
             newButton.addEventListener('click', function() {
                 const ticketData = this.dataset;
                 document.getElementById("show-ticket-id").textContent = ticketData.id;
@@ -392,7 +357,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     attachments.forEach(file => {
                         const fileUrl = `/storage/${file}`;
                         const ext = file.split('.').pop().toLowerCase();
-                        if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                        if (['jpg','jpeg','png','gif','webp','heif'].includes(ext)) {
                             const img = document.createElement("img");
                             img.src = fileUrl;
                             img.className = "img-thumbnail me-2 mb-2";
@@ -419,9 +384,9 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // 3. Live Search (AJAX)
+    // 2. Fungsi untuk Live Search
     const searchInput = document.getElementById("searchInput");
-    if(searchInput) {
+    if (searchInput) {
         let searchTimer = null;
         searchInput.addEventListener("input", function() {
             clearTimeout(searchTimer);
@@ -431,30 +396,30 @@ document.addEventListener("DOMContentLoaded", function() {
                 
                 fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" } })
                 .then(res => res.json())
-                .then(data => {
-                    const tableBody = document.querySelector("#ticketsTable tbody");
-                    const paginationWrapper = document.querySelector('.pagination-wrapper');
-                    tableBody.innerHTML = "";
-                    
-                    if(data.data && data.data.length > 0) {
-                        data.data.forEach(ticket => {
-                            tableBody.innerHTML += createTicketRow(ticket);
-                        });
-                    } else {
-                        tableBody.innerHTML = `<tr><td colspan="7" class="text-center">Tidak ada tiket yang cocok.</td></tr>`;
-                    }
-                    
-                    paginationWrapper.innerHTML = '';
-                    bindViewButtonEvents();
-                })
+                .then(data => updateTable(data))
                 .catch(err => console.error(err));
             }, 400);
         });
     }
 
-    // Bind pertama kali
+    // 3. Fungsi untuk Pagination AJAX
+    const paginationWrapper = document.querySelector('.pagination-wrapper');
+    if (paginationWrapper) {
+        paginationWrapper.addEventListener('click', function(event) {
+            if (event.target.tagName === 'A' && event.target.classList.contains('page-link')) {
+                event.preventDefault();
+                const url = event.target.getAttribute('href');
+                
+                fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" } })
+                .then(res => res.json())
+                .then(data => updateTable(data))
+                .catch(err => console.error(err));
+            }
+        });
+    }
+
+    // Panggil fungsi ini saat halaman pertama kali dimuat
     bindViewButtonEvents();
 });
 </script>
-
 @endpush

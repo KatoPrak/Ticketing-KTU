@@ -121,26 +121,46 @@
     <div class="dashboard-card p-3">
         <h5 class="mb-3"><i class="fas fa-tasks me-2"></i>Quick Actions</h5>
         <div class="d-grid gap-2">
-            <a href="{{ route('news.create') }}" class="btn btn-primary">
+            <a href="{{ route('it.news.create') }}" class="btn btn-primary">
                 <i class="fas fa-newspaper me-2"></i> Create News
             </a>
         </div>
     </div>
 </div>
     <!-- Modal Detail Tiket -->
-    <div class="modal fade" id="ticketDetailModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-ticket-alt me-2"></i>Detail Tiket</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="ticketDetailContent">
-                    <p class="text-center text-muted">Memuat detail tiket...</p>
-                </div>
-            </div>
+    <div class="modal fade" id="detailTicketModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow-lg border-0">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold text-primary">
+          <i class="fas fa-ticket-alt me-2"></i> Detail Tiket
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="d_loader" class="text-center my-4">
+          <div class="spinner-border text-primary"></div>
         </div>
+        <div id="d_content" class="d-none">
+          <table class="table table-borderless align-middle mb-0">
+            <tr><th width="25%">ID Tiket</th><td><span id="d_ticket_id"></span></td></tr>
+            <tr><th>Dibuat oleh</th><td><span id="d_user"></span></td></tr>
+            <tr><th>Departemen</th><td><span id="d_department"></span></td></tr>
+            <tr><th>Kategori</th><td><span id="d_category"></span></td></tr>
+            <tr><th>Status</th><td><span class="badge bg-warning text-dark" id="d_status"></span></td></tr>
+            <tr><th>Prioritas</th><td><span class="badge bg-info text-dark" id="d_priority"></span></td></tr>
+            <tr><th>Deskripsi</th><td><span id="d_description"></span></td></tr>
+            <tr><th>Tanggal</th><td><span id="d_created"></span></td></tr>
+            <tr><th>Lampiran</th><td><div id="d_attachments" class="d-flex flex-wrap gap-2"></div></td></tr>
+          </table> 
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
     </div>
+  </div>
+</div>
 @endsection
 
 @push('scripts')
