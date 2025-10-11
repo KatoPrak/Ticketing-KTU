@@ -250,46 +250,76 @@ body.sidebar-open {
 }
 
 /* ========================================
-   TABLES
+   TABLES (FIXED & IMPROVED VERSION)
    ======================================== */
 .table-responsive {
-    border-radius: 8px;
+    width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+}
+
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background-color: rgba(127, 86, 216, 0.3);
+    border-radius: 10px;
 }
 
 .table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
     font-size: 0.95rem;
+    color: var(--text-dark);
+    background-color: #fff;
     margin-bottom: 0;
 }
 
-.table th {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #666;
-    border-top: none;
-    white-space: nowrap;
-    padding: 1rem 0.75rem;
+.table th,
+.table td {
+    padding: 0.9rem 0.75rem;
+    text-align: left;
+    vertical-align: middle;
+    border-top: 1px solid #e0e6ed;
 }
 
-.table td {
-    padding: 0.875rem 0.75rem;
-    vertical-align: middle;
+.table thead th {
+    background-color: #f8f9fc;
+    color: #555;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.table-hover tbody tr {
+    transition: background-color 0.2s ease-in-out;
 }
 
 .table-hover tbody tr:hover {
     background-color: rgba(127, 86, 216, 0.05);
 }
 
-/* Ticket table specific styles */
-.table td.text-start {
-    max-width: 300px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* User Management table mobile optimization */
 .table-striped tbody tr:nth-of-type(odd) {
     background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Text alignment utilities for tables */
+.table .text-center {
+    text-align: center;
+}
+
+.table .text-start {
+    text-align: left;
+}
+
+.table .text-end {
+    text-align: right;
 }
 
 /* Card footer pagination */
@@ -480,7 +510,7 @@ body.sidebar-open {
         font-size: 1.5rem;
     }
 
-    /* Table adjustments for tablet */
+    /* Table responsive adjustments for tablet */
     .table {
         font-size: 0.9rem;
     }
@@ -490,9 +520,21 @@ body.sidebar-open {
         padding: 0.75rem 0.5rem;
     }
 
-    /* Hide less critical columns on tablet */
-    .table td:nth-child(3),
-    .table th:nth-child(3) {
+    .table .text-start {
+        max-width: 250px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Hide non-critical columns on tablet */
+    .table tbody td:nth-child(3),
+    .table thead th:nth-child(3) {
+        display: none;
+    }
+
+    /* User management table - hide ID Staff on tablet */
+    #userTable tbody td:nth-child(2),
+    #userTable thead th:nth-child(2) {
         display: none;
     }
 
@@ -503,12 +545,6 @@ body.sidebar-open {
         flex: 0 0 100%;
         max-width: 100%;
         margin-bottom: 0.5rem;
-    }
-
-    /* User management table - hide ID Staff on tablet */
-    #userTable td:nth-child(2),
-    #userTable th:nth-child(2) {
-        display: none;
     }
 }
 
@@ -585,43 +621,109 @@ body.sidebar-open {
 
     /* Table mobile optimizations */
     .table {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
     }
 
     .table th,
     .table td {
-        padding: 0.6rem 0.3rem;
+        padding: 0.65rem 0.4rem;
+        white-space: nowrap;
     }
 
-    /* Hide columns on mobile - show only essential info */
-    .table td:nth-child(3), /* Departemen */
-    .table th:nth-child(3),
-    .table td:nth-child(4), /* Kategori */
-    .table th:nth-child(4),
-    .table td:nth-child(7), /* Dibuat Oleh */
-    .table th:nth-child(7) {
+    /* Enable horizontal scroll for all tables on mobile */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Make tables scrollable with minimum width */
+    .table {
+        min-width: 700px; /* Force horizontal scroll */
+    }
+
+    /* Ticket list specific - hide less important columns */
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(3), /* Departemen */
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(3),
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(4), /* Kategori */
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(4),
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(7) /* Dibuat Oleh */
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(7) {
         display: none;
+    }
+
+    /* Keep Status and Priority visible - columns 5 and 6 */
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(5), /* Status */
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(5),
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(6), /* Priority */
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(6) {
+        display: table-cell !important;
     }
 
     /* User management table - hide ID Staff and Email on mobile */
-    #userTable td:nth-child(2), /* ID Staff */
-    #userTable th:nth-child(2),
-    #userTable td:nth-child(3), /* Email */
-    #userTable th:nth-child(3) {
+    #userTable tbody td:nth-child(2), /* ID Staff */
+    #userTable thead th:nth-child(2),
+    #userTable tbody td:nth-child(3), /* Email */
+    #userTable thead th:nth-child(3) {
         display: none;
     }
 
-    /* User management action buttons */
+    #userTable {
+        min-width: 100%; /* Full width, no horizontal scroll */
+    }
+
+    /* User management action buttons - stack vertically */
     #userTable .btn {
-        padding: 0.35rem 0.5rem;
+        padding: 0.4rem 0.6rem;
         font-size: 0.75rem;
         display: block;
         width: 100%;
         margin-bottom: 0.25rem;
     }
 
-    #userTable td:last-child {
-        min-width: 80px;
+    #userTable tbody td:last-child {
+        min-width: 90px;
+    }
+
+    /* Wrap table in scrollable container */
+    #userTable tbody td:nth-child(1), /* Name */
+    #userTable thead th:nth-child(1) {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #userTable tbody td:nth-child(4), /* Department */
+    #userTable thead th:nth-child(4) {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Dashboard table - keep all columns visible */
+    .dashboard-card .table {
+        min-width: 600px;
+    }
+
+    .dashboard-card .table tbody td,
+    .dashboard-card .table thead th {
+        display: table-cell !important;
+    }
+
+    .dashboard-card .table {
+        font-size: 0.8rem;
+    }
+
+    .dashboard-card .table th,
+    .dashboard-card .table td {
+        padding: 0.55rem 0.35rem;
+    }
+
+    .dashboard-card .badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
     }
 
     /* Make select dropdowns smaller */
@@ -739,51 +841,95 @@ body.sidebar-open {
 
     /* Extra small table optimization */
     .table {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
+        min-width: 650px; /* Smaller min-width for extra small screens */
     }
 
     .table th,
     .table td {
-        padding: 0.5rem 0.25rem;
+        padding: 0.5rem 0.3rem;
     }
 
-    /* Show only critical columns on very small screens */
-    .table td:nth-child(2), /* Deskripsi */
-    .table th:nth-child(2) {
-        max-width: 120px;
+    /* Ticket list - show only critical columns */
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(2) { /* Deskripsi */
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    .table td:nth-child(3), /* Departemen */
-    .table th:nth-child(3),
-    .table td:nth-child(4), /* Kategori */
-    .table th:nth-child(4),
-    .table td:nth-child(6), /* Prioritas */
-    .table th:nth-child(6),
-    .table td:nth-child(7), /* Dibuat Oleh */
-    .table th:nth-child(7) {
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(3),
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(3),
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(4),
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(4),
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(7),
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(7) {
         display: none;
     }
 
-    /* User management - show only Name, Department, Actions */
-    #userTable td:nth-child(2), /* ID Staff */
-    #userTable th:nth-child(2),
-    #userTable td:nth-child(3), /* Email */
-    #userTable th:nth-child(3) {
+    /* Keep Status (col 5) and Priority (col 6) visible */
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(5),
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(5),
+    .table:not(#userTable):not(.dashboard-card .table) tbody td:nth-child(6),
+    .table:not(#userTable):not(.dashboard-card .table) thead th:nth-child(6) {
+        display: table-cell !important;
+    }
+
+    /* User management - keep compact */
+    #userTable {
+        min-width: 100%; /* No horizontal scroll */
+    }
+
+    #userTable tbody td:nth-child(2),
+    #userTable thead th:nth-child(2),
+    #userTable tbody td:nth-child(3),
+    #userTable thead th:nth-child(3) {
         display: none;
     }
 
-    #userTable td:nth-child(4) { /* Department */
-        font-size: 0.7rem;
+    /* Truncate long text in Name column */
+    #userTable tbody td:nth-child(1),
+    #userTable thead th:nth-child(1) {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
-    /* Stack action buttons vertically */
+    #userTable tbody td:nth-child(4) { /* Department */
+        font-size: 0.75rem;
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     #userTable .editUser,
     #userTable .deleteUser {
         display: block;
         width: 100%;
         margin-bottom: 0.25rem;
-        padding: 0.3rem 0.4rem;
+        padding: 0.35rem 0.5rem;
         font-size: 0.7rem;
+    }
+
+    #userTable tbody td:last-child {
+        width: 85px;
+        min-width: 85px;
+    }
+
+    /* Dashboard table - still scrollable but more compact */
+    .dashboard-card .table {
+        min-width: 550px;
+        font-size: 0.75rem;
+    }
+
+    .dashboard-card .table th,
+    .dashboard-card .table td {
+        padding: 0.45rem 0.25rem;
+    }
+
+    .dashboard-card .badge {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.4rem;
     }
 
     /* Compact form controls */

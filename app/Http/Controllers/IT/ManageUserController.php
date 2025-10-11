@@ -14,12 +14,30 @@ class ManageUserController extends Controller
     /**
      * Menampilkan daftar user
      */
-    public function index()
-    {
-        // Diubah untuk mengambil user dengan role 'user'
-        $users = User::where('role', 'user')->get();
-        return view('it.manage-user', compact('users'));
+    public function index(Request $request)
+{
+    $search = $request->input('search');
+
+    $query = User::where('role', 'user');
+
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('id_staff', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('department', 'like', "%{$search}%");
+        });
     }
+
+    // Kalau permintaan AJAX, kirim JSON saja
+    if ($request->ajax()) {
+        return response()->json($query->get());
+    }
+
+    $users = $query->get();
+    return view('it.manage-user', compact('users'));
+}
+
 
     /**
      * Menyimpan user baru

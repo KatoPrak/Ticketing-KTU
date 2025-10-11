@@ -1,26 +1,25 @@
 @extends('layouts.it')
 
-@section('title','Daftar Tiket IT')
-<meta name="csrf-token" content="{{ csrf_token() }}">
-@vite(['resources/css/list-tiket.css', 'resources/js/it.js'])
+@section('title', 'IT Ticket List')
+@vite(['resources/css/it-tickets.css', 'resources/js/it-tickets.js']) {{-- Disarankan ganti nama agar lebih spesifik --}}
 
 @section('content')
 <div class="container py-4">
 
-    <h2 class="fw-bold mb-3"><i class="fas fa-ticket-alt text-primary me-2"></i> Daftar Tiket IT</h2>
+    <h2 class="fw-bold mb-3"><i class="fas fa-ticket-alt text-primary me-2"></i> IT Ticket List</h2>
 
     {{-- ================= FILTER ================= --}}
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
-            <form method="GET" action="{{ route('it.index-ticket') }}" class="row g-2">
+            <form method="GET" action="{{ route('it.index-ticket') }}" class="row g-2 align-items-center">
                 <div class="col-md-4">
-                    <input type="text" name="search" class="form-control" placeholder="Cari tiket..." value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control" placeholder="Search by ID or description..." value="{{ request('search') }}">
                 </div>
                 <div class="col-md-3">
                     <select name="status" class="form-select">
-                        <option value="">Semua Status</option>
-                        @foreach(['waiting','in_progress','pending'] as $status)
-                            <option value="{{ $status }}" @selected(request('status')==$status)>
+                        <option value="">All Statuses</option>
+                        @foreach(['waiting','in_progress','pending','resolved'] as $status)
+                            <option value="{{ $status }}" @selected(request('status') == $status)>
                                 {{ ucfirst(str_replace('_',' ',$status)) }}
                             </option>
                         @endforeach
@@ -28,9 +27,9 @@
                 </div>
                 <div class="col-md-3">
                     <select name="category_id" class="form-select">
-                        <option value="">Semua Kategori</option>
+                        <option value="">All Categories</option>
                         @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}" @selected(request('category_id')==$cat->id)>
+                            <option value="{{ $cat->id }}" @selected(request('category_id') == $cat->id)>
                                 {{ $cat->name }}
                             </option>
                         @endforeach
@@ -43,75 +42,70 @@
         </div>
     </div>
 
-    {{-- ================= TABEL TIKET ================= --}}
+    {{-- ================= TICKET TABLE ================= --}}
     <div class="card shadow-sm">
-        <div class="card-body table-responsive">
-            <table class="table table-hover align-middle text-center">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID Tiket</th>
-                        <th class="text-start">Deskripsi</th>
-                        <th>Departemen</th>
-                        <th>Kategori</th>
-                        <th>Status</th>
-                        <th>Prioritas</th>
-                        <th>Dibuat Oleh</th>
-                        <th>Aksi</th>
+    <div class="card-body table-responsive">
+        <table class="table table-hover align-middle text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>Ticket ID</th>
+                    <th class="text-start">Description</th>
+                    <th>Department</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Created By</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($tickets as $ticket)
+                    {{-- ✅ PERUBAHAN ADA DI BARIS INI --}}
+                    <tr id="ticket-row-{{ $ticket->id }}" class="priority-{{ $ticket->priority }}">
+                        <td data-label="Ticket ID">#{{ $ticket->ticket_id }}</td>
+                        <td data-label="Description" class="text-start">{{ Str::limit($ticket->description, 60) }}</td>
+                        <td data-label="Department">{{ $ticket->user->department ?? '-' }}</td>
+                        <td data-label="Category">{{ $ticket->category->name ?? '-' }}</td>
+                        <td data-label="Status">
+                            <select class="form-select form-select-sm update-ticket-field select-status-{{$ticket->status}}"
+                                    data-id="{{ $ticket->id }}" data-field="status" data-original-value="{{ $ticket->status }}">
+                                @foreach(['waiting','in_progress','pending','resolved','closed'] as $status)
+                                    <option value="{{ $status }}" @selected($ticket->status == $status)>
+                                        {{ ucfirst(str_replace('_',' ',$status)) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td data-label="Priority">
+                            <select class="form-select form-select-sm update-ticket-field select-priority-{{$ticket->priority}}"
+                                    data-id="{{ $ticket->id }}" data-field="priority" data-original-value="{{ $ticket->priority }}">
+                                @foreach(['low','medium','high','urgent'] as $priority)
+                                    <option value="{{ $priority }}" @selected($ticket->priority == $priority)>
+                                        {{ ucfirst($priority) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td data-label="Created By">{{ $ticket->user->name ?? '-' }}</td>
+                        <td data-label="Action">
+                            <button class="btn btn-sm btn-outline-primary btn-detail-ticket" data-id="{{ $ticket->id }}">
+                                <i class="fas fa-eye me-1"></i> Detail
+                            </button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse($tickets as $ticket)
-                        <tr id="ticket-row-{{ $ticket->id }}">
-                            <td>#{{ $ticket->ticket_id }}</td>
-                            <td class="text-start">{{ Str::limit($ticket->description, 60) }}</td>
-                            <td>{{ $ticket->user->department ?? '-' }}</td>
-                            <td>{{ $ticket->category->name ?? '-' }}</td>
-                            <td>
-                                <select class="form-select form-select-sm update-ticket-field"
-                                        data-id="{{ $ticket->id }}"
-                                        data-field="status"
-                                        data-original-value="{{ $ticket->status }}">
-                                    @foreach(['waiting','in_progress','pending','resolved','closed'] as $status)
-                                        <option value="{{ $status }}" @selected($ticket->status==$status)>
-                                            {{ ucfirst(str_replace('_',' ',$status)) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </td>
-                            <td>
-                                <select class="form-select form-select-sm update-ticket-field"
-                                        data-id="{{ $ticket->id }}"
-                                        data-field="priority"
-                                        data-original-value="{{ $ticket->priority }}">
-                                    @foreach(['low','medium','high','urgent'] as $priority)
-                                        <option value="{{ $priority }}" @selected($ticket->priority==$priority)>
-                                            {{ ucfirst($priority) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </td>
-                            <td>{{ $ticket->user->name ?? '-' }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-detail-ticket"
-                                        data-id="{{ $ticket->id }}">
-                                    <i class="fas fa-eye me-1"></i> Detail
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="text-muted">Tidak ada tiket ditemukan</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card-footer d-flex justify-content-between align-items-center">
-            <span>Menampilkan {{ $tickets->firstItem() ?? 0 }} - {{ $tickets->lastItem() ?? 0 }} dari {{ $tickets->total() }}</span>
-            {{ $tickets->links('pagination::bootstrap-5') }}
-        </div>
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center text-muted p-4">No tickets found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+        <span>Showing {{ $tickets->firstItem() ?? 0 }} to {{ $tickets->lastItem() ?? 0 }} of {{ $tickets->total() }}</span>
+        {{ $tickets->links('pagination::bootstrap-5') }}
+    </div>
+</div>
 </div>
 
 {{-- ================= MODAL DETAIL ================= --}}
@@ -119,61 +113,60 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content shadow-lg border-0">
       <div class="modal-header bg-light">
-        <h5 class="modal-title fw-bold text-primary">
-          <i class="fas fa-ticket-alt me-2"></i> Detail Tiket
-        </h5>
+        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-ticket-alt me-2"></i> Ticket Details</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <div id="d_loader" class="text-center my-4">
-          <div class="spinner-border text-primary"></div>
-        </div>
+        <div id="d_loader" class="text-center my-4"><div class="spinner-border text-primary"></div></div>
         <div id="d_content" class="d-none">
-          <table class="table table-borderless align-middle mb-0">
-            <tr><th width="25%">ID Tiket</th><td><span id="d_ticket_id"></span></td></tr>
-            <tr><th>Dibuat oleh</th><td><span id="d_user"></span></td></tr>
-            <tr><th>Departemen</th><td><span id="d_department"></span></td></tr>
-            <tr><th>Kategori</th><td><span id="d_category"></span></td></tr>
-            <tr><th>Status</th><td><span class="badge bg-warning text-dark" id="d_status"></span></td></tr>
-            <tr><th>Prioritas</th><td><span class="badge bg-info text-dark" id="d_priority"></span></td></tr>
-            <tr><th>Deskripsi</th><td><span id="d_description"></span></td></tr>
-            <tr><th>Tanggal</th><td><span id="d_created"></span></td></tr>
-            <tr><th>Lampiran</th><td><div id="d_attachments" class="d-flex flex-wrap gap-2"></div></td></tr>
+          <table class="align-middle mb-0">
+            <tr><th width="25%">Ticket ID</th><td><span id="d_ticket_id" class="fw-bold text-primary"></span></td></tr>
+            <tr><th>Created By</th><td><span id="d_user"></span></td></tr>
+            <tr><th>Department</th><td><span id="d_department"></span></td></tr>
+            <tr><th>Category</th><td><span id="d_category"></span></td></tr>
+            <tr><th>Status</th><td><span class="badge" id="d_status"></span></td></tr>
+            <tr><th>Priority</th><td><span class="badge" id="d_priority"></span></td></tr>
+            <tr><th>Description</th><td style="white-space: pre-wrap;"><span id="d_description"></span></td></tr>
+            <tr><th>Date</th><td><span id="d_created"></span></td></tr>
+            <tr id="d_row_notes" class="d-none"><th class="align-text-top">Resolution Notes</th><td><div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded"></div></td></tr>
+            <tr><th class="align-text-top">Attachments</th><td><div id="d_attachments" class="d-flex flex-wrap gap-2"></div></td></tr>
           </table>
         </div>
       </div>
       <div class="modal-footer bg-light">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
 
+{{-- ================= RESOLUTION NOTES MODAL ================= --}}
+<div class="modal fade" id="resolutionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content shadow-lg border-0">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Resolution Notes</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <textarea id="resolutionNotes" class="form-control" rows="4" placeholder="Write ticket completion notes..."></textarea>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="saveResolutionBtn" class="btn btn-primary">Save Notes</button>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function() {
 
-    // ==========================================================
-    // 🔔 TOAST HELPER
-    // ==========================================================
-    const toastEl = document.getElementById('liveToast');
-    const bsToast = new bootstrap.Toast(toastEl);
-    const showToast = (msg, success = true) => {
-        document.getElementById('toast-body-message').textContent = msg;
-        toastEl.querySelector('i').className = success
-            ? 'fas fa-check-circle text-success me-2'
-            : 'fas fa-times-circle text-danger me-2';
-        bsToast.show();
-    };
-
-    // ==========================================================
-    // ⚙️ UPDATE STATUS / PRIORITY FIELD
-    // ==========================================================
     document.body.addEventListener('change', async (e) => {
         if (!e.target.classList.contains('update-ticket-field')) return;
+
         const select = e.target;
         const id = select.dataset.id;
         const field = select.dataset.field;
@@ -185,6 +178,21 @@ document.addEventListener("DOMContentLoaded", function(){
             return;
         }
 
+        // jika status pending/closed → buka modal catatan
+        if (field === 'status' && ['pending', 'closed'].includes(value)) {
+            const modal = new bootstrap.Modal(document.getElementById('resolutionModal'));
+            document.getElementById('saveResolutionBtn').onclick = async () => {
+                const notes = document.getElementById('resolutionNotes').value.trim();
+                await updateFieldWithNotes(id, field, value, old, notes);
+                modal.hide();
+            };
+            modal.show();
+        } else {
+            await updateFieldWithNotes(id, field, value, old, null);
+        }
+    });
+
+    async function updateFieldWithNotes(id, field, value, old, notes) {
         try {
             const res = await fetch(`/it/tickets/${id}/update-field`, {
                 method: 'POST',
@@ -192,95 +200,23 @@ document.addEventListener("DOMContentLoaded", function(){
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
-                body: JSON.stringify({ field, value })
+                body: JSON.stringify({ field, value, resolution_notes: notes })
             });
+
             const data = await res.json();
             if (data.success) {
-                showToast(data.message);
-                select.dataset.originalValue = value;
+                alert('Berhasil memperbarui tiket.');
             } else {
-                showToast(data.message, false);
-                select.value = old;
+                alert(data.message);
+                document.querySelector(`[data-id="${id}"][data-field="${field}"]`).value = old;
             }
         } catch (err) {
             console.error(err);
-            showToast('Server error', false);
-            select.value = old;
+            alert('Terjadi kesalahan server.');
+            document.querySelector(`[data-id="${id}"][data-field="${field}"]`).value = old;
         }
-    });
+    }
 
-    // ==========================================================
-    // 🎫 DETAIL MODAL HANDLER
-    // ==========================================================
-    document.body.addEventListener('click', async (e) => {
-        const btn = e.target.closest('.btn-detail-ticket');
-        if (!btn) return;
-
-        // pastikan pakai ID modal yang benar
-        const modalEl = document.getElementById('detailTicketModal');
-        const modal = new bootstrap.Modal(modalEl);
-        const modalBody = modalEl.querySelector('.modal-body');
-
-        modal.show();
-        modalBody.innerHTML = `
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary"></div>
-                <p class="mt-2">Memuat detail tiket...</p>
-            </div>
-        `;
-
-        try {
-            const res = await fetch(`/it/tickets/${btn.dataset.id}`);
-            const ticket = await res.json();
-            const user = ticket.user || {};
-            const cat = ticket.category || {};
-            let attachments = [];
-
-            // Jika "attachments" dikirim dalam bentuk string JSON
-            try {
-                attachments = Array.isArray(ticket.attachments)
-                    ? ticket.attachments
-                    : JSON.parse(ticket.attachments || '[]');
-            } catch {
-                attachments = [];
-            }
-
-            let filesHTML = `<span class="text-muted">Tidak ada lampiran</span>`;
-            if (attachments.length > 0) {
-                filesHTML = attachments.map(file => {
-                    const url = `/storage/${file}`;
-                    const ext = file.split('.').pop().toLowerCase();
-                    if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
-                        return `
-                            <img src="${url}" class="img-thumbnail me-2 mb-2"
-                                 style="max-width:150px;cursor:pointer"
-                                 onclick="window.open('${url}','_blank')">
-                        `;
-                    }
-                    return `<a href="${url}" target="_blank">${file.split('/').pop()}</a>`;
-                }).join('');
-            }
-
-            modalBody.innerHTML = `
-                <div id="detail-content">
-                    <table class="table table-borderless align-middle mb-0">
-                        <tr><th width="25%">ID Tiket</th><td>#${ticket.ticket_id}</td></tr>
-                        <tr><th>Dibuat oleh</th><td>${user.name || '-'}</td></tr>
-                        <tr><th>Departemen</th><td>${user.department || '-'}</td></tr>
-                        <tr><th>Kategori</th><td>${cat.name || '-'}</td></tr>
-                        <tr><th>Status</th><td><span class="badge bg-secondary">${ticket.status}</span></td></tr>
-                        <tr><th>Prioritas</th><td><span class="badge bg-info text-dark">${ticket.priority}</span></td></tr>
-                        <tr><th>Deskripsi</th><td style="white-space: pre-wrap;">${ticket.description}</td></tr>
-                        <tr><th>Dibuat pada</th><td>${ticket.created_at || '-'}</td></tr>
-                        <tr><th>Lampiran</th><td>${filesHTML}</td></tr>
-                    </table>
-                </div>
-            `;
-        } catch (err) {
-            console.error(err);
-            modalBody.innerHTML = `<div class="alert alert-danger">Gagal memuat detail tiket.</div>`;
-        }
-    });
 });
 </script>
 @endpush

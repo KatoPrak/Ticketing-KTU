@@ -13,6 +13,7 @@
     "dependencies": {
         "admin-lte": "3.2",
         "bootstrap": "^5.3.7",
+        "expo": "^54.0.13",
         "jquery": "^3.7.1"
     }
 }
