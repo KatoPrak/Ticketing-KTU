@@ -49,7 +49,6 @@
         .badge-low { background: #28a745; color: white; }
         .badge-medium { background: #ffc107; color: #000; }
         .badge-high { background: #dc3545; color: white; }
-        .badge-urgent { background: #8b0000; color: white; }
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -71,6 +70,8 @@
 <body>
     <div class="container">
         <div class="header">
+            {{-- LOGO DITAMBAHKAN DI SINI --}}
+            <img src="{{ asset('assets/image/logo-ktu.jpg') }}" alt="Logo Perusahaan" style="max-width: 150px; height: auto; margin-bottom: 10px;">
             <h2 style="margin: 0;">🎫 Tiket Baru Masuk</h2>
         </div>
         
@@ -94,15 +95,17 @@
             </div>
             
             <div class="info-row">
-                <strong>Pembuat:</strong> {{ $ticket->user->name ?? 'Unknown' }}
-                @if($ticket->user && $ticket->user->department)
-                    ({{ $ticket->user->department }})
+                {{-- PEMANGGILAN NAMA/PEMBUAT DIPERBAIKI DI SINI --}}
+                <strong>Pembuat:</strong>
+                {{ $ticket->user->name ?? 'Unknown' }}
+                @if($ticket->user?->department)
+                    ({{ $ticket->user->department->name }})
                 @endif
             </div>
             
             <div class="info-row">
                 <strong>Deskripsi:</strong><br>
-                {{ $ticket->description }}
+                {!! nl2br(e($ticket->description)) !!}
             </div>
             
             <div class="info-row">

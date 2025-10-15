@@ -412,8 +412,11 @@ tbody tr:hover {
     align-items: center;
 }
 
+
 .modal-body {
-    padding: 20px;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: calc(90vh - 160px); /* header + footer space */
 }
 
 .modal-footer {
@@ -423,6 +426,16 @@ tbody tr:hover {
     justify-content: flex-end;
     gap: 10px;
 }
+#userModal {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#userModal.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 
 .close {
     font-size: 24px;
@@ -521,4 +534,209 @@ tbody tr:hover {
     .stats-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* === Wider & Cleaner Modal === */
+#userModal .modal-content {
+    max-width: 650px; /* dari 500px -> 650px */
+    width: 90%;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    overflow: hidden;
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Header styling */
+#userModal .modal-header {
+    background: linear-gradient(135deg, #3498db 0%, #2c82c9 100%);
+    color: #fff;
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+}
+
+#userModal .modal-header h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Body padding lebih lega */
+#userModal .modal-body {
+    padding: 1.8rem 2rem;
+}
+
+/* Input & select spacing */
+#userModal .form-control,
+#userModal select {
+    height: 42px;
+    padding: 10px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 100%;
+    transition: all 0.25s ease;
+}
+
+#userModal .form-control:focus,
+#userModal select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+}
+
+/* Footer alignment */
+#userModal .modal-footer {
+    background: #f8f8f8;
+    padding: 1rem 1.8rem;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #userModal .modal-content {
+        width: 95%;
+        max-width: 95%;
+    }
+}
+/* Smooth fade-in effect */
+.modal.fade .modal-dialog {
+  transform: scale(0.95);
+  transition: all 0.25s ease-out;
+}
+.modal.fade.show .modal-dialog {
+  transform: scale(1);
+}
+
+/* Input hover & focus enhancement */
+.form-control-lg, .form-select-lg {
+  border-radius: 0.75rem;
+  transition: box-shadow 0.2s ease;
+}
+.form-control-lg:focus, .form-select-lg:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Info alert tweak */
+.alert-info {
+  background-color: #e8f4ff;
+  border: 1px solid #b6e0fe;
+  color: #084298;
+}
+
+/* Button enhancements */
+.btn {
+  border-radius: 0.65rem;
+}
+.btn-outline-secondary:hover {
+  background-color: #f8f9fa;
+  color: #333;
+}.modal-dialog.modal-lg {
+    max-width: 720px !important;
+}
+.modal-content {
+    border-radius: 1rem !important;
+    overflow: hidden;
+}
+.modal-body {
+    padding: 2rem 2.5rem !important;
+}
+.modal-footer {
+    padding: 1rem 2rem !important;
+}
+.form-control-lg, .form-select-lg {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+}
+.modal.fade .modal-dialog {
+    transform: translateY(-20px);
+    transition: all 0.25s ease;
+}
+.modal.fade.show .modal-dialog {
+    transform: translateY(0);
+}
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #007bff, #00aaff);
+}
+
+.modal-content {
+  animation: fadeInUp 0.25s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Biar modal selalu di tengah sempurna */
+.modal-dialog {
+  display: flex;
+  align-items: center;
+  min-height: calc(100vh - 1rem);
+}
+
+/* Hapus batasan tinggi default */
+.modal.show .modal-dialog {
+  transform: none !important;
+}
+
+/* Bonus: bikin efek blur di belakang */
+.modal-backdrop.show {
+  backdrop-filter: blur(5px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.modal-dialog-centered {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 100vh !important;
+}
+
+.modal-content {
+  margin: auto;
+  border-radius: 10px;
+}
+/* ==== FIX BOOTSTRAP MODAL POSITION ==== */
+.modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1055 !important;
+}
+
+.modal-backdrop {
+  z-index: 1050 !important;
+}
+
+.modal-dialog {
+  margin: 0 auto !important;
+}
+
+.modal-dialog-centered {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh !important;
+}
+
+body.modal-open .dashboard-container {
+  filter: blur(0) !important;
+  overflow: visible !important;
+}
+/* ==== FIX CLOSE BUTTON & MODAL LAYOUT ==== */
+.modal-header {
+  position: relative;
+  padding-right: 3rem !important; /* beri ruang buat tombol close */
+}
+
+.modal-header .btn-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1056;
 }

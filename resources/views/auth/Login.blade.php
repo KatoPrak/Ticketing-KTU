@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - KTU Shipyard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ asset('assets/image/logo-ktu.jpg') }}">
 
@@ -374,10 +375,13 @@
         <input type="text" id="id_staff" name="id_staff" class="form-control"
                value="{{ old('id_staff') }}" required autofocus>
     </div>
-    <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" id="password" name="password" class="form-control" required>
-    </div>
+<div class="mb-3 position-relative">
+    <label for="password" class="form-label">Password</label>
+    <input type="password" id="password" name="password" class="form-control" required>
+    <i class="fas fa-eye" id="togglePassword" 
+       style="position: absolute; right: 10px; top: 70%; transform: translateY(-50%); cursor: pointer; color: #6c757d;">
+    </i>
+</div>
 
     {{-- Remember Me checkbox --}}
     <div class="mb-3 form-check">
@@ -411,72 +415,89 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginForm');
-            const loginBtn = document.getElementById('loginBtn');
-            const btnText = loginBtn.querySelector('.btn-text');
-            const btnLoading = loginBtn.querySelector('.btn-loading');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = loginBtn.querySelector('.btn-text');
+        const btnLoading = loginBtn.querySelector('.btn-loading');
 
-            // Handle form submission with loading state
-            loginForm.addEventListener('submit', function(e) {
-                // Show loading state
-                loginBtn.disabled = true;
-                btnText.classList.add('d-none');
-                btnLoading.classList.remove('d-none');
+        // === BLOK BARU: Mulai Show/Hide Password ===
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
 
-                // If there's a validation error, the page will reload and reset the button
-                // If login is successful, user will be redirected
+        if (togglePassword && password) {
+            togglePassword.addEventListener('click', function () {
+                // Ganti tipe input dari password ke text atau sebaliknya
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
                 
-                // Optional: Add timeout to re-enable button in case of network issues
-                setTimeout(function() {
+                // Ganti ikon mata
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        }
+        // === BLOK BARU: Selesai Show/Hide Password ===
+
+        // Handle form submission with loading state
+        loginForm.addEventListener('submit', function(e) {
+            // Show loading state
+            loginBtn.disabled = true;
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+            
+            setTimeout(function() {
+                if (!isSubmitting) { // Hanya reset jika tidak ada submit yang berhasil
                     loginBtn.disabled = false;
                     btnText.classList.remove('d-none');
                     btnLoading.classList.add('d-none');
-                }, 10000); // 10 seconds timeout
-            });
-
-            // Remember me tooltip or info
-            const rememberCheckbox = document.getElementById('remember');
-            rememberCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    console.log('Remember me enabled - user will stay logged in for 30 days');
                 }
-            });
+            }, 10000);
+        });
 
-            // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => {
+        // Remember me tooltip or info
+        const rememberCheckbox = document.getElementById('remember');
+        rememberCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                console.log('Remember me enabled - user will stay logged in.');
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                if(alert) {
                     alert.style.transition = 'opacity 0.5s';
                     alert.style.opacity = '0';
                     setTimeout(() => alert.remove(), 500);
-                });
-            }, 5000);
-        });
+                }
+            });
+        }, 5000);
+    });
 
-        // Forgot password info function
-        function showForgotPasswordInfo() {
-            alert('Please contact IT administrator to reset your password.\n\nEmail: it@ktushipyard.com\nPhone: +62-XXX-XXXX-XXXX');
+    // Forgot password info function
+    function showForgotPasswordInfo() {
+        alert('Please contact IT administrator to reset your password.\n\nEmail: it@ktushipyard.com\nWhatsApp: +62-813-7099-9910');
+    }
+
+    // Prevent multiple form submissions
+    let isSubmitting = false;
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        if (isSubmitting) {
+            e.preventDefault();
+            return false;
         }
+        isSubmitting = true;
+    });
 
-        // Prevent multiple form submissions
-        let isSubmitting = false;
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            if (isSubmitting) {
-                e.preventDefault();
-                return false;
-            }
-            isSubmitting = true;
-        });
-
-        // Enhanced security: Clear form data on page unload
-        window.addEventListener('beforeunload', function() {
-            const passwordField = document.querySelector('input[name="password"]');
-            if (passwordField) {
-                passwordField.value = '';
-            }
-        });
-    </script>
+    // // Enhanced security: Clear form data on page unload
+    // window.addEventListener('beforeunload', function() {
+    //     const passwordField = document.querySelector('input[name="password"]');
+    //     if (passwordField) {
+    //         passwordField.value = '';
+    //     }
+    // });
+</script>
 </body>
 </html>

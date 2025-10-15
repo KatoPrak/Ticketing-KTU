@@ -1,23 +1,58 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Ticket;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function submit(Request $request)
+    /**
+     * Menampilkan daftar semua laporan.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function index(Request $request)
     {
-        // Validasi data
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'lampiran' => 'nullable|file|max:2048',
-        ]);
+        $year = $request->get('year', Carbon::now()->year);
+        $filter = $request->get('filter', 'year'); // default year
 
-        // Simpan data ke database atau proses lainnya
-        // Report::create([...]);
+        $query = Ticket::whereYear('created_at', $year);
 
-        return back()->with('success', 'Laporan berhasil dikirim!');
+        if ($filter === 'week') {
+            $ticketsByDay = $query->selectRaw('DAYOFWEEK(created_at) as day, COUNT(*) as total')
+                ->groupBy('day')
+                ->pluck('total', 'day');
+
+            $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+            $labels = [];
+            $ticketData = [];
+            foreach (range(1, 7) as $d) {
+                $labels[] = $days[$d-1];
+                $ticketData[] = $ticketsByDay[$d] ?? 0;
+            }
+
+            $chartType = 'bar';
+        } else {
+            $ticketsByMonth = $query->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+                ->groupBy('month')
+                ->pluck('total', 'month');
+
+            $labels = collect(range(1, 12))->map(function ($m) {
+                return Carbon::create()->month($m)->format('F');
+            })->toArray();
+
+            $ticketData = [];
+            foreach (range(1, 12) as $m) {
+                $ticketData[] = $ticketsByMonth[$m] ?? 0;
+            }
+
+            $chartType = 'line';
+        }
+
+        return view('admin.reports', compact('labels', 'ticketData', 'year', 'filter', 'chartType'));
     }
 }

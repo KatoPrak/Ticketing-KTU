@@ -13,6 +13,7 @@ use App\Http\Middleware\RememberMeMiddleware;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\It\ManageUserController;
+use App\Http\Controllers\It\DepartmentController as ItDepartmentController;
 
 
 // ============================
@@ -46,53 +47,62 @@ Route::middleware([RememberMeMiddleware::class])->group(function () {
 });
 
 // ============================
-// Laporan staff
-// ============================
-Route::post('/report/submit', [ReportController::class, 'submit'])->name('report.submit');
-
-// ============================
 // Staff routes
 // ============================
 Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () {
     Route::get('/tickets', [StaffTicketController::class, 'index'])->name('tickets.index');
     Route::post('/tickets', [StaffTicketController::class, 'store'])->name('tickets.store');
+    Route::get('/tickets/{id}', [StaffTicketController::class, 'show'])->name('tickets.show'); // ✅ Tambahkan ini
     Route::get('/fetch-dashboard-tickets', [StaffTicketController::class, 'fetchDashboardTickets'])->name('tickets.fetchDashboard');
 });
 
 // ============================
 // IT routes
-// ============================
-Route::middleware(['auth'])->prefix('it')->name('it.')->group(function () {
-    // === NEWS ROUTE DIPINDAHKAN KE SINI ===
+Route::middleware(['auth', 'role:it'])->prefix('it')->name('it.')->group(function () {
+    
+    // Route untuk News (sudah benar)
     Route::resource('news', NewsController::class);
-    // ======================================
 
-    Route::get('/index-ticket', [ItTicketController::class, 'index'])->name('index-ticket');
-    Route::get('/tickets', [ItTicketController::class, 'index'])->name('it.tickets.index');
-    Route::post('/tickets/{id}/update-field', [ItTicketController::class, 'updateField'])->name('it.tickets.update-field');
-    Route::post('/tickets', [ItTicketController::class, 'store'])->name('tickets.store');
-    Route::put('/tickets/{id}', [ItTicketController::class, 'update'])->name('tickets.update');
-    Route::get('/riwayat-ticket', [ItTicketController::class, 'riwayat'])->name('riwayat-ticket');
-    Route::get('/it/tickets/{ticket}', [App\Http\Controllers\It\TicketController::class, 'show'])->name('it.tickets.show');
-    Route::get('/it/tickets/{id}', [App\Http\Controllers\It\TicketController::class, 'show'])->name('it.ticket.show');
-    Route::get('/tickets/{ticket}', [ItTicketController::class, 'show'])->name('tickets.show');
+    // Route untuk Department
+    Route::post('/departments', [ItDepartmentController::class, 'store'])->name('departments.store');
+    
+    // --- Kumpulan Route untuk Tickets ---
+
+    // 1. Route standar CRUD (index, store, show, update) ditangani oleh resource
+    Route::resource('tickets', ItTicketController::class)->only([
+        'index', 'store', 'show', 'update'
+    ]);
+    // Baris di atas secara otomatis membuat:
+    // GET       /it/tickets                  -> it.tickets.index
+    // POST      /it/tickets                  -> it.tickets.store
+    // GET       /it/tickets/{ticket}         -> it.tickets.show
+    // PUT/PATCH /it/tickets/{ticket}         -> it.tickets.update
+
+    // 2. Route kustom untuk tiket
+    Route::get('/tickets-history', [ItTicketController::class, 'riwayat'])->name('tickets.history');
+    Route::post('/tickets/{ticket}/update-field', [ItTicketController::class, 'updateField'])->name('tickets.updateField');
+
 });
 
-// ============================
-// Admin routes
-// ============================
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+    // Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
-    // Users
+    // Users Management
     Route::get('/users', [AdminController::class, 'showUsers'])->name('users.index');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+    Route::get('/users/{id}', [AdminController::class, 'getUser']);
     Route::get('/users/{id}', [AdminController::class, 'getUser'])->name('users.show');
     Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.destroy');
 
     // Tickets
     Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/export/pdf', [AdminTicketController::class, 'exportPdf'])->name('tickets.export.pdf');
 
     // Reports
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
@@ -103,12 +113,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/categories/{id}', [AdminController::class, 'updateCategory'])->name('categories.update');
     Route::delete('/categories/{id}', [AdminController::class, 'deleteCategory'])->name('categories.destroy');
 
-    // Export
+    // Export umum (hapus duplikasi PDF)
     Route::get('/export/excel', [AdminController::class, 'exportExcel'])->name('export.excel');
     Route::post('/export/csv', [AdminController::class, 'exportCsv'])->name('export.csv');
-    Route::get('/export/pdf', [AdminController::class, 'exportPdf'])->name('export.pdf');
-    Route::post('/export/pdf', [AdminController::class, 'exportPdf'])->name('export.pdf.post');
+    Route::get('/export/pdf', [AdminTicketController::class, 'exportPdf'])->name('export.pdf');
 
-    // Chart
+    // Chart Data
     Route::get('/chart-data', [AdminController::class, 'getChartData'])->name('chart.data');
 });

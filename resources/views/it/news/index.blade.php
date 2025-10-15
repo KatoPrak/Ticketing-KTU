@@ -24,7 +24,7 @@
     {{-- Tabel News --}}
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0" id="newsTable">
                 <thead class="table-light text-uppercase small text-muted">
                     <tr>
                         <th class="ps-4" style="width:5%">#</th>
@@ -44,11 +44,12 @@
                         <td class="text-center">
                             {{-- Delete Button --}}
 <button type="button" 
-        class="btn btn-sm btn-danger" 
+    class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1" 
         data-bs-toggle="modal" 
         data-bs-target="#deleteModal"
         data-bs-url="{{ route('it.news.destroy', $item->id) }}">
-    Delete
+    <i class="bi bi-trash3-fill"></i>
+    <span>Delete</span>
 </button>
 
                         </td>

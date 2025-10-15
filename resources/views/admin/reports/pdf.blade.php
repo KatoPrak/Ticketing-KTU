@@ -1,9 +1,8 @@
-{{-- resources/views/admin/reports/pdf.blade.php --}}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Admin Report - {{ $reportType }}</title>
+    <title>Admin Report - {{ ucfirst($reportType) }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,7 +56,7 @@
         }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -93,11 +92,11 @@
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .data-table th {
             background: #f8fafc;
-            padding: 12px 8px;
+            padding: 10px;
             text-align: left;
             font-weight: 600;
             color: #374151;
@@ -105,12 +104,20 @@
             font-size: 12px;
         }
         .data-table td {
-            padding: 10px 8px;
+            padding: 8px;
             border: 1px solid #f1f5f9;
             font-size: 12px;
         }
         .data-table tbody tr:nth-child(even) {
             background: #f8fafc;
+        }
+        .table-caption {
+            font-size: 11px;
+            color: #9ca3af;
+            text-align: right;
+            margin-top: -5px;
+            margin-bottom: 20px;
+            font-style: italic;
         }
         .footer {
             margin-top: 40px;
@@ -127,11 +134,13 @@
     </style>
 </head>
 <body>
+    {{-- Header --}}
     <div class="header">
         <h1>Admin Report</h1>
         <p>{{ ucfirst($reportType) }} Report | {{ $startDate->format('M d, Y') }} - {{ $endDate->format('M d, Y') }}</p>
     </div>
 
+    {{-- Report Info --}}
     <div class="report-info">
         <h3>Report Information</h3>
         <div class="info-grid">
@@ -142,3 +151,126 @@
             <div class="info-item">
                 <span class="info-label">Date Range:</span>
                 <span class="info-value">{{ $startDate->format('M d, Y') }} - {{ $endDate->format('M d, Y') }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Generated At:</span>
+                <span class="info-value">{{ $generatedAt->format('M d, Y H:i') }}</span>
+            </div>
+        </div>
+    </div>
+
+    {{-- === Kondisi untuk Report Type === --}}
+    @if ($reportType === 'user')
+        {{-- 🧍 USER REPORT --}}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ $totalUsers }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ $activeUsers ?? 0 }}</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ $inactiveUsers ?? 0 }}</div>
+                <div class="stat-label">Inactive Users</div>
+            </div>
+        </div>
+
+        {{-- Role Statistics --}}
+        @if(!empty($roles))
+            <div class="section">
+                <h3 class="section-title">Role Statistics</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Total Users</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($roles as $role)
+                            <tr>
+                                <td>{{ ucfirst($role->role) }}</td>
+                                <td>{{ $role->total }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <div class="table-caption">Data diambil dari sistem Helpdesk per {{ now()->format('d M Y, H:i') }}</div>
+            </div>
+        @endif
+
+    @else
+        {{-- 🎟️ TICKET REPORT --}}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ $totalUsers }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ $totalTickets }}</div>
+                <div class="stat-label">Total Tickets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ $resolvedTickets }}</div>
+                <div class="stat-label">Resolved Tickets</div>
+            </div>
+        </div>
+
+        {{-- Category Statistics --}}
+        @if(!empty($categoryStats))
+            <div class="section">
+                <h3 class="section-title">Category Statistics</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Total Tickets</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($categoryStats as $key => $value)
+                            <tr>
+                                <td>{{ is_array($value) ? ($value['name'] ?? $key) : $key }}</td>
+                                <td>{{ is_array($value) ? ($value['count'] ?? 0) : $value }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <div class="table-caption">Data diambil dari sistem Helpdesk per {{ now()->format('d M Y, H:i') }}</div>
+            </div>
+        @endif
+
+        {{-- Department Statistics --}}
+        @if(!empty($departmentStats))
+            <div class="section">
+                <h3 class="section-title">Department Statistics</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Total Tickets</th>
+                        </tr>
+                    </thead>
+                        <tbody>
+                        @foreach($departmentStats as $key => $value)
+                            <tr>
+                                <td>{{ $value->name ?? $key }}</td>
+                                <td>{{ $value->count ?? 0 }}</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+
+                </table>
+                <div class="table-caption">Data diambil dari sistem Helpdesk per {{ now()->format('d M Y, H:i') }}</div>
+            </div>
+        @endif
+    @endif
+
+    {{-- Footer --}}
+    <div class="footer">
+        Generated by Helpdesk System &mdash; {{ now()->format('M d, Y H:i') }}
+    </div>
+</body>
+</html>

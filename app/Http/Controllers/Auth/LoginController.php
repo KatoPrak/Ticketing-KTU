@@ -10,11 +10,23 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
+    /**
+     * Show the application's login form.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showLoginForm()
     {
         return view('auth.Login');
     }
 
+    /**
+     * Handle an incoming authentication request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -22,18 +34,18 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Rate limiting
+        // Rate limiting key generation
         $key = Str::lower($request->id_staff) . '|' . $request->ip();
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
             throw ValidationException::withMessages([
-                'id_staff' => "Terlalu banyak percobaan login. Silakan coba lagi dalam {$seconds} detik.",
+                'id_staff' => "Too many login attempts. Please try again in {$seconds} seconds.",
             ]);
         }
 
         $credentials = $request->only('id_staff', 'password');
-        $remember = $request->boolean('remember'); // ✅ boolean aman
+        $remember = $request->boolean('remember'); // ✅ safe boolean cast
 
         if (Auth::attempt($credentials, $remember)) {
             RateLimiter::clear($key);
@@ -41,24 +53,32 @@ class LoginController extends Controller
 
             $user = Auth::user();
 
-            // Optional: update last login
+            // Optional: update last login timestamp
+            // Note: Ensure the 'last_login_at' column exists on your User model's table.
             if (isset($user->last_login_at)) {
                 $user->last_login_at = now();
                 $user->save();
             }
 
-            session()->flash('success', 'Login berhasil, selamat datang ' . $user->name . '!');
+            session()->flash('success', 'Login successful, welcome back ' . $user->name . '!');
 
             return $this->redirectBasedOnRole($user);
         }
 
+        // If authentication fails, hit the rate limiter and redirect back.
         RateLimiter::hit($key, 60);
 
         return back()->withErrors([
-            'id_staff' => 'ID Staff atau password salah.',
+            'id_staff' => 'Staff ID or password is incorrect.',
         ])->withInput($request->except('password'));
     }
 
+    /**
+     * Determine where to redirect users based on their role.
+     *
+     * @param mixed $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
     protected function redirectBasedOnRole($user)
     {
         switch ($user->role) {
@@ -72,6 +92,12 @@ class LoginController extends Controller
         }
     }
 
+    /**
+     * Log the user out of the application.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -79,7 +105,7 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        session()->flash('success', 'Anda berhasil logout. Sampai jumpa!');
+        session()->flash('success', 'You have successfully logged out. Goodbye!');
 
         return redirect('/');
     }

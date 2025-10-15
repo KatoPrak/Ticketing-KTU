@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class TicketController extends Controller
 {
@@ -16,7 +18,8 @@ class TicketController extends Controller
     {
         $categories = Category::all();
 
-        $tickets = Ticket::with(['category', 'user'])
+        // FIX: Tambahkan relasi 'department' untuk ditampilkan di tabel
+        $tickets = Ticket::with(['category', 'user', 'department'])
             ->whereNotIn('status', ['closed'])
             ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
             ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->category_id))
@@ -31,51 +34,60 @@ class TicketController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $recentTickets = Ticket::with(['category', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
-
-        return view('it.index-ticket', compact('categories', 'tickets', 'recentTickets'));
+        return view('it.index-ticket', compact('categories', 'tickets'));
     }
+
 
     // ============================================================
     // 🎫 SHOW — Detail tiket (dipakai di modal AJAX)
     // ============================================================
-    public function show($id)
-    {
-        $ticket = Ticket::with(['user', 'category'])->findOrFail($id);
+// Ganti method show() Anda yang lama dengan yang ini
 
-        return response()->json([
-            'id' => $ticket->id,
-            'ticket_id' => $ticket->ticket_id,
-            'description' => $ticket->description,
-            'priority' => $ticket->priority,
-            'status' => $ticket->status,
-            'attachments' => $ticket->attachments ?? [],
-            'resolution_notes' => $ticket->resolution_notes ?? '',
-            'created_at' => $ticket->created_at->format('d-m-Y H:i'),
-            'user' => [
-                'name' => $ticket->user->name ?? 'Unknown',
-                'department' => $ticket->user->department ?? '-',
-            ],
-            'category' => [
-                'name' => $ticket->category->name ?? '-',
-            ],
-        ]);
+public function show(Ticket $ticket)
+{
+    // Muat semua relasi yang dibutuhkan
+    $ticket->load(['user', 'category', 'department']);
+
+    // Logika untuk memastikan attachments selalu berupa array
+    $attachments = $ticket->attachments;
+    if (is_string($attachments)) {
+        $decoded = json_decode($attachments, true);
+        $attachments = is_array($decoded) ? $decoded : [];
+    } elseif (!is_array($attachments)) {
+        $attachments = [];
     }
+
+    // FIX: Gunakan optional() untuk mencegah error jika relasi kosong
+    return response()->json([
+        'id' => $ticket->id,
+        'ticket_id' => $ticket->ticket_id,
+        'description' => $ticket->description,
+        'priority' => $ticket->priority,
+        'status' => $ticket->status,
+        'attachments' => $attachments,
+        'resolution_notes' => $ticket->resolution_notes ?? '',
+        'created_at' => optional($ticket->created_at)->format('d-m-Y H:i'),
+        'user' => [
+            'name' => optional($ticket->user)->name ?? 'User Deleted',
+        ],
+        'category' => [
+            'name' => optional($ticket->category)->name ?? 'No Category',
+        ],
+        'department' => [
+            'name' => optional($ticket->department)->name ?? 'No Department',
+        ],
+    ]);
+}
 
     // ============================================================
     // 🧭 UPDATE (umum)
     // ============================================================
-    public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'status'   => 'nullable|in:waiting,in_progress,pending,resolved,closed',
-            'priority' => 'nullable|in:low,medium,high,urgent',
-        ]);
-
-        $ticket = Ticket::findOrFail($id);
+public function update(Request $request, Ticket $ticket)
+{
+    $validated = $request->validate([
+        'status'   => 'nullable|in:waiting,in_progress,pending,resolved,closed',
+        'priority' => 'nullable|in:low,medium,high,urgent',
+    ]);
         $ticket->update($validated);
 
         if ($request->expectsJson()) {
@@ -90,61 +102,63 @@ class TicketController extends Controller
     }
 
     // ============================================================
-    // ⚙️ UPDATE FIELD (via AJAX) — status / priority / resolution_notes
+    // ⚙️ UPDATE FIELD (via AJAX)
     // ============================================================
-    public function updateField(Request $request, $id)
-    {
-        try {
-            $request->validate([
-                'field' => 'required|in:status,priority',
-                'value' => 'required|string',
-                'resolution_notes' => 'nullable|string|max:2000'
-            ]);
+ // ============================================================
+    // ⚙️ UPDATE FIELD (via AJAX)
+    // ============================================================
+public function updateField(Request $request, Ticket $ticket)
+{
+    // Gunakan Validator facade untuk kontrol penuh
+    $validator = Validator::make($request->all(), [
+        'field' => 'required|in:status,priority',
+        'value' => 'required|string',
+        'resolution_notes' => 'nullable|string|max:2000'
+    ]);
 
-            $ticket = Ticket::findOrFail($id);
-
-            // Validasi value status/priority
-            if ($request->field === 'status' && !in_array($request->value, ['waiting','in_progress','pending','resolved','closed'])) {
-                return response()->json(['success' => false, 'message' => 'Invalid status value.'], 422);
-            }
-            if ($request->field === 'priority' && !in_array($request->value, ['low','medium','high','urgent'])) {
-                return response()->json(['success' => false, 'message' => 'Invalid priority value.'], 422);
-            }
-
-            // Simpan perubahan field
-            $ticket->{$request->field} = $request->value;
-
-            // 💬 Jika status pending/closed, simpan resolution_notes
-            if ($request->field === 'status' && in_array($request->value, ['pending','closed'])) {
-                if ($request->filled('resolution_notes')) {
-                    $ticket->resolution_notes = $request->resolution_notes;
-                }
-            }
-
-            $ticket->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => ucfirst($request->field).' updated successfully.',
-                'ticket' => $ticket->load('category','user')
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Server error: ' . $e->getMessage()
-            ], 500);
-        }
+    // Jika validasi gagal, kirim response error
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation error.',
+            'errors' => $validator->errors()
+        ], 422);
     }
 
-    // ============================================================
+    // Ambil data yang sudah tervalidasi
+    $validated = $validator->validated();
+    
+    $field = $validated['field'];
+    $value = $validated['value'];
+
+    $ticket->{$field} = $value;
+
+    // Cek dan simpan resolution_notes jika ada
+    if (array_key_exists('resolution_notes', $validated) && $field === 'status' && in_array($value, ['pending', 'closed', 'resolved'])) {
+        $ticket->resolution_notes = $validated['resolution_notes'];
+    }
+    
+    $ticket->save();
+
+    // Muat relasi terbaru sebelum mengirim response
+    $ticket->load('category','user', 'department');
+
+    return response()->json([
+        'success' => true,
+        'message' => ucfirst($field).' updated successfully.',
+        'ticket' => $ticket
+    ]);
+}
+
+     // ============================================================
     // 🗂️ RIWAYAT — Tiket yang sudah closed
     // ============================================================
     public function riwayat(Request $request)
     {
         $categories = Category::all();
 
-        $tickets = Ticket::with(['category', 'user'])
+        // FIX: Tambahkan relasi 'department'
+        $tickets = Ticket::with(['category', 'user', 'department'])
             ->whereIn('status', ['closed'])
             ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
             ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->category_id))
@@ -158,14 +172,10 @@ class TicketController extends Controller
             })
             ->orderBy('updated_at', 'desc')
             ->paginate(10);
-
-        $recentTickets = Ticket::with(['category', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
-
-        return view('it.riwayat-ticket', compact('categories', 'tickets', 'recentTickets'));
+        
+        return view('it.riwayat-ticket', compact('categories', 'tickets'));
     }
+
 
     // ============================================================
     // 📊 DASHBOARD IT
@@ -177,10 +187,10 @@ class TicketController extends Controller
         $completedTickets = Ticket::where('status', 'resolved')->count();
         $urgentTickets    = Ticket::where('priority', 'urgent')->where('status', '!=', 'resolved')->count();
 
-        $recentTickets = Ticket::with(['category', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+$recentTickets = Ticket::with(['category', 'user', 'department'])
+        ->orderBy('created_at', 'desc')
+        ->take(5)
+        ->get();
 
         return view('it.IT', compact(
             'activeTickets',
@@ -200,7 +210,7 @@ class TicketController extends Controller
             'category_id' => 'required|exists:categories,id',
             'description' => 'required|string|max:1000',
             'priority'    => 'nullable|in:low,medium,high,urgent',
-            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,docx|max:2048',
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,docx,xls,xlsx|max:2048',
         ]);
 
         $lastTicket = Ticket::orderBy('id', 'desc')->first();
@@ -215,16 +225,19 @@ class TicketController extends Controller
             }
         }
 
+        // FIX: Tambahkan 'department_id' saat membuat tiket baru
         $ticket = Ticket::create([
             'ticket_id'   => $ticketId,
-            'user_id'     => auth()->id(),
+            'user_id'     => Auth::id(),
+            'department_id' => Auth::user()->department_id, // Mengambil ID dept dari user yg login
             'category_id' => $validated['category_id'],
             'description' => $validated['description'],
             'priority'    => $validated['priority'] ?? 'medium',
             'status'      => 'waiting',
-            'attachments' => $attachmentPaths,
+            'attachments' => $attachmentPaths, // Simpan sebagai array
         ]);
 
         return back()->with('success', 'Tiket berhasil dibuat dengan ID: ' . $ticketId);
     }
 }
+

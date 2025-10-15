@@ -57,7 +57,7 @@
 <script>
     // Help info
     function showHelp() {
-        alert('Please contact the IT team for assistance.\n\nEmail: it@ktushipyard.com\nPhone: +62-813-7099-9910');
+        alert('Please contact the IT team for assistance.\n\nEmail: it@ktushipyard.com\nWhatsApp: +62-813-7099-9910');
     }
 
     // Active link handler

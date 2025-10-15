@@ -18,7 +18,7 @@
     @vite(['resources/css/user.css','resources/js/user.js'])
     @yield('styles')
 </head>
-<body>
+<body class="@yield('body-class')">
     <!-- Overlay Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 

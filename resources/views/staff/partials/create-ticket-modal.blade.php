@@ -1,11 +1,13 @@
-<div class="modal fade" id="createTicketModal" tabindex="-1" aria-labelledby="createTicketModalLabel" aria-hidden="true">
+<div class="modal fade" id="createTicketModal" tabindex="-1" aria-labelledby="createTicketModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow-lg border-0">
-            <form id="createTicketForm" action="{{ route('staff.tickets.store') }}" method="POST" enctype="multipart/form-data">
+            <form id="createTicketForm" action="{{ route('staff.tickets.store') }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="priority" value="low">
-                <div class="modal-header border-0">
-                    <h1 class="modal-title fs-4 fw-bold text-white" id="createTicketModalLabel">
+                <div class="modal-header border-0 bg-primary text-white">
+                    <h1 class="modal-title fs-4 fw-bold" id="createTicketModalLabel">
                         <i class="fas fa-ticket-alt me-2"></i> Create New Ticket
                     </h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -18,7 +20,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Department</label>
-                            <input type="text" class="form-control" value="{{ Auth::user()->department ?? 'Not set' }}" disabled>
+                            <input type="text" class="form-control"
+                                value="{{ Auth::user()->department ? Auth::user()->department->name : '-' }}" disabled>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Category <span class="text-danger">*</span></label>

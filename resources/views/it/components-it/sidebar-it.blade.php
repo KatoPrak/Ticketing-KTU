@@ -1,7 +1,5 @@
-<!-- Sidebar Overlay -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header p-3 border-bottom">
         <h5 class="mb-0">
@@ -12,31 +10,32 @@
     <nav class="sidebar-menu mt-3">
         <ul class="list-unstyled">
             <li>
-                <a href="{{ route('it.dashboard') }}" 
+                <a href="{{ route('it.dashboard') }}"
                    class="{{ request()->routeIs('it.dashboard') ? 'active' : '' }}">
                     <i class="fas fa-home me-2"></i> <span>Dashboard</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('it.index-ticket') }}" 
-                   class="{{ request()->routeIs('it.index-ticket') ? 'active' : '' }}">
+                {{-- FIX: Tambahkan kondisi agar tidak aktif saat di halaman history --}}
+                <a href="{{ route('it.tickets.index') }}"
+                   class="{{ (request()->routeIs('it.tickets.*') && !request()->routeIs('it.tickets.history')) ? 'active' : '' }}">
                     <i class="fas fa-ticket-alt me-2"></i> <span>Tickets</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('it.riwayat-ticket') }}" 
-                   class="{{ request()->routeIs('it.riwayat-ticket') ? 'active' : '' }}">
+                <a href="{{ route('it.tickets.history') }}"
+                   class="{{ request()->routeIs('it.tickets.history') ? 'active' : '' }}">
                     <i class="fas fa-history me-2"></i> <span>Ticket History</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('it.news.index') }}" 
-                   class="{{ request()->routeIs('it.news.index') ? 'active' : '' }}">
+                <a href="{{ route('it.news.index') }}"
+                   class="{{ request()->routeIs('it.news.*') ? 'active' : '' }}">
                     <i class="fas fa-newspaper me-2"></i> <span>News</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('it.staff.index') }}" 
+                <a href="{{ route('it.staff.index') }}"
                    class="{{ request()->routeIs('it.staff.*') ? 'active' : '' }}">
                     <i class="fas fa-users me-2"></i> <span>Staff</span>
                 </a>

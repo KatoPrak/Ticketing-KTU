@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use App\Models\Department;
 
 class AdminController extends Controller
 {
@@ -22,97 +23,116 @@ class AdminController extends Controller
         $this->middleware('admin');
     }
 
-    public function index()
-    {
-        $totalUsers = User::count();
-        $newUsersThisMonth = User::whereMonth('created_at', now()->month)
-                                  ->whereYear('created_at', now()->year)
-                                  ->count();
+    public function index(Request $request)
+{
+    $totalUsers = User::count();
+    $newUsersThisMonth = User::whereMonth('created_at', now()->month)
+                              ->whereYear('created_at', now()->year)
+                              ->count();
 
-        $totalTickets = Ticket::count();
+    $totalTickets = Ticket::count();
 
-        $pendingTickets = Ticket::where('status', 'pending')->count();
-        $inProgressTickets = Ticket::where('status', 'in_progress')->count();
-        $resolvedTickets = Ticket::where('status', 'resolved')->count();
-        $closedTickets = Ticket::where('status', 'closed')->count();
+    $pendingTickets = Ticket::where('status', 'pending')->count();
+    $inProgressTickets = Ticket::where('status', 'in_progress')->count();
+    $resolvedTickets = Ticket::where('status', 'resolved')->count();
+    $closedTickets = Ticket::where('status', 'closed')->count();
 
-        $totalCategories = Category::count();
-        $categories = Category::withCount('tickets')->get();
+    $totalCategories = Category::count();
+    $categories = Category::withCount('tickets')->get();
 
-        $users = User::orderBy('created_at', 'desc')->paginate(10);
+    $users = User::orderBy('created_at', 'desc')->paginate(10);
 
-        $monthlyTickets = $this->getMonthlyTicketsData();
-        $categoryStats = $this->getCategoryStatsData();
-        $departmentStats = $this->getDepartmentStatsData();
+    // Ambil data monthly (existing helper)
+    $monthlyTickets = $this->getMonthlyTicketsData();
+    // siapkan labels & data untuk Chart.js (aman jika helper berubah)
+    $labels = $monthlyTickets['labels'] ?? [];
+    $ticketData = $monthlyTickets['data'] ?? [];
 
-        // Mengubah jalur tampilan agar sesuai dengan file Anda yang ada
-        return view('admin.Admin', compact(
-            'totalUsers',
-            'newUsersThisMonth',
-            'totalTickets',
-            'pendingTickets',
-            'inProgressTickets',
-            'resolvedTickets',
-            'closedTickets',
-            'totalCategories',
-            'users',
-            'categories',
-            'monthlyTickets',
-            'categoryStats',
-            'departmentStats'
-        ));
-    }
+    // ambil filter/year dari request (default aman)
+    $filter = $request->get('filter', 'month');
+    $year = $request->get('year', now()->year);
 
-    public function showUsers()
-    {
-        $users = User::all();
-        return view('admin.management-pengguna', compact('users'));
-    }
+    // juga kirimkan statistik kategori/department (seperti sebelumnya)
+    $categoryStats = $this->getCategoryStatsData();
+    $departmentStats = $this->getDepartmentStatsData();
+
+    return view('admin.Admin', compact(
+        'totalUsers',
+        'newUsersThisMonth',
+        'totalTickets',
+        'pendingTickets',
+        'inProgressTickets',
+        'resolvedTickets',
+        'closedTickets',
+        'totalCategories',
+        'users',
+        'categories',
+        'monthlyTickets',
+        'categoryStats',
+        'departmentStats',
+        // tambahan untuk chart & filter agar Blade tidak undefined
+        'labels',
+        'ticketData',
+        'filter',
+        'year'
+    ));
+}
+
+public function showUsers()
+{
+    $users = User::with('department')->get();
+    $departments = Department::all();
+
+    return view('admin.management-pengguna', compact('users', 'departments'));
+}
+
 
     public function storeUser(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'id_staff' => 'required|string|max:50|unique:users,id_staff',
-            'email' => 'required|email|unique:users,email',
-            'role' => 'required|string',
-            'department' => 'required|string',
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'id_staff' => 'required|string|max:50|unique:users,id_staff',
+        'email' => 'required|email|unique:users,email',
+        'role' => 'required|string',
+        'department_id' => 'required|exists:departments,id', // <-- ganti department jadi department_id
+    ]);
 
-        $user = new User();
-        $user->name = $validated['name'];
-        $user->id_staff = $validated['id_staff'];
-        $user->email = $validated['email'];
-        $user->role = $validated['role'];
-        $user->department = $validated['department'];
-        $user->password = Hash::make($request->input('password', 'STAFFKTU123'));
-        $user->save();
+    $user = new User();
+    $user->name = $validated['name'];
+    $user->id_staff = $validated['id_staff'];
+    $user->email = $validated['email'];
+    $user->role = $validated['role'];
+    $user->department_id = $validated['department_id']; // simpan sebagai id
+    $user->password = Hash::make($request->input('password', 'STAFFKTU123'));
+    $user->save();
 
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan!');
-    }
+    return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan!');
+}
+
 
     public function updateUser(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
+{
+    $user = User::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'id_staff' => 'required|string|max:50|unique:users,id_staff,' . $user->id,
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|string',
-            'department' => 'required|string',
-        ]);
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'id_staff' => 'required|string|max:50|unique:users,id_staff,' . $user->id,
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        'role' => 'required|string',
+        'department_id' => 'required|exists:departments,id', // <-- ganti department jadi department_id
+    ]);
 
-        $user->update([
-            'name' => $validated['name'],
-            'id_staff' => $validated['id_staff'],
-            'email' => $validated['email'],
-            'role' => $validated['role'],
-            'department' => $validated['department'],
-        ]);
+    $user->update([
+        'name' => $validated['name'],
+        'id_staff' => $validated['id_staff'],
+        'email' => $validated['email'],
+        'role' => $validated['role'],
+        'department_id' => $validated['department_id'], // simpan sebagai id
+    ]);
 
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui!');
-    }
+    return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui!');
+}
+
 
     public function deleteUser($id)
     {
@@ -206,14 +226,14 @@ class AdminController extends Controller
     public function exportExcel(Request $request)
     {
         $data = $this->prepareExportData($request);
-
         $filename = 'admin_data_' . now()->format('Y-m-d') . '.csv';
+
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
 
-        $callback = function() use ($data) {
+        $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
 
             if (isset($data['users'])) {
@@ -272,35 +292,63 @@ class AdminController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $reportType = $request->report_type ?? 'summary';
-        $startDate = $request->start_date ? Carbon::parse($request->start_date) : now()->subMonth();
-        $endDate = $request->end_date ? Carbon::parse($request->end_date) : now();
+        $reportType = $request->reportType ?? 'summary';
+        $dateRange = $request->dateRange ?? 'month';
+
+        switch ($dateRange) {
+            case 'week':
+                $startDate = now()->subWeek();
+                break;
+            case 'year':
+                $startDate = now()->subYear();
+                break;
+            default:
+                $startDate = now()->subMonth();
+        }
+
+        $endDate = now();
 
         $data = [
             'reportType' => $reportType,
             'startDate' => $startDate,
             'endDate' => $endDate,
-            'totalUsers' => User::count(),
-            'totalTickets' => Ticket::whereBetween('created_at', [$startDate, $endDate])->count(),
-            'resolvedTickets' => Ticket::where('status', 'resolved')
-                                    ->whereBetween('created_at', [$startDate, $endDate])
-                                    ->count(),
-            'categoryStats' => $this->getCategoryStatsData($startDate, $endDate),
-            'departmentStats' => $this->getDepartmentStatsData($startDate, $endDate),
             'generatedAt' => now(),
+            'totalUsers' => 0,
+            'activeUsers' => 0,
+            'roles' => [],
+            'totalTickets' => 0,
+            'resolvedTickets' => 0,
+            'categoryStats' => [],
+            'departmentStats' => [],
         ];
+
+        if ($reportType === 'user') {
+            $data['totalUsers'] = User::count();
+            $data['activeUsers'] = User::where('status', 'active')->count();
+            $data['roles'] = User::select('role', DB::raw('count(*) as total'))
+                ->groupBy('role')
+                ->get();
+        } else {
+            $data['totalTickets'] = Ticket::whereBetween('created_at', [$startDate, $endDate])->count();
+            $data['resolvedTickets'] = Ticket::where('status', 'resolved')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->count();
+            $data['categoryStats'] = $this->getCategoryStatsData($startDate, $endDate);
+            $data['departmentStats'] = $this->getDepartmentStatsData($startDate, $endDate);
+        }
 
         $html = view('admin.reports.pdf', $data)->render();
 
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
+
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        return $dompdf->stream('admin_report_' . now()->format('Y-m-d') . '.pdf');
+        return $dompdf->stream($reportType . '_report_' . now()->format('Y-m-d') . '.pdf');
     }
 
     private function prepareExportData(Request $request)
@@ -331,8 +379,8 @@ class AdminController extends Controller
             $date = now()->subMonths($i);
             $months[] = $date->format('M Y');
             $data[] = Ticket::whereMonth('created_at', $date->month)
-                        ->whereYear('created_at', $date->year)
-                        ->count();
+                ->whereYear('created_at', $date->year)
+                ->count();
         }
 
         return [
@@ -358,18 +406,20 @@ class AdminController extends Controller
         });
     }
 
-    private function getDepartmentStatsData($startDate = null, $endDate = null)
-    {
-        $query = DB::table('tickets')
-                ->join('users', 'tickets.user_id', '=', 'users.id')
-                ->select('users.department', DB::raw('count(*) as count'));
+   private function getDepartmentStatsData($startDate = null, $endDate = null)
+{
+    $query = DB::table('tickets as t')
+        ->join('users as u', 't.user_id', '=', 'u.id')
+        ->join('departments as d', 'u.department_id', '=', 'd.id') // join department
+        ->select('d.name as department_name', DB::raw('count(*) as count'));
 
-        if ($startDate && $endDate) {
-            $query->whereBetween('tickets.created_at', [$startDate, $endDate]);
-        }
-
-        return $query->groupBy('users.department')->get();
+    if ($startDate && $endDate) {
+        $query->whereBetween('t.created_at', [$startDate, $endDate]);
     }
+
+    return $query->groupBy('d.name')->get();
+}
+
 
     public function getChartData(Request $request)
     {
@@ -383,27 +433,70 @@ class AdminController extends Controller
             'departments' => $this->getDepartmentStatsData($startDate, $endDate),
         ]);
     }
-}
-{
-    $totalUsers = \App\Models\User::count();
-    $totalTickets = Ticket::count();
-    $pendingTickets = Ticket::where('status', 'waiting')->count();
 
-    // Ambil jumlah tiket per bulan (12 bulan terakhir)
-    $ticketsByMonth = Ticket::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
-        ->whereYear('created_at', Carbon::now()->year)
-        ->groupBy('month')
-        ->pluck('total', 'month');
+        public function dashboard(Request $request)
+        {
+            $totalUsers = User::count();
+            $totalTickets = Ticket::count();
+            $pendingTickets = Ticket::where('status', 'pending')->count();
 
-    // Siapin label & data
-    $months = collect(range(1, 12))->map(function ($m) {
-        return Carbon::create()->month($m)->format('F'); // Januari, Februari, dst
-    });
+            $filter = $request->get('filter', 'month');
+            $year = $request->get('year', now()->year);
 
-    $ticketData = [];
-    foreach ($months as $i => $name) {
-        $ticketData[] = $ticketsByMonth[$i + 1] ?? 0; // kalau gak ada data isi 0
-    }
+            switch ($filter) {
+                case 'week':
+                    $startDate = now()->startOfWeek();
+                    $endDate = now()->endOfWeek();
+                    $chartType = 'bar';
+                    break;
 
-    return view('admin.Admin', compact('totalUsers', 'totalTickets', 'pendingTickets', 'months', 'ticketData'));
-}
+                case 'year':
+                    $startDate = now()->startOfYear();
+                    $endDate = now()->endOfYear();
+                    $chartType = 'line';
+                    break;
+
+                default: // month
+                    $startDate = now()->startOfMonth();
+                    $endDate = now()->endOfMonth();
+                    $chartType = 'line';
+                    break;
+            }
+
+            $tickets = Ticket::whereBetween('created_at', [$startDate, $endDate])->get();
+
+            $labels = [];
+            $ticketData = [];
+
+            if ($filter === 'year') {
+                $labels = collect(range(1, 12))->map(fn($m) => Carbon::create()->month($m)->format('M'));
+                $ticketData = collect(range(1, 12))->map(fn($m) =>
+                    $tickets->whereBetween('created_at', [
+                        Carbon::create($year, $m, 1)->startOfMonth(),
+                        Carbon::create($year, $m, 1)->endOfMonth()
+                    ])->count()
+                );
+            } else {
+                $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
+                foreach ($period as $date) {
+                    $labels[] = $date->format('d M');
+                    $ticketData[] = $tickets->whereBetween('created_at', [
+                        $date->copy()->startOfDay(),
+                        $date->copy()->endOfDay()
+                    ])->count();
+                }
+            }
+
+            // pastikan view-nya sesuai file kamu
+            return view('admin.Admin', compact(
+                'totalUsers',
+                'totalTickets',
+                'pendingTickets',
+                'labels',
+                'ticketData',
+                'year',
+                'filter',
+                'chartType'
+            ));
+        }
+        }

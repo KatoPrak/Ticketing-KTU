@@ -12,6 +12,9 @@
                     <strong>Ticket ID:</strong> <span id="modalTicketId" class="text-muted"></span>
                 </div>
                 <div class="mb-3">
+                    <strong>Department:</strong> <span id="modalDepartment" class="text-muted"></span>
+                </div>
+                <div class="mb-3">
                     <strong>Category:</strong> <span id="modalCategory" class="text-muted"></span>
                 </div>
                 <div class="mb-3">

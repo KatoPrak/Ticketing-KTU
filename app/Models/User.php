@@ -14,7 +14,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'department',
+        'department_id',
         'role',
         'id_staff', 
         'status',
@@ -40,6 +40,14 @@ class User extends Authenticatable
     {
         return 'remember_token';
     }
+// app/Models/User.php
+public function department() {
+    return $this->belongsTo(Department::class);
+}
+
+public function user() {
+    return $this->belongsTo(User::class);
+}
 
     /**
      * Get the token value for the "remember me" session.

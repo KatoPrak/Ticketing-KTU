@@ -1,6 +1,6 @@
 @extends('layouts.it')
 
-@section('title', 'Riwayat Tiket IT')
+@section('title', 'IT Ticket History')
 @vite(['resources/css/list-tiket.css','resources/js/it.js'])
 
 @section('content')
@@ -9,7 +9,7 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="page-title">
-            <i class="fas fa-history me-2 text-primary"></i> Riwayat Tiket IT
+            <i class="fas fa-history me-2 text-primary"></i> IT Ticket History
         </h2>
     </div>
 
@@ -20,12 +20,12 @@
                 <thead class="table-light">
                     <tr>
                         <th>Ticket ID</th>
-                        <th>Deskripsi</th>
-                        <th>Kategori</th>
+                        <th>Description</th>
+                        <th>Category</th>
                         <th>Status</th>
-                        <th>Prioritas</th>
-                        <th>Dibuat Oleh</th>
-                        <th>Terakhir Update</th>
+                        <th>Priority</th>
+                        <th>Created By</th>
+                        <th>Last Updated</th>
                     </tr>
                 </thead>
                 <tbody id="riwayatTbody">
@@ -41,7 +41,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted">Belum ada riwayat tiket</td>
+                        <td colspan="7" class="text-center text-muted">No ticket history available</td>
                     </tr>
                 @endforelse
                 </tbody>

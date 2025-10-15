@@ -13,6 +13,7 @@ class Ticket extends Model
     // Pastikan semua kolom yang diisi ada di sini
     protected $fillable = [
         'user_id',
+        'department_id',
         'category_id',
         'description',
         'attachments',
@@ -39,6 +40,11 @@ class Ticket extends Model
     {
         return $this->belongsTo(Category::class);
     }
+    
+    public function department()
+{
+    return $this->belongsTo(Department::class);
+}
 
     public function assignedTo()
     {
