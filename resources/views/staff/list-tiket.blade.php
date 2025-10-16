@@ -145,93 +145,49 @@
             </div>
         </div>
     </div>
-
 </div>
 {{-- 🎟️ CREATE TICKET MODAL --}}
 @include('staff.modals.form-ticket')
-
-{{-- ========================================================================= --}}
-{{-- ======================== TICKET DETAIL MODAL ============================ --}}
-{{-- ========================================================================= --}}
-<div class="modal fade" id="detailTicketModal" tabindex="-1" aria-labelledby="detailTicketModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered custom-modal">
-        <div class="modal-content shadow-lg border-0">
-
-            {{-- Header --}}
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-ticket-alt me-2"></i> Ticket Details
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-
-            {{-- Body --}}
-            <div class="modal-body">
-
-                {{-- Loader --}}
-                <div id="d_loader" class="text-center py-4">
-                    <div class="spinner-border text-info"></div>
-                    <p class="text-muted mt-2">Loading ticket...</p>
-                </div>
-
-                {{-- Content --}}
-                <div id="d_content" class="d-none">
-                    <table class="table table-borderless">
-                        <tr>
-                            <th>Ticket ID</th>
-                            <td id="d_ticket_id">-</td>
-                        </tr>
-                        <tr>
-                            <th>Description</th>
-                            <td id="d_description" style="white-space: pre-wrap;">-</td>
-                        </tr>
-                        <tr>
-                            <th>Category</th>
-                            <td id="d_category">-</td>
-                        </tr>
-                        <tr>
-                            <th>User</th>
-                            <td id="d_user">-</td>
-                        </tr>
-                        <tr>
-                            <th>Created</th>
-                            <td id="d_created">-</td>
-                        </tr>
-                        <tr>
-                            <th>Status</th>
-                            <td>
-                                <span id="d_status" class="badge rounded-pill px-3 py-2 bg-secondary">-</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Priority</th>
-                            <td>
-                                <span id="d_priority" class="badge rounded-pill px-3 py-2 bg-secondary">-</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Attachments</th>
-                            <td id="d_attachments">
-                                <span class="text-muted">No attachments</span>
-                            </td>
-                        </tr>
-                        <tr id="d_row_notes" class="d-none">
-                            <th>Notes</th>
-                            <td id="d_notes">-</td>
-                        </tr>
-                    </table>
-                </div>
-
-            </div>
+@include('staff.modals.show-ticket-modal')
 
             {{-- Footer --}}
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
-
         </div>
     </div>
 </div>
-
-
 @endsection
+
+{{-- ✅ SUCCESS TOAST NOTIFICATION --}}
+@if(session('success'))
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    <div id="ticketSuccessToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                🎟️ Ticket has been successfully created!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+@endif
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const toastEl = document.getElementById('ticketToast');
+    const ticketToast = new bootstrap.Toast(toastEl);
+
+    // Tangkap event setelah ticket berhasil dibuat
+    document.addEventListener('ticket:created', (event) => {
+        const { message } = event.detail;
+        toastEl.querySelector('.toast-body').textContent = message || "Ticket successfully created!";
+        toastEl.classList.remove('text-bg-danger', 'text-bg-warning');
+        toastEl.classList.add('text-bg-success');
+        ticketToast.show();
+    });
+});
+</script>
+@endpush

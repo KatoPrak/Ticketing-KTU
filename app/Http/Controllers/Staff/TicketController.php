@@ -17,77 +17,71 @@ class TicketController extends Controller
     /**
      * Display ticket list + handle AJAX reload.
      */
-    public function index(Request $request)
-    {
-        $categories = Category::all();
+public function index(Request $request)
+{
+    $query = Ticket::with(['category', 'user.department'])
+        ->where('user_id', auth()->id())
+        ->latest();
 
-        $query = Ticket::with(['category', 'user.department'])
-            ->where('user_id', Auth::id());
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('ticket_id', 'like', "%{$search}%")
+              ->orWhere('description', 'like', "%{$search}%")
+              ->orWhereHas('category', fn($cat) => $cat->where('name', 'like', "%{$search}%"))
+              ->orWhereHas('user.department', fn($dept) => $dept->where('name', 'like', "%{$search}%"));
+        });
+    }
 
-        if ($request->status) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->category_id) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('description', 'like', "%{$request->search}%")
-                    ->orWhere('ticket_id', 'like', "%{$request->search}%");
-            });
-        }
-
-        // Active tickets with pagination
-        $tickets = $query->whereNotIn('status', ['resolved', 'closed'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(5);
-
-        // Normalize each ticket
-        $tickets->getCollection()->transform(function ($ticket) {
-            $ticket->attachments = json_decode($ticket->attachments, true) ?? [];
-            $ticket->created_at_formatted = $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y H:i');
-            return $ticket;
+    // kalau request AJAX, return JSON
+    if ($request->ajax()) {
+        $tickets = $query->get()->map(function($t) {
+            return [
+                'id' => $t->id,
+                'ticket_id' => $t->ticket_id,
+                'user' => [
+                    'id' => $t->user->id,
+                    'name' => $t->user->name,
+                ],
+                'department' => [
+                    'id' => $t->user->department->id ?? null,
+                    'name' => $t->user->department->name ?? '-',
+                ],
+                'category' => [
+                    'id' => $t->category->id ?? null,
+                    'name' => $t->category->name ?? '-',
+                ],
+                'priority' => ucfirst($t->priority),
+                'status' => ucfirst($t->status),
+                'created_at_formatted' => $t->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i'),
+            ];
         });
 
-        // History tickets (resolved / closed)
-        $historyTickets = Ticket::with(['category', 'user.department'])
-            ->where('user_id', Auth::id())
-            ->whereIn('status', ['resolved', 'closed'])
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($ticket) {
-                $ticket->attachments = json_decode($ticket->attachments, true) ?? [];
-                $ticket->created_at_formatted = $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y H:i');
-                return $ticket;
-            });
-
-        // If AJAX (live search / pagination), return JSON
-if ($request->ajax()) {
-    $tickets = Ticket::with(['user.department', 'category'])
-        ->latest()
-        ->paginate(10);
-
-    return response()->json([
-        'data' => $tickets->items(),
-    ]);
-}
-
-
-
-        return view('staff.list-tiket', compact('categories', 'tickets', 'historyTickets'));
+        return response()->json(['tickets' => $tickets]);
     }
+
+    // kalau bukan AJAX, render blade biasa
+    $tickets = $query->paginate(5);
+    $historyTickets = Ticket::with(['category', 'user.department'])
+        ->where('user_id', auth()->id())
+        ->whereIn('status', ['resolved', 'closed'])
+        ->latest()
+        ->take(5)
+        ->get();
+
+    return view('staff.list-tiket', compact('tickets', 'historyTickets'));
+}
 
     /**
      * Fetch latest tickets for dashboard.
      */
     public function fetchDashboardTickets()
     {
-        $tickets = Ticket::with('category')
+        // ✅ pakai get() bukan paginate() untuk response JSON dashboard
+        $tickets = Ticket::with(['category', 'user.department', 'department'])
             ->where('user_id', auth()->id())
             ->latest()
-            ->take(3)
+            ->take(5)
             ->get();
 
         return response()->json($tickets);
@@ -96,100 +90,111 @@ if ($request->ajax()) {
     /**
      * Store a new ticket (AJAX).
      */
-public function store(Request $request)
-{
-    try {
-        $validated = $request->validate([
-            'category_id'   => 'required|exists:categories,id',
-            'priority'      => 'required|string',
-            'description'   => 'required|string',
-            'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,heic,heif',
-        ]);
-
-        // Upload files (if any)
-        $filePaths = [];
-        if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $file) {
-                $filePaths[] = $file->store('tickets', 'public');
-            }
-        }
-
-        $user = Auth::user();
-
-        // Pastikan department_id tidak null
-        $departmentId = $user->department_id ?? \App\Models\Department::first()?->id;
-
-        // Create new ticket
-        $ticket = Ticket::create([
-            'user_id'       => $user->id,
-            'department_id' => $departmentId,
-            'category_id'   => $validated['category_id'],
-            'priority'      => strtolower($validated['priority']),
-            'description'   => $validated['description'],
-            'attachments'   => json_encode($filePaths),
-            'status'        => 'waiting',
-        ]);
-
-        // Generate custom ticket_id
-        $ticket->ticket_id = 'T-KTU-' . str_pad($ticket->id, 4, '0', STR_PAD_LEFT);
-        $ticket->save();
-
-        // Load relations for clean response
-        $ticket->load(['category', 'user.department']);
-
-        // Kirim email tapi jangan ganggu AJAX
+    public function store(Request $request)
+    {
         try {
-            $itEmail = env('IT_TEAM_EMAIL', 'irvanronaldi2@gmail.com');
-            Mail::to($itEmail)->send(new TicketCreatedMail($ticket));
-        } catch (\Exception $e) {
-            Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
-        }
+            $validated = $request->validate([
+                'category_id'   => 'required|exists:categories,id',
+                'priority'      => 'required|string',
+                'description'   => 'required|string',
+                'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,heic,heif',
+            ]);
 
-        // Siapkan JSON response agar JS dapat relasi lengkap
-        return response()->json([
-            'success' => true,
-            'message' => 'Ticket successfully created!',
-            'ticket' => [
-                'id' => $ticket->id,
-                'ticket_id' => $ticket->ticket_id,
-                'category' => [
-                    'id' => $ticket->category->id ?? null,
-                    'name' => $ticket->category->name ?? '-',
-                ],
-                'user' => [
-                    'id' => $ticket->user->id,
-                    'name' => $ticket->user->name,
-                    'department' => [
-                        'id' => $ticket->user->department->id ?? null,
-                        'name' => $ticket->user->department->name ?? '-',
+            // Upload files (if any)
+            $filePaths = [];
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $filePaths[] = $file->store('tickets', 'public');
+                }
+            }
+
+            $user = Auth::user();
+
+            // ✅ Pastikan department_id tidak null
+            $departmentId = $user->department_id ?? Department::first()?->id;
+
+            if (!$departmentId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No department found. Please assign a department to this user.',
+                ], 400);
+            }
+
+            // ✅ Create ticket
+            $ticket = Ticket::create([
+                'user_id'       => $user->id,
+                'department_id' => $departmentId,
+                'category_id'   => $validated['category_id'],
+                'priority'      => strtolower($validated['priority']),
+                'description'   => $validated['description'],
+                'attachments'   => json_encode($filePaths),
+                'status'        => 'waiting',
+            ]);
+
+            // ✅ Generate custom ticket ID
+            $ticket->ticket_id = 'T-KTU-' . str_pad($ticket->id, 4, '0', STR_PAD_LEFT);
+            $ticket->save();
+
+            // ✅ Load relations
+            $ticket->load(['category', 'user.department', 'department']);
+
+            // Kirim email (jangan ganggu AJAX)
+            try {
+                $itEmail = env('IT_TEAM_EMAIL', 'irvanronaldi2@gmail.com');
+                Mail::to($itEmail)->send(new TicketCreatedMail($ticket));
+            } catch (\Exception $e) {
+                Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
+            }
+
+            // ✅ JSON response lengkap
+            return response()->json([
+                'success' => true,
+                'message' => 'Ticket successfully created!',
+                'ticket' => [
+                    'id' => $ticket->id,
+                    'ticket_id' => $ticket->ticket_id,
+                    'category' => [
+                        'id' => $ticket->category->id ?? null,
+                        'name' => $ticket->category->name ?? '-',
                     ],
+                    'department' => [
+                        'id' => $ticket->department->id ?? null,
+                        'name' => $ticket->department->name ?? '-',
+                    ],
+                    'user' => [
+                        'id' => $ticket->user->id,
+                        'name' => $ticket->user->name,
+                        'department' => [
+                            'id' => $ticket->user->department->id ?? null,
+                            'name' => $ticket->user->department->name ?? '-',
+                        ],
+                    ],
+                    'status' => ucfirst($ticket->status),
+                    'priority' => ucfirst($ticket->priority),
+                    'description' => $ticket->description,
+                    'attachments' => $filePaths,
+                    'created_at_formatted' => $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i'),
                 ],
-                'status' => ucfirst($ticket->status),
-                'priority' => ucfirst($ticket->priority),
-                'description' => $ticket->description,
-                'attachments' => $filePaths,
-                'created_at_formatted' => $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i'),
-            ],
-        ], 201);
+            ], 201);
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Validation failed!',
-            'errors' => $e->errors(),
-        ], 422);
-    } catch (\Exception $e) {
-        Log::error('Failed to create new ticket', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to create ticket, please try again later.'
-        ], 500);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed!',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Failed to create new ticket', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create ticket, please try again later.',
+            ], 500);
+        }
     }
-}
-
 
     /**
      * Display ticket details (AJAX).
@@ -197,7 +202,7 @@ public function store(Request $request)
     public function show($id)
     {
         try {
-            $ticket = Ticket::with(['category', 'user.department'])
+            $ticket = Ticket::with(['category', 'user.department', 'department'])
                 ->where('user_id', Auth::id())
                 ->findOrFail($id);
 
@@ -214,6 +219,10 @@ public function store(Request $request)
                         'id'   => $ticket->category->id ?? null,
                         'name' => $ticket->category->name ?? '-',
                     ],
+                    'department' => [
+                        'id'   => $ticket->department->id ?? null,
+                        'name' => $ticket->department->name ?? '-',
+                    ],
                     'user'       => [
                         'id'         => $ticket->user->id,
                         'name'       => $ticket->user->name,
@@ -222,8 +231,8 @@ public function store(Request $request)
                             'name' => $ticket->user->department->name ?? '-',
                         ],
                     ],
-                    'status'     => $ticket->status,
-                    'priority'   => $ticket->priority,
+                    'status'     => ucfirst($ticket->status),
+                    'priority'   => ucfirst($ticket->priority),
                     'description'=> $ticket->description,
                     'attachments'=> $ticket->attachments,
                     'created_at' => $ticket->created_at_formatted,

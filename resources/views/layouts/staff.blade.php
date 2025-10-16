@@ -16,7 +16,8 @@
     @vite([
         'resources/css/user.css',
         'resources/js/it.js',
-        'resources/js/ticket-detail-handler.js'
+        'resources/js/ticket-detail-handler.js',
+        'resources/js/staff.js'
     ])
 
     @yield('styles')

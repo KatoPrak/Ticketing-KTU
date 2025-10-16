@@ -37,10 +37,11 @@ public function getCreatedAtFormattedAttribute()
     return $this->created_at ? $this->created_at->format('d M Y H:i') : null;
 }
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+public function user()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
+
 
     public function category()
     {

@@ -10,29 +10,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const ticketForm = document.getElementById('ticketForm');
 
     // =========================================================================
-    // LOGIKA UNTUK UPLOAD FILE
+    // LOGIKA UPLOAD FILE
     // =========================================================================
     if (uploadArea && fileInput && uploadedFilesDiv && filesList) {
-        uploadArea.addEventListener('dragover', (e) => {
+        uploadArea.addEventListener('dragover', e => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
         });
         uploadArea.addEventListener('dragleave', () => {
             uploadArea.classList.remove('dragover');
         });
-        uploadArea.addEventListener('drop', (e) => {
+        uploadArea.addEventListener('drop', e => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
-            const files = Array.from(e.dataTransfer.files);
-            handleFiles(files);
+            handleFiles(Array.from(e.dataTransfer.files));
         });
-        fileInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            handleFiles(files);
+        fileInput.addEventListener('change', e => {
+            handleFiles(Array.from(e.target.files));
         });
 
         function handleFiles(newFiles) {
-            let validFiles = newFiles.filter(file => validateFile(file));
+            const validFiles = newFiles.filter(validateFile);
             uploadedFiles.push(...validFiles);
             updateFilesList();
             fileInput.value = '';
@@ -42,11 +40,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const maxSize = 5 * 1024 * 1024;
             const allowedTypes = ['image/jpeg', 'image/png', 'image/heif'];
             if (file.size > maxSize) {
-                alert('File is too large. Maximum size is 5MB per file.');
+                alert('File terlalu besar (maksimum 5MB).');
                 return false;
             }
             if (!allowedTypes.includes(file.type)) {
-                alert('File type not supported. Only jpg, png are allowed.');
+                alert('Jenis file tidak didukung. Hanya JPG dan PNG.');
                 return false;
             }
             return true;
@@ -56,11 +54,10 @@ document.addEventListener('DOMContentLoaded', function() {
             filesList.innerHTML = '';
             if (uploadedFiles.length > 0) {
                 uploadedFilesDiv.style.display = 'block';
-                uploadArea.style.display = 'block';
                 uploadedFiles.forEach((file, index) => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item d-flex justify-content-between align-items-center p-2 border rounded-3 bg-light mb-2';
-                    fileItem.innerHTML = `
+                    const item = document.createElement('div');
+                    item.className = 'file-item d-flex justify-content-between align-items-center p-2 border rounded-3 bg-light mb-2';
+                    item.innerHTML = `
                         <div>
                             <i class="fas fa-file-alt me-2 text-info"></i>
                             <span>${file.name}</span>
@@ -68,24 +65,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <button type="button" class="btn-close" aria-label="Remove" data-index="${index}"></button>
                     `;
-                    filesList.appendChild(fileItem);
+                    filesList.appendChild(item);
                 });
             } else {
                 uploadedFilesDiv.style.display = 'none';
             }
         }
 
-        filesList.addEventListener('click', function(event) {
-            if (event.target.classList.contains('btn-close')) {
-                const indexToRemove = parseInt(event.target.dataset.index, 10);
-                removeFile(indexToRemove);
+        filesList.addEventListener('click', e => {
+            if (e.target.classList.contains('btn-close')) {
+                const idx = parseInt(e.target.dataset.index, 10);
+                uploadedFiles.splice(idx, 1);
+                updateFilesList();
             }
         });
-
-        function removeFile(index) {
-            uploadedFiles.splice(index, 1);
-            updateFilesList();
-        }
 
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
@@ -110,12 +103,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const formData = new FormData(form);
-        if (uploadedFiles.length > 0) {
-            uploadedFiles.forEach(file => formData.append('attachments[]', file));
-        }
+        uploadedFiles.forEach(f => formData.append('attachments[]', f));
 
         submitButton.disabled = true;
-        submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...`;
+        submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Submitting...`;
 
         try {
             const response = await fetch(form.action, {
@@ -129,50 +120,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const result = await response.json();
 
- if (response.ok) {
-    const ticket = result.ticket;
+            if (response.ok) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('createTicketModal'));
+                if (modal) modal.hide();
 
-    // Tutup modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('createTicketModal'));
-    if (modal) modal.hide();
+                form.reset();
+                uploadedFiles = [];
+                updateFilesList();
 
-    // Reset form dan file list
-    form.reset();
-    uploadedFiles = [];
-    updateFilesList();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Ticket created!',
+                    text: result.message || 'Your ticket has been added successfully.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
 
-    // SweetAlert notifikasi
-    Swal.fire({
-        icon: 'success',
-        title: 'Ticket created!',
-        text: result.message || 'Your ticket has been added successfully.',
-        timer: 1500,
-        showConfirmButton: false
-    });
-
-    // Tambah baris baru di tabel tanpa reload
-    appendTicketRow(ticket);
-    refreshTicketsList();
-
-}
- else {
-                let errorMessages = Object.values(result.errors)
-                    .map(error => `- ${error[0]}`).join('\n');
-                alert('Failed to create ticket:\n' + errorMessages);
+                refreshTicketsList();
+            } else {
+                const errors = Object.values(result.errors)
+                    .map(e => `- ${e[0]}`).join('\n');
+                alert('Gagal membuat tiket:\n' + errors);
             }
-
         } catch (error) {
             console.error('Error:', error);
-            alert('A connection error occurred. Please try again.');
+            alert('Terjadi kesalahan koneksi.');
         } finally {
             submitButton.disabled = false;
             submitButton.innerHTML = `<i class="fas fa-paper-plane me-1"></i> Submit Ticket`;
         }
     }
 
-    if (ticketForm) {
-        ticketForm.addEventListener('submit', submitTicket);
-    }
+    if (ticketForm) ticketForm.addEventListener('submit', submitTicket);
 
     // =========================================================================
     // SIDEBAR HANDLER
@@ -184,74 +163,47 @@ document.addEventListener('DOMContentLoaded', function() {
     if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 });
 
-
 // =========================================================================
-// FUNGSI GLOBAL: REFRESH LIST TIKET TANPA RELOAD
+// REFRESH LIST TIKET TANPA RELOAD
 // =========================================================================
 function refreshTicketsList() {
-    fetch(window.location.href, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
+    fetch('/tickets', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(res => res.json())
         .then(data => {
-            const tbody = document.querySelector('#ticketTableBody');
+            const tbody = document.querySelector('#ticketsTable tbody');
             tbody.innerHTML = '';
 
-            data.data.forEach(ticket => {
-                const departmentName = ticket.user?.department?.name || '-';
-                const categoryName = ticket.category?.name || '-';
-                const shortDesc = ticket.description.length > 50
-                    ? ticket.description.substring(0, 47) + '...'
-                    : ticket.description;
+            data.tickets.forEach(ticket => {
+                const dept = ticket.user?.department?.name ?? '-';
+                const category = ticket.category?.name ?? '-';
+                const user = ticket.user?.name ?? '-';
 
-                const statusClass = {
-                    open: 'bg-success',
-                    progress: 'bg-warning text-dark',
-                    resolved: 'bg-primary',
-                    closed: 'bg-danger',
-                    waiting: 'bg-secondary'
-                }[ticket.status.toLowerCase()] || 'bg-secondary';
+                const row = `
+                    <tr>
+                        <td>${ticket.ticket_id}</td>
+                        <td>${user}</td>
+                        <td>${dept}</td>
+                        <td>${category}</td>
+                        <td>${ticket.priority}</td>
+                        <td>${ticket.status}</td>
+                        <td>${ticket.created_at_formatted}</td>
+                       <td>
+  <button class="btn btn-info btn-sm btn-detail-ticket" data-id="${ticket.id}">
+    Detail
+  </button>
+</td>
 
-                const priorityClass = {
-                    high: 'bg-danger',
-                    medium: 'bg-warning text-dark',
-                    low: 'bg-success'
-                }[ticket.priority.toLowerCase()] || 'bg-secondary';
-
-                const row = document.createElement('tr');
-                row.id = `ticket-row-${ticket.id}`;
-                row.innerHTML = `
-                    <td>${ticket.ticket_id}</td>
-                    <td>${departmentName}</td>
-                    <td>${categoryName}</td>
-                    <td>${shortDesc}</td>
-                    <td><span class="badge ${statusClass}">${ticket.status}</span></td>
-                    <td><span class="badge ${priorityClass}">${ticket.priority}</span></td>
-                    <td>${ticket.created_at_formatted ?? new Date(ticket.created_at).toLocaleString()}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary btn-detail-ticket" data-id="${ticket.id}">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </td>
+                    </tr>
                 `;
-                tbody.appendChild(row);
-            });
-
-            // re-bind tombol detail biar event-nya hidup lagi
-            document.querySelectorAll('.btn-detail-ticket').forEach(btn => {
-                btn.addEventListener('click', e => {
-                    const id = e.currentTarget.dataset.id;
-                    openTicketDetail(id);
-                });
+                tbody.insertAdjacentHTML('beforeend', row);
             });
         })
-        .catch(err => console.error('Refresh tickets failed:', err));
+        .catch(err => console.error('Refresh error:', err));
 }
 
 
-
 // =========================================================================
-// GLOBAL FUNCTIONS (SIDEBAR)
+// SIDEBAR
 // =========================================================================
 function toggleSidebar() {
     document.getElementById("sidebar").classList.toggle("show");

@@ -41,9 +41,12 @@ class User extends Authenticatable
         return 'remember_token';
     }
 // app/Models/User.php
-public function department() {
-    return $this->belongsTo(Department::class);
+// App\Models\User.php
+public function department()
+{
+    return $this->belongsTo(Department::class, 'department_id');
 }
+
 
 public function user() {
     return $this->belongsTo(User::class);

@@ -78,6 +78,7 @@ function populateTicketModal(ticket) {
     $('#d_description').text(ticket.description || '-');
     $('#d_category').text(ticket.category?.name || '-');
     $('#d_user').text(ticket.user?.name || '-');
+    $('#d_department').text(ticket.user?.department?.name || '-');
     $('#d_created').text(ticket.created_at || '-');
 
     // Status badge
