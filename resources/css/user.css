@@ -37,6 +37,36 @@ body {
     right: 0;
     z-index: 1030 !important;
 }
+#d_attachments img {
+  transition: transform 0.2s ease-in-out;
+}
+#d_attachments img:hover {
+  transform: scale(1.05);
+}
+#d_attachments {
+    padding-left: 0.75rem;        /* sejajar dengan teks field */
+}
+
+#d_attachments .attachment-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.3rem;
+}
+
+#d_attachments img {
+    max-width: 220px;
+    max-height: 180px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    object-fit: cover;
+    transition: transform 0.2s ease-in-out;
+}
+
+#d_attachments img:hover {
+    transform: scale(1.05);
+}
 
 .navbar-brand {
     color: white !important;

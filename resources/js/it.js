@@ -183,64 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ==========================
-    // GLOBAL EVENT HANDLERS
-    // ==========================
 
-    // --- Handler untuk Detail Modal ---
-    document.body.addEventListener("click", async (e) => {
-        if (!e.target.closest(".btn-detail-ticket")) return;
-        
-        const detailBtn = e.target.closest(".btn-detail-ticket");
-        const id = detailBtn.dataset.id;
-        const modalEl = document.getElementById("detailTicketModal");
-        if (!modalEl) return;
-        
-        const modal = new bootstrap.Modal(modalEl);
-        const loader = document.getElementById("d_loader");
-        const content = document.getElementById("d_content");
-
-        loader.classList.remove("d-none");
-        content.classList.add("d-none");
-        modal.show();
-
-        try {
-            const response = await fetch(`${BASE_URL}/${id}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const ticket = await response.json();
-
-            // Populate modal content... (kode yang sudah benar)
-            document.getElementById("d_ticket_id").innerText = ticket.ticket_id || "-";
-            document.getElementById("d_department").innerText = ticket.department?.name || "-";
-            const descSpan = document.getElementById("d_description");
-    descSpan.innerText = ticket.description || "-";
-    descSpan.classList.add('fw-bold'); 
-            document.getElementById("d_category").innerText = ticket.category?.name || "-";
-            document.getElementById("d_user").innerText = ticket.user?.name || "-";
-            document.getElementById("d_created").innerText = ticket.created_at || "-";
-            const s = document.getElementById("d_status");
-            s.innerText = ticket.status || "-";
-            s.className = `badge ${getStatusBadgeClass(ticket.status)}`;
-            const p = document.getElementById("d_priority");
-            p.innerText = ticket.priority || "-";
-            p.className = `badge ${getPriorityBadgeClass(ticket.priority)}`;
-            const notesRow = document.getElementById("d_row_notes");
-            if (ticket.resolution_notes) {
-                document.getElementById("d_notes").innerText = ticket.resolution_notes;
-                notesRow.classList.remove("d-none");
-            } else {
-                notesRow.classList.add("d-none");
-            }
-            document.getElementById("d_attachments").innerHTML = renderAttachments(ticket.attachments);
-        } catch (err) {
-            console.error("Failed to load ticket:", err);
-            modal.hide();
-            alert('Failed to load ticket details.');
-        } finally {
-            loader.classList.add("d-none");
-            content.classList.remove("d-none");
-        }
-    });
 
     // --- Handler untuk Update Status/Priority ---
     document.body.addEventListener('change', async (e) => {

@@ -30,6 +30,12 @@ class Ticket extends Model
     protected $casts = [
     'attachments' => 'array',
 ];
+protected $appends = ['created_at_formatted'];
+
+public function getCreatedAtFormattedAttribute()
+{
+    return $this->created_at ? $this->created_at->format('d M Y H:i') : null;
+}
 
     public function user()
     {

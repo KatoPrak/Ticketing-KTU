@@ -27,4 +27,19 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    // app/Exceptions/Handler.php
+public function render($request, Throwable $exception)
+{
+    if ($request->expectsJson()) {
+        if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+        if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+    }
+    return parent::render($request, $exception);
+}
+
 }
