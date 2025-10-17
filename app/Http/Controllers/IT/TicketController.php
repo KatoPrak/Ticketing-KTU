@@ -199,45 +199,5 @@ $recentTickets = Ticket::with(['category', 'user', 'department'])
             'urgentTickets',
             'recentTickets'
         ));
-    }
-
-    // ============================================================
-    // 🆕 STORE — Membuat tiket baru
-    // ============================================================
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'required|string|max:1000',
-            'priority'    => 'nullable|in:low,medium,high,urgent',
-            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,docx,xls,xlsx|max:2048',
-        ]);
-
-        $lastTicket = Ticket::orderBy('id', 'desc')->first();
-        $nextId = $lastTicket ? $lastTicket->id + 1 : 1;
-        $ticketId = 'IT-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
-
-        $attachmentPaths = [];
-        if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $file) {
-                $path = $file->store('tickets', 'public');
-                $attachmentPaths[] = $path;
-            }
-        }
-
-        // FIX: Tambahkan 'department_id' saat membuat tiket baru
-        $ticket = Ticket::create([
-            'ticket_id'   => $ticketId,
-            'user_id'     => Auth::id(),
-            'department_id' => Auth::user()->department_id, // Mengambil ID dept dari user yg login
-            'category_id' => $validated['category_id'],
-            'description' => $validated['description'],
-            'priority'    => $validated['priority'] ?? 'medium',
-            'status'      => 'waiting',
-            'attachments' => $attachmentPaths, // Simpan sebagai array
-        ]);
-
-        return back()->with('success', 'Tiket berhasil dibuat dengan ID: ' . $ticketId);
-    }
-}
+    }}
 

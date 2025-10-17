@@ -90,111 +90,112 @@ public function index(Request $request)
     /**
      * Store a new ticket (AJAX).
      */
-    public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'category_id'   => 'required|exists:categories,id',
-                'priority'      => 'required|string',
-                'description'   => 'required|string',
-                'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,heic,heif',
-            ]);
+public function store(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'category_id'   => 'required|exists:categories,id',
+            'priority'      => 'required|string',
+            'description'   => 'required|string',
+            'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,heic,heif',
+        ]);
 
-            // Upload files (if any)
-            $filePaths = [];
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $filePaths[] = $file->store('tickets', 'public');
-                }
+        // Upload file attachments
+        $filePaths = [];
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $filePaths[] = $file->store('tickets', 'public');
             }
-
-            $user = Auth::user();
-
-            // ✅ Pastikan department_id tidak null
-            $departmentId = $user->department_id ?? Department::first()?->id;
-
-            if (!$departmentId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No department found. Please assign a department to this user.',
-                ], 400);
-            }
-
-            // ✅ Create ticket
-            $ticket = Ticket::create([
-                'user_id'       => $user->id,
-                'department_id' => $departmentId,
-                'category_id'   => $validated['category_id'],
-                'priority'      => strtolower($validated['priority']),
-                'description'   => $validated['description'],
-                'attachments'   => json_encode($filePaths),
-                'status'        => 'waiting',
-            ]);
-
-            // ✅ Generate custom ticket ID
-            $ticket->ticket_id = 'T-KTU-' . str_pad($ticket->id, 4, '0', STR_PAD_LEFT);
-            $ticket->save();
-
-            // ✅ Load relations
-            $ticket->load(['category', 'user.department', 'department']);
-
-            // Kirim email (jangan ganggu AJAX)
-            try {
-                $itEmail = env('IT_TEAM_EMAIL', 'irvanronaldi2@gmail.com');
-                Mail::to($itEmail)->send(new TicketCreatedMail($ticket));
-            } catch (\Exception $e) {
-                Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
-            }
-
-            // ✅ JSON response lengkap
-            return response()->json([
-                'success' => true,
-                'message' => 'Ticket successfully created!',
-                'ticket' => [
-                    'id' => $ticket->id,
-                    'ticket_id' => $ticket->ticket_id,
-                    'category' => [
-                        'id' => $ticket->category->id ?? null,
-                        'name' => $ticket->category->name ?? '-',
-                    ],
-                    'department' => [
-                        'id' => $ticket->department->id ?? null,
-                        'name' => $ticket->department->name ?? '-',
-                    ],
-                    'user' => [
-                        'id' => $ticket->user->id,
-                        'name' => $ticket->user->name,
-                        'department' => [
-                            'id' => $ticket->user->department->id ?? null,
-                            'name' => $ticket->user->department->name ?? '-',
-                        ],
-                    ],
-                    'status' => ucfirst($ticket->status),
-                    'priority' => ucfirst($ticket->priority),
-                    'description' => $ticket->description,
-                    'attachments' => $filePaths,
-                    'created_at_formatted' => $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i'),
-                ],
-            ], 201);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed!',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (\Exception $e) {
-            Log::error('Failed to create new ticket', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create ticket, please try again later.',
-            ], 500);
         }
+
+        $user = Auth::user();
+
+        // Pastikan department_id tidak null
+        $departmentId = $user->department_id ?? Department::first()?->id;
+        if (!$departmentId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No department found. Please assign a department to this user.',
+            ], 400);
+        }
+
+        // Create ticket
+        $ticket = Ticket::create([
+            'user_id'       => $user->id,
+            'department_id' => $departmentId,
+            'category_id'   => $validated['category_id'],
+            'priority'      => strtolower($validated['priority']),
+            'description'   => $validated['description'],
+            'attachments'   => json_encode($filePaths),
+            'status'        => 'waiting',
+        ]);
+
+        // Generate custom ticket ID
+        $ticket->ticket_id = 'T-KTU-' . str_pad($ticket->id, 4, '0', STR_PAD_LEFT);
+        $ticket->save();
+
+        // Load relations
+        $ticket->load(['category', 'user.department', 'department']);
+
+        // Ambil email tim IT dari .env
+        $itEmails = explode(',', env('IT_TEAM_EMAILS', 'ferdinal.sukman@ktushipyard.com'));
+
+        // Kirim email ke semua email tim IT
+        try {
+            Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
+        } catch (\Exception $e) {
+            Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
+        }
+
+        // Response JSON
+        return response()->json([
+            'success' => true,
+            'message' => 'Ticket successfully created!',
+            'ticket' => [
+                'id' => $ticket->id,
+                'ticket_id' => $ticket->ticket_id,
+                'category' => [
+                    'id' => $ticket->category->id ?? null,
+                    'name' => $ticket->category->name ?? '-',
+                ],
+                'department' => [
+                    'id' => $ticket->department->id ?? null,
+                    'name' => $ticket->department->name ?? '-',
+                ],
+                'user' => [
+                    'id' => $ticket->user->id,
+                    'name' => $ticket->user->name,
+                    'department' => [
+                        'id' => $ticket->user->department->id ?? null,
+                        'name' => $ticket->user->department->name ?? '-',
+                    ],
+                ],
+                'status' => ucfirst($ticket->status),
+                'priority' => ucfirst($ticket->priority),
+                'description' => $ticket->description,
+                'attachments' => $filePaths,
+                'created_at_formatted' => $ticket->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i'),
+            ],
+        ], 201);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation failed!',
+            'errors' => $e->errors(),
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Failed to create new ticket', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create ticket, please try again later.',
+        ], 500);
     }
+}
 
     /**
      * Display ticket details (AJAX).

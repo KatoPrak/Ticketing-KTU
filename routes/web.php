@@ -55,7 +55,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
 // -----------------------------
 // IT ROUTES
 // -----------------------------
-Route::middleware(['auth', 'role:it'])->prefix('it')->name('it.')->group(function () {
+Route::middleware(['auth', 'role:tim it'])->prefix('it')->name('it.')->group(function () {
     Route::resource('news', NewsController::class);
     Route::post('/departments', [ItDepartmentController::class, 'store'])->name('departments.store');
     Route::get('/staff', [ManageUserController::class, 'index'])->name('staff.index');

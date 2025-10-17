@@ -13,26 +13,25 @@ class TicketCreatedMail extends Mailable
 
     public $ticket;
 
+    /**
+     * Buat instance baru dari mail ini.
+     */
     public function __construct(Ticket $ticket)
     {
         $this->ticket = $ticket;
     }
 
+    /**
+     * Bangun pesan email.
+     */
     public function build()
-{
-    // Lokasi logo di folder public
-    $logoPath = public_path('assets/image/logo-ktu.jpg');
+    {
+        $subject = sprintf('🎫 Tiket Baru Diterima: %s', $this->ticket->ticket_id);
 
-    $logoCid = null;
-    if (file_exists($logoPath)) {
-        $logoCid = $this->embed($logoPath);
+        return $this->subject($subject)
+                    ->view('emails.new-ticket-notification')
+                    ->with([
+                        'ticket' => $this->ticket,
+                    ]);
     }
-
-    return $this->subject('🎫 Tiket Baru: ' . $this->ticket->ticket_id)
-                ->view('emails.new-ticket-notification')
-                ->with([
-                    'logoCid' => $logoCid,
-                ]);
-}
-
 }
