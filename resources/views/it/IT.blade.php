@@ -129,8 +129,8 @@
                         <tr><th>Created by</th><td><span id="d_user"></span></td></tr>
                         <tr><th>Department</th><td><span id="d_department"></span></td></tr>
                         <tr><th>Category</th><td><span id="d_category"></span></td></tr>
-                        <tr><th>Status</th><td><span class="badge" id="d_status"></span></td></tr>
-                        <tr><th>Priority</th><td><span class="badge" id="d_priority"></span></td></tr>
+                        <tr><th>Status</th><td><span class="badge bg-success" id="d_status">Open</span></td></tr>
+                        <tr><th>Priority</th><td><span class="badge bg-info" id="d_priority">High</span></td></tr>
                         <tr><th>Description</th><td style="white-space: pre-wrap;"><span id="d_description"></span></td></tr>
                         <tr><th>Date</th><td><span id="d_created"></span></td></tr>
                         <tr id="d_row_notes" class="d-none"><th>Resolution Notes</th><td><div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded"></div></td></tr>

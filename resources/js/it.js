@@ -2,6 +2,8 @@
 // it.js — FINAL & CONSOLIDATED (ALL FUNCTIONS INCLUDED)
 // ==========================================================
 import Swal from 'sweetalert2';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // ==========================
 // BASE URL & HEADERS
@@ -201,6 +203,53 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+document.body.addEventListener('click', async function(e){
+    if (!e.target.closest('.btn-detail-ticket')) return;
+
+    const btn = e.target.closest('.btn-detail-ticket');
+    const ticketId = btn.dataset.id;
+    const modalEl = document.getElementById("detailTicketModal");
+    if (!modalEl) return;
+
+    const loader = document.getElementById('d_loader');
+    const content = document.getElementById('d_content');
+    const modal = new bootstrap.Modal(modalEl);
+    
+    loader.classList.remove('d-none');
+    content.classList.add('d-none');
+    modal.show();
+
+    try {
+        const res = await fetch(`/it/tickets/${ticketId}`, { headers: defaultHeaders });
+        const data = await res.json();
+
+        document.getElementById('d_ticket_id').textContent = data.ticket_id;
+        document.getElementById('d_user').textContent = data.user.name;
+        document.getElementById('d_department').textContent = data.department.name;
+        document.getElementById('d_category').textContent = data.category.name;
+        document.getElementById('d_status').textContent = data.status;
+        document.getElementById('d_priority').textContent = data.priority;
+        document.getElementById('d_description').textContent = data.description;
+        document.getElementById('d_created').textContent = data.created_at;
+
+        document.getElementById('d_attachments').innerHTML = renderAttachments(data.attachments);
+
+        const notesRow = document.getElementById('d_row_notes');
+        const notesDiv = document.getElementById('d_notes');
+        if (data.resolution_notes) {
+            notesDiv.textContent = data.resolution_notes;
+            notesRow.classList.remove('d-none');
+        } else {
+            notesRow.classList.add('d-none');
+        }
+    } catch(err){
+        console.error(err);
+        content.innerHTML = '<p class="text-danger">Gagal memuat data tiket.</p>';
+    } finally {
+        loader.classList.add('d-none');
+        content.classList.remove('d-none');
+    }
+});
 
 
     // --- Handler untuk Update Status/Priority ---

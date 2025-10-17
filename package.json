@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "admin-lte": "3.2",
-        "bootstrap": "^5.3.7",
+        "bootstrap": "^5.3.8",
         "jquery": "^3.7.1",
         "sweetalert2": "^11.26.2"
     }
