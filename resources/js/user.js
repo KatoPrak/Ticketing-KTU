@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadArea = document.querySelector('.file-upload-area');
     const uploadedFilesDiv = document.getElementById('uploadedFiles');
     const filesList = document.getElementById('filesList');
-    const ticketForm = document.getElementById('ticketForm');
 
     // =========================================================================
     // LOGIKA UPLOAD FILE
@@ -17,14 +16,17 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             uploadArea.classList.add('dragover');
         });
+
         uploadArea.addEventListener('dragleave', () => {
             uploadArea.classList.remove('dragover');
         });
+
         uploadArea.addEventListener('drop', e => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
             handleFiles(Array.from(e.dataTransfer.files));
         });
+
         fileInput.addEventListener('change', e => {
             handleFiles(Array.from(e.target.files));
         });
@@ -39,19 +41,23 @@ document.addEventListener('DOMContentLoaded', function() {
         function validateFile(file) {
             const maxSize = 5 * 1024 * 1024;
             const allowedTypes = ['image/jpeg', 'image/png', 'image/heif'];
+
             if (file.size > maxSize) {
                 alert('File terlalu besar (maksimum 5MB).');
                 return false;
             }
+
             if (!allowedTypes.includes(file.type)) {
                 alert('Jenis file tidak didukung. Hanya JPG dan PNG.');
                 return false;
             }
+
             return true;
         }
 
         function updateFilesList() {
             filesList.innerHTML = '';
+
             if (uploadedFiles.length > 0) {
                 uploadedFilesDiv.style.display = 'block';
                 uploadedFiles.forEach((file, index) => {
@@ -90,70 +96,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =========================================================================
-    // SUBMIT TICKET DENGAN AJAX TANPA RELOAD
-    // =========================================================================
-    async function submitTicket(event) {
-        event.preventDefault();
-        const form = event.target;
-        const submitButton = form.querySelector('button[type="submit"]');
-
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-
-        const formData = new FormData(form);
-        uploadedFiles.forEach(f => formData.append('attachments[]', f));
-
-        submitButton.disabled = true;
-        submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Submitting...`;
-
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('createTicketModal'));
-                if (modal) modal.hide();
-
-                form.reset();
-                uploadedFiles = [];
-                updateFilesList();
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Ticket created!',
-                    text: result.message || 'Your ticket has been added successfully.',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-
-                refreshTicketsList();
-            } else {
-                const errors = Object.values(result.errors)
-                    .map(e => `- ${e[0]}`).join('\n');
-                alert('Gagal membuat tiket:\n' + errors);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan koneksi.');
-        } finally {
-            submitButton.disabled = false;
-            submitButton.innerHTML = `<i class="fas fa-paper-plane me-1"></i> Submit Ticket`;
-        }
-    }
-
-    if (ticketForm) ticketForm.addEventListener('submit', submitTicket);
-
-    // =========================================================================
     // SIDEBAR HANDLER
     // =========================================================================
     const sidebarToggler = document.getElementById('sidebarToggler');
@@ -187,12 +129,11 @@ function refreshTicketsList() {
                         <td>${ticket.priority}</td>
                         <td>${ticket.status}</td>
                         <td>${ticket.created_at_formatted}</td>
-                       <td>
-  <button class="btn btn-info btn-sm btn-detail-ticket" data-id="${ticket.id}">
-    Detail
-  </button>
-</td>
-
+                        <td>
+                            <button class="btn btn-info btn-sm btn-detail-ticket" data-id="${ticket.id}">
+                                Detail
+                            </button>
+                        </td>
                     </tr>
                 `;
                 tbody.insertAdjacentHTML('beforeend', row);
@@ -200,7 +141,6 @@ function refreshTicketsList() {
         })
         .catch(err => console.error('Refresh error:', err));
 }
-
 
 // =========================================================================
 // SIDEBAR

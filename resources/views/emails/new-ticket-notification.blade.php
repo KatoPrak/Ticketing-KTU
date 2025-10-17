@@ -70,8 +70,10 @@
 <body>
     <div class="container">
         <div class="header">
-            {{-- LOGO DITAMBAHKAN DI SINI --}}
-            <img src="{{ asset('assets/image/logo-ktu.jpg') }}" alt="Logo Perusahaan" style="max-width: 150px; height: auto; margin-bottom: 10px;">
+            {{-- LOGO EMBED LANGSUNG --}}
+            @if(isset($logoCid))
+                <img src="{{ $logoCid }}" alt="Logo Perusahaan" style="max-width: 150px; height: auto; margin-bottom: 10px;">
+            @endif
             <h2 style="margin: 0;">🎫 Tiket Baru Masuk</h2>
         </div>
         
@@ -89,13 +91,12 @@
             
             <div class="info-row">
                 <strong>Prioritas:</strong> 
-                <span class="badge badge-{{ $ticket->priority }}">
+                <span class="badge badge-{{ strtolower($ticket->priority) }}">
                     {{ strtoupper($ticket->priority) }}
                 </span>
             </div>
             
             <div class="info-row">
-                {{-- PEMANGGILAN NAMA/PEMBUAT DIPERBAIKI DI SINI --}}
                 <strong>Pembuat:</strong>
                 {{ $ticket->user->name ?? 'Unknown' }}
                 @if($ticket->user?->department)

@@ -19,8 +19,20 @@ class TicketCreatedMail extends Mailable
     }
 
     public function build()
-    {
-        return $this->subject('🎫 Tiket Baru: ' . $this->ticket->ticket_id)
-                    ->view('emails.new-ticket-notification');
+{
+    // Lokasi logo di folder public
+    $logoPath = public_path('assets/image/logo-ktu.jpg');
+
+    $logoCid = null;
+    if (file_exists($logoPath)) {
+        $logoCid = $this->embed($logoPath);
     }
+
+    return $this->subject('🎫 Tiket Baru: ' . $this->ticket->ticket_id)
+                ->view('emails.new-ticket-notification')
+                ->with([
+                    'logoCid' => $logoCid,
+                ]);
+}
+
 }

@@ -1,6 +1,7 @@
 // ==========================================================
 // it.js — FINAL & CONSOLIDATED (ALL FUNCTIONS INCLUDED)
 // ==========================================================
+import Swal from 'sweetalert2';
 
 // ==========================
 // BASE URL & HEADERS
@@ -94,6 +95,17 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             createForm.reset();
+
+            // ✅ Tambahkan SweetAlert sukses di sini
+            Swal.fire({
+                title: "Tiket Berhasil Dibuat!",
+                text: "Tiket kamu sudah tersimpan dan sedang diproses.",
+                icon: "success",
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "Oke"
+            });
+
+            // Tutup modal kalau ada
             const modalEl = document.getElementById("createTicketModal");
             if (modalEl) {
                 const modal = bootstrap.Modal.getInstance(modalEl);
@@ -102,7 +114,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error("❌ Create ticket error:", err);
-            alert('Failed to create ticket: ' + err.message);
+            Swal.fire({
+                title: "Gagal Membuat Tiket",
+                text: err.message,
+                icon: "error",
+                confirmButtonColor: "#d33",
+                confirmButtonText: "Tutup"
+            });
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = `<i class="fas fa-paper-plane me-1"></i> Submit Ticket`;
