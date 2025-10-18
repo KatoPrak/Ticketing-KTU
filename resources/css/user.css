@@ -24,80 +24,6 @@ body {
     padding-top: var(--navbar-height);
 }
 
-
-/* ===== NAVBAR ===== */
-.navbar-custom {
-    background: linear-gradient(135deg, var(--primary-color), #6366f1);
-    height: var(--navbar-height);
-    padding: 0.75rem 1rem;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1030 !important;
-}
-#d_attachments img {
-  transition: transform 0.2s ease-in-out;
-}
-#d_attachments img:hover {
-  transform: scale(1.05);
-}
-#d_attachments {
-    padding-left: 0.75rem;        /* sejajar dengan teks field */
-}
-
-#d_attachments .attachment-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: 0.3rem;
-}
-
-#d_attachments img {
-    max-width: 220px;
-    max-height: 180px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    object-fit: cover;
-    transition: transform 0.2s ease-in-out;
-}
-
-#d_attachments img:hover {
-    transform: scale(1.05);
-}
-
-.navbar-brand {
-    color: white !important;
-    font-weight: 700;
-    font-size: 1.3rem;
-    padding: 0;
-}
-
-.navbar-nav .nav-link {
-    color: white !important;
-    font-weight: 500;
-    padding: 0.4rem 0.8rem;
-    transition: all 0.3s ease;
-    border-radius: 6px;
-    position: relative;
-}
-
-.navbar-nav .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-}
-
-.navbar-toggler {
-    border: none;
-    color: white;
-    padding: 0.25rem 0.5rem;
-}
-
-.navbar-toggler:focus {
-    box-shadow: none;
-}
-
 /* ===== MODAL ===== */
 .custom-modal { max-width: 60% !important; }
 
@@ -380,6 +306,11 @@ footer.footer.collapsed { margin-left: 80px; }
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
 }
+.row {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
 .welcome-banner::after {
     content: '';
     position: absolute;
@@ -452,9 +383,9 @@ footer.footer.collapsed { margin-left: 80px; }
     padding: 0.75rem 2rem;
     font-weight: 600;
 }
+
 /* ===== RESPONSIVE LAYOUT ===== */
 @media (max-width: 992px) {
-    /* Sidebar jadi overlay di tablet/hp */
     .sidebar {
         left: -100%;
         width: var(--sidebar-width);
@@ -462,33 +393,20 @@ footer.footer.collapsed { margin-left: 80px; }
     .sidebar.show {
         left: 0;
     }
-
-    /* Overlay aktif pas sidebar muncul */
     .sidebar-overlay.show {
         opacity: 1;
         visibility: visible;
     }
-
-    /* Konten full tanpa sidebar */
     .main-content {
         margin-left: 0 !important;
         padding: 1rem;
     }
-
     footer.footer {
         margin-left: 0 !important;
     }
 }
 
 @media (max-width: 768px) {
-    /* Navbar lebih rapat */
-    .navbar-custom {
-        padding: 0.5rem 0.75rem;
-    }
-    .navbar-brand {
-        font-size: 1.1rem;
-    }
-
     /* Quick action jadi grid 2 kolom */
     .quick-action-btn {
         padding: 1rem;
@@ -502,36 +420,20 @@ footer.footer.collapsed { margin-left: 80px; }
 }
 
 @media (max-width: 576px) {
-    /* Banner lebih kecil di HP */
     .welcome-banner {
         padding: 1rem 1.25rem;
         font-size: 0.9rem;
     }
-
-    /* Card padding kecil */
     .dashboard-card {
         padding: 0.75rem;
     }
-
-    /* Modal biar full layar di HP */
     .custom-modal {
         max-width: 90% !important;
         margin: 0 auto;
     }
-    /* Perbaikan untuk posisi dropdown di layar kecil */
-@media (max-width: 768px) {
-    .navbar-nav .dropdown-menu {
-        position: absolute !important; /* Paksa posisi agar absolut terhadap navbar */
-        right: 5px; /* Beri sedikit jarak dari tepi kanan layar */
-        left: auto; /* Nonaktifkan posisi dari kiri */
-        margin-top: 8px; /* Beri sedikit jarak dari navbar */
-    }
-}
-/* Atur ulang ukuran modal 'Create Ticket' di layar HP */
-@media (max-width: 576px) {
+    /* Atur ulang ukuran modal 'Create Ticket' di layar HP */
     #createTicketModal .modal-dialog {
         max-width: 90%; /* Ubah dari default menjadi 90% */
         margin: auto; /* Pastikan tetap di tengah */
     }
-}
 }

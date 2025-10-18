@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+
 // ==========================
 // BASE URL & HEADERS
 // ==========================
@@ -251,6 +252,29 @@ document.body.addEventListener('click', async function(e){
     }
 });
 
+// ==========================
+// LOGOUT BUTTON HANDLER
+// ==========================
+document.addEventListener("DOMContentLoaded", () => {
+    const logoutBtn = document.getElementById("logoutBtn");
+    const logoutForm = document.getElementById("logoutForm");
+
+    if (logoutBtn && logoutForm) {
+        logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            const locale = document.documentElement.lang || 'en';
+            const message = locale.startsWith('id')
+                ? 'Apakah Anda yakin ingin logout?'
+                : 'Are you sure you want to logout?';
+
+            if (confirm(message)) {
+                logoutForm.submit();
+            }
+        });
+    }
+});
+
 
     // --- Handler untuk Update Status/Priority ---
     document.body.addEventListener('change', async (e) => {
@@ -320,26 +344,4 @@ document.body.addEventListener('click', async function(e){
             select.value = old;
         }
     }
-});
-
-
-// ==========================
-// GLOBAL SIDEBAR FUNCTIONS
-// ==========================
-function toggleSidebar() {
-    document.getElementById("sidebar")?.classList.toggle("show");
-    document.getElementById("sidebarOverlay")?.classList.toggle("show");
-}
-
-function closeSidebar() {
-    document.getElementById("sidebar")?.classList.remove("show");
-    document.getElementById("sidebarOverlay")?.classList.remove("show");
-}
-
-// Make them available globally
-window.toggleSidebar = toggleSidebar;
-window.closeSidebar = closeSidebar;
-
-document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeSidebar();
 });
