@@ -1,9 +1,7 @@
-<div class="modal fade" id="detailTicketModal" tabindex="-1" aria-labelledby="detailTicketModalLabel"
-    aria-hidden="true">
+{{-- staff/modals/show-ticket-modal.blade.php --}}
+<div class="modal fade" id="detailTicketModal" tabindex="-1" aria-labelledby="detailTicketModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered custom-modal">
         <div class="modal-content shadow-lg border-0">
-
-            {{-- Header --}}
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title">
                     <i class="fas fa-ticket-alt me-2"></i> Ticket Details
@@ -11,9 +9,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            {{-- Body --}}
             <div class="modal-body">
-
                 {{-- Loader --}}
                 <div id="d_loader" class="text-center py-4">
                     <div class="spinner-border text-info"></div>
@@ -71,5 +67,11 @@
                         </tr>
                     </table>
                 </div>
-
             </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

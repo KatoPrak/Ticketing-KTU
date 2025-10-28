@@ -154,3 +154,26 @@ function closeSidebar() {
     document.getElementById("sidebar").classList.remove("show");
     document.getElementById("sidebarOverlay").classList.remove("show");
 }
+// Add this to your existing JavaScript
+function adaptTableForMobile() {
+    const table = document.querySelector('.table');
+    if (!table) return;
+    
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+    const rows = table.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        cells.forEach((cell, index) => {
+            if (headers[index]) {
+                cell.setAttribute('data-label', headers[index]);
+            }
+        });
+    });
+}
+
+// Panggil fungsi saat load dan resize
+document.addEventListener('DOMContentLoaded', function() {
+    adaptTableForMobile();
+    window.addEventListener('resize', adaptTableForMobile);
+});

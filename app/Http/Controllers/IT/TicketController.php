@@ -104,9 +104,6 @@ public function update(Request $request, Ticket $ticket)
     // ============================================================
     // ⚙️ UPDATE FIELD (via AJAX)
     // ============================================================
- // ============================================================
-    // ⚙️ UPDATE FIELD (via AJAX)
-    // ============================================================
 public function updateField(Request $request, Ticket $ticket)
 {
     // Gunakan Validator facade untuk kontrol penuh

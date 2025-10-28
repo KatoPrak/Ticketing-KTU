@@ -16,9 +16,9 @@
     <!-- ✅ File utama -->
     @vite([
         'resources/css/user.css',
-        'resources/js/it.js',
         'resources/js/ticket-detail-handler.js',
-        'resources/js/staff.js'
+        'resources/js/staff.js',
+        'resources/js/user.js'
     ])
 
     @yield('styles')

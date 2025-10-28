@@ -165,7 +165,6 @@
         /* Tablet responsive */
         @media (max-width: 1024px) {
             .background-wrapper {
-                background-attachment: scroll;
                 background-size: 100% 100%; /* Fit exact untuk tablet */
             }
         }
@@ -213,7 +212,6 @@
             .background-wrapper {
                 background-image: none !important; /* Hilangkan background image di small mobile */
                 background-color: rgba(6, 41, 99, 0.75); /* Ganti dengan warna biru solid */
-                background-attachment: scroll;
             }
             
             /* Hapus overlay karena sudah menggunakan background solid */
@@ -284,7 +282,6 @@
             .background-wrapper {
                 background-image: none !important; /* Hilangkan background image di landscape mobile */
                 background-color: rgba(6, 41, 99, 0.75); /* Ganti dengan warna biru solid */
-                background-attachment: scroll;
             }
 
             .login-container {

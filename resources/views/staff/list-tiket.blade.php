@@ -146,17 +146,11 @@
         </div>
     </div>
 </div>
-{{-- 🎟️ CREATE TICKET MODAL --}}
-@include('staff.modals.form-ticket')
-@include('staff.modals.show-ticket-modal')
 
-            {{-- Footer --}}
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+{{-- 🎟️ MODALS --}}
+@include('staff.modals.form-ticket')        {{-- Create Ticket Modal --}}
+@include('staff.modals.show-ticket-modal')  {{-- Detail Ticket Modal --}}
+
 @endsection
 
 {{-- ✅ SUCCESS TOAST NOTIFICATION --}}

@@ -204,54 +204,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-document.body.addEventListener('click', async function(e){
-    if (!e.target.closest('.btn-detail-ticket')) return;
-
-    const btn = e.target.closest('.btn-detail-ticket');
-    const ticketId = btn.dataset.id;
-    const modalEl = document.getElementById("detailTicketModal");
-    if (!modalEl) return;
-
-    const loader = document.getElementById('d_loader');
-    const content = document.getElementById('d_content');
-    const modal = new bootstrap.Modal(modalEl);
-    
-    loader.classList.remove('d-none');
-    content.classList.add('d-none');
-    modal.show();
-
-    try {
-        const res = await fetch(`/it/tickets/${ticketId}`, { headers: defaultHeaders });
-        const data = await res.json();
-
-        document.getElementById('d_ticket_id').textContent = data.ticket_id;
-        document.getElementById('d_user').textContent = data.user.name;
-        document.getElementById('d_department').textContent = data.department.name;
-        document.getElementById('d_category').textContent = data.category.name;
-        document.getElementById('d_status').textContent = data.status;
-        document.getElementById('d_priority').textContent = data.priority;
-        document.getElementById('d_description').textContent = data.description;
-        document.getElementById('d_created').textContent = data.created_at;
-
-        document.getElementById('d_attachments').innerHTML = renderAttachments(data.attachments);
-
-        const notesRow = document.getElementById('d_row_notes');
-        const notesDiv = document.getElementById('d_notes');
-        if (data.resolution_notes) {
-            notesDiv.textContent = data.resolution_notes;
-            notesRow.classList.remove('d-none');
-        } else {
-            notesRow.classList.add('d-none');
-        }
-    } catch(err){
-        console.error(err);
-        content.innerHTML = '<p class="text-danger">Gagal memuat data tiket.</p>';
-    } finally {
-        loader.classList.add('d-none');
-        content.classList.remove('d-none');
-    }
-});
-
 // ==========================
 // LOGOUT BUTTON HANDLER
 // ==========================
@@ -274,8 +226,138 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+// ==========================
+// DATE FORMATTER - ADD THIS MISSING FUNCTION
+// ==========================
+function formatDateFromRaw(dateString) {
+    if (!dateString || dateString === 'N/A') return 'N/A';
+    
+    console.log('🔧 Formatting date:', dateString);
+    
+    // Handle format "28-10-2025 10:08" (DD-MM-YYYY HH:MM)
+    if (dateString.includes('-') && dateString.includes(' ')) {
+        const [datePart, timePart] = dateString.split(' ');
+        const [day, month, year] = datePart.split('-');
+        
+        if (day && month && year && timePart) {
+            // Reformat to "2025-10-28 10:08"
+            const formatted = `${year}-${month}-${day} ${timePart}`;
+            console.log('✅ Formatted date:', formatted);
+            return formatted;
+        }
+    }
+    
+    // Return original if not matching expected format
+    console.log('ℹ️ Unknown format, returning original');
+    return dateString;
+}
+// ==========================
+// TICKET DETAIL MODAL HANDLER
+// ==========================
+document.addEventListener("click", async (e) => {
+    if (e.target.closest('.btn-detail-ticket')) {
+        const button = e.target.closest('.btn-detail-ticket');
+        const ticketId = button.dataset.id;
+        
+        if (ticketId) {
+            await showTicketDetail(ticketId);
+        }
+    }
+});
 
-
+async function showTicketDetail(ticketId) {
+    const modal = new bootstrap.Modal(document.getElementById('detailTicketModal'));
+    const loader = document.getElementById('d_loader');
+    const content = document.getElementById('d_content');
+    
+    // Show loader, hide content
+    loader.classList.remove('d-none');
+    content.classList.add('d-none');
+    
+    try {
+        const response = await fetch(`/it/tickets/${ticketId}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch ticket details: ${response.status}`);
+        }
+        
+        const ticket = await response.json();
+        
+        // DEBUG: Lihat data di console
+        console.log('Ticket data:', ticket);
+        console.log('Created at raw:', ticket.created_at);
+        console.log('Created at formatted:', ticket.created_at_formatted);
+        
+        // Populate modal dengan data
+        document.getElementById('d_ticket_id').textContent = ticket.ticket_id || 'N/A';
+        document.getElementById('d_user').textContent = ticket.user?.name || 'N/A';
+        document.getElementById('d_department').textContent = ticket.department?.name || 'N/A';
+        document.getElementById('d_category').textContent = ticket.category?.name || 'N/A';
+        document.getElementById('d_status').textContent = ticket.status ? ticket.status.replace('_', ' ').toUpperCase() : 'N/A';
+        document.getElementById('d_priority').textContent = ticket.priority ? ticket.priority.toUpperCase() : 'N/A';
+        document.getElementById('d_description').textContent = ticket.description || 'No description';
+        
+        // FIX: Handle date dengan multiple fallback
+        let displayDate = 'Date not available';
+        
+        if (ticket.created_at_formatted && ticket.created_at_formatted !== 'N/A') {
+            // Jika sudah ada format, gunakan langsung
+            displayDate = ticket.created_at_formatted;
+        } else if (ticket.created_at) {
+            // Format dari created_at raw
+            displayDate = formatDateFromRaw(ticket.created_at);
+        }
+        
+        console.log('Final display date:', displayDate);
+        document.getElementById('d_created').textContent = displayDate;
+        
+        // Handle resolution notes
+        const notesRow = document.getElementById('d_row_notes');
+        const notesElement = document.getElementById('d_notes');
+        if (ticket.resolution_notes) {
+            notesElement.textContent = ticket.resolution_notes;
+            notesRow.classList.remove('d-none');
+        } else {
+            notesRow.classList.add('d-none');
+        }
+        
+        // Handle attachments
+        const attachmentsContainer = document.getElementById('d_attachments');
+        if (ticket.attachments && ticket.attachments.length > 0) {
+            attachmentsContainer.innerHTML = renderAttachments(ticket.attachments);
+        } else {
+            attachmentsContainer.innerHTML = '<em>No attachments</em>';
+        }
+        
+        // Update badge classes
+        const statusBadge = document.getElementById('d_status');
+        const priorityBadge = document.getElementById('d_priority');
+        
+        statusBadge.className = `badge ${getStatusBadgeClass(ticket.status)}`;
+        priorityBadge.className = `badge ${getPriorityBadgeClass(ticket.priority)}`;
+        
+        // Hide loader, show content
+        loader.classList.add('d-none');
+        content.classList.remove('d-none');
+        
+        // Show modal
+        modal.show();
+        
+    } catch (error) {
+        console.error('Error loading ticket details:', error);
+        loader.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Failed to load ticket details: ${error.message}
+            </div>
+        `;
+    }
+}
     // --- Handler untuk Update Status/Priority ---
     document.body.addEventListener('change', async (e) => {
         if (!e.target.classList.contains('update-ticket-field')) return;
