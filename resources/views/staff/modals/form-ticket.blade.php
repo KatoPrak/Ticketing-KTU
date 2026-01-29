@@ -9,7 +9,6 @@
                     </h1>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -35,10 +34,15 @@
                             <label class="form-label">Contact Email</label>
                             <input type="email" class="form-control" value="{{ Auth::user()->email }}" disabled>
                         </div>
-
                         <div class="col-12">
-                            <label class="form-label">Description <span class="text-danger">*</span></label>
-                            <textarea class="form-control" name="description" style="height: 120px" required></textarea>
+                            <label class="form-label">Problem <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="description" style="height: 120px"></textarea>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-lightbulb text-warning me-1"></i>
+                                    <strong>Remote Support Tip:</strong> Many issues can be resolved remotely. If possible, include your AnyDesk ID, or IP address to avoid unnecessary on-site visits.
+                                </small>
+                            </div>
                         </div>
 
                         {{-- Hidden default priority --}}

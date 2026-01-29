@@ -12,7 +12,7 @@ class TicketFactory extends Factory
     {
         // Nilai untuk status dan prioritas ini harus cocok dengan yang ada di ENUM database Anda
         $statuses = ['waiting', 'in_progress', 'pending', 'resolved']; 
-        $priorities = ['low', 'medium', 'high', 'urgent'];
+        $priorities = ['low', 'medium', 'high', 'urgent','critical'];
         
         $createdAt = $this->faker->dateTimeBetween('-6 months', 'now');
         $status = $this->faker->randomElement($statuses);

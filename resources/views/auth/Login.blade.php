@@ -26,25 +26,22 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            /* Coba berbagai path alternatif */
             background-image: url("assets/image/backgroud-login.png");
             background-repeat: no-repeat;
             background-position: center center;
-            background-size: 100% 100%; /* Fit exact ke setiap layar tanpa mempertahankan aspect ratio */
+            background-size: 100% 100%;
             background-attachment: fixed;
-            background-color: #f8f9fa; /* Fallback color untuk area kosong */
+            background-color: #f8f9fa;
         }
 
-        /* Alternative: gunakan body sebagai backup */
         body {
             background-image: url("/assets/image/backgroud-login.png");
             background-repeat: no-repeat;
             background-position: center center;
-            background-size: 100% 100%; /* Fit exact ke setiap layar */
+            background-size: 100% 100%;
             background-attachment: fixed;
         }
         
-        /* Override body background untuk mobile */
         @media (max-width: 768px) {
             body {
                 background-image: none !important;
@@ -52,7 +49,6 @@
             }
         }
 
-        /* Overlay untuk memastikan readability */
         .background-overlay {
             position: absolute;
             top: 0;
@@ -68,10 +64,9 @@
             justify-content: flex-end;
             align-items: center;
             min-height: 100vh;
-            padding: 20px 80px 20px 20px; /* Tambah padding kanan untuk geser ke kiri */
+            padding: 20px 80px 20px 20px;
         }
 
-        /* Auto center untuk mobile dari awal */
         @media (max-width: 991px) {
             .login-container {
                 justify-content: center;
@@ -79,7 +74,7 @@
             }
             
             .login-card {
-                transform: translateX(0); /* Reset posisi untuk mobile */
+                transform: translateX(0);
             }
         }
 
@@ -92,7 +87,7 @@
             width: 100%;
             max-width: 360px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            transform: translateX(-50px); /* Geser card 50px ke kiri */
+            transform: translateX(-50px);
         }
 
         .login-card .login-logo {
@@ -130,7 +125,6 @@
             box-shadow: 0 4px 12px rgba(127, 86, 216, 0.3);
         }
 
-        /* Remember me checkbox styling */
         .form-check {
             margin-bottom: 1.5rem;
         }
@@ -150,7 +144,6 @@
             font-size: 0.9rem;
         }
 
-        /* Loading state for login button */
         .btn-custom:disabled {
             background-color: #6c757d !important;
             border-color: #6c757d !important;
@@ -162,21 +155,40 @@
             height: 1rem;
         }
 
-        /* Tablet responsive */
+        /* Styling untuk toggle password icon */
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: #7F56D8;
+        }
+
+        .password-input-wrapper {
+            position: relative;
+        }
+
+        .password-input-wrapper input {
+            padding-right: 40px;
+        }
+
         @media (max-width: 1024px) {
             .background-wrapper {
-                background-size: 100% 100%; /* Fit exact untuk tablet */
+                background-size: 100% 100%;
             }
         }
 
-        /* Mobile responsive */
         @media (max-width: 768px) {
             .background-wrapper {
-                background-image: none !important; /* Hilangkan background image di mobile */
-                background-color: rgba(6, 41, 99, 0.75); /* Ganti dengan warna biru solid */
+                background-image: none !important;
+                background-color: rgba(6, 41, 99, 0.75);
             }
-            
-            /* Hapus overlay karena sudah menggunakan background solid */
 
             .login-container {
                 justify-content: center;
@@ -192,7 +204,7 @@
                 padding: 25px;
                 margin: auto;
                 background: rgba(255, 255, 255, 0.98);
-                transform: translateX(0); /* Pastikan tidak ada transform di mobile */
+                transform: translateX(0);
                 position: relative;
                 z-index: 3;
             }
@@ -207,14 +219,11 @@
             }
         }
 
-        /* Small mobile responsive */
         @media (max-width: 480px) {
             .background-wrapper {
-                background-image: none !important; /* Hilangkan background image di small mobile */
-                background-color: rgba(6, 41, 99, 0.75); /* Ganti dengan warna biru solid */
+                background-image: none !important;
+                background-color: rgba(6, 41, 99, 0.75);
             }
-            
-            /* Hapus overlay karena sudah menggunakan background solid */
 
             .login-container {
                 justify-content: center;
@@ -249,11 +258,10 @@
             }
         }
 
-        /* Very small screens */
         @media (max-width: 360px) {
             .background-wrapper {
-                background-image: none !important; /* Hilangkan background image di very small screen */
-                background-color: rgba(6, 41, 99, 0.75); /* Ganti dengan warna biru solid */
+                background-image: none !important;
+                background-color: rgba(6, 41, 99, 0.75);
             }
             
             .login-container {
@@ -277,11 +285,10 @@
             }
         }
 
-        /* Landscape mobile */
         @media (max-height: 600px) and (orientation: landscape) {
             .background-wrapper {
-                background-image: none !important; /* Hilangkan background image di landscape mobile */
-                background-color: rgba(6, 41, 99, 0.75); /* Ganti dengan warna biru solid */
+                background-image: none !important;
+                background-color: rgba(6, 41, 99, 0.75);
             }
 
             .login-container {
@@ -307,14 +314,12 @@
             }
         }
 
-        /* High DPI displays */
         @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
             .background-wrapper {
-                background-size: 100% 100%; /* Fit exact untuk high DPI */
+                background-size: 100% 100%;
             }
         }
 
-        /* Print styles */
         @media print {
             .background-wrapper {
                 display: none;
@@ -340,7 +345,6 @@
             </h3>
             <p style="margin:0;">KTU SHIPYARD</p>
 
-            {{-- Tampilkan error jika ada --}}
             @if ($errors->any())
                 <div class="alert alert-danger">
                     <ul class="mb-0">
@@ -351,14 +355,12 @@
                 </div>
             @endif
 
-            {{-- Tampilkan pesan sukses jika ada --}}
             @if (session('success'))
                 <div class="alert alert-success">
                     {{ session('success') }}
                 </div>
             @endif
 
-            {{-- Tampilkan pesan info jika ada --}}
             @if (session('info'))
                 <div class="alert alert-info">
                     {{ session('info') }}
@@ -366,42 +368,38 @@
             @endif
 
             <form method="POST" action="{{ route('login') }}" id="loginForm">
-    @csrf
-    <div class="mb-3">
-        <label for="id_staff" class="form-label">Username</label>
-        <input type="text" id="id_staff" name="id_staff" class="form-control"
-               value="{{ old('id_staff') }}" required autofocus>
-    </div>
-<div class="mb-3 position-relative">
-    <label for="password" class="form-label">Password</label>
-    <input type="password" id="password" name="password" class="form-control" required>
-    <i class="fas fa-eye" id="togglePassword" 
-       style="position: absolute; right: 10px; top: 70%; transform: translateY(-50%); cursor: pointer; color: #6c757d;">
-    </i>
-</div>
+                @csrf
+                <div class="mb-3">
+                    <label for="id_staff" class="form-label">Username</label>
+                    <input type="text" id="id_staff" name="id_staff" class="form-control"
+                           value="{{ old('id_staff') }}" required autofocus>
+                </div>
+                
+                <div class="mb-3 password-input-wrapper">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                    <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                </div>
 
-    {{-- Remember Me checkbox --}}
-    <div class="mb-3 form-check">
-        <input type="checkbox" name="remember" id="remember" value="1"
-               class="form-check-input" {{ old('remember') ? 'checked' : '' }}>
-        <label class="form-check-label" for="remember">
-            Remember me.
-        </label>
-    </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" name="remember" id="remember" value="1"
+                           class="form-check-input" {{ old('remember') ? 'checked' : '' }}>
+                    <label class="form-check-label" for="remember">
+                        Remember me.
+                    </label>
+                </div>
 
-    <div class="d-flex justify-content-end">
-        <button type="submit" class="btn btn-custom w-50" id="loginBtn">
-            <span class="btn-text">Login</span>
-            <span class="btn-loading d-none">
-                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                Logging in...
-            </span>
-        </button>
-    </div>
-</form>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-custom w-50" id="loginBtn">
+                        <span class="btn-text">Login</span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            Logging in...
+                        </span>
+                    </button>
+                </div>
+            </form>
 
-
-            {{-- Optional: Forgot Password Link --}}
             <div class="text-center mt-3">
                 <small>
                     <a href="#" class="text-muted text-decoration-none" onclick="showForgotPasswordInfo()">
@@ -412,89 +410,79 @@
         </div>
     </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const loginForm = document.getElementById('loginForm');
-        const loginBtn = document.getElementById('loginBtn');
-        const btnText = loginBtn.querySelector('.btn-text');
-        const btnLoading = loginBtn.querySelector('.btn-loading');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = loginBtn.querySelector('.btn-text');
+            const btnLoading = loginBtn.querySelector('.btn-loading');
 
-        // === BLOK BARU: Mulai Show/Hide Password ===
-        const togglePassword = document.querySelector('#togglePassword');
-        const password = document.querySelector('#password');
+            // Show/Hide Password Toggle
+            const togglePassword = document.querySelector('#togglePassword');
+            const password = document.querySelector('#password');
 
-        if (togglePassword && password) {
-            togglePassword.addEventListener('click', function () {
-                // Ganti tipe input dari password ke text atau sebaliknya
-                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-                password.setAttribute('type', type);
-                
-                // Ganti ikon mata
-                this.classList.toggle('fa-eye');
-                this.classList.toggle('fa-eye-slash');
-            });
-        }
-        // === BLOK BARU: Selesai Show/Hide Password ===
-
-        // Handle form submission with loading state
-        loginForm.addEventListener('submit', function(e) {
-            // Show loading state
-            loginBtn.disabled = true;
-            btnText.classList.add('d-none');
-            btnLoading.classList.remove('d-none');
-            
-            setTimeout(function() {
-                if (!isSubmitting) { // Hanya reset jika tidak ada submit yang berhasil
-                    loginBtn.disabled = false;
-                    btnText.classList.remove('d-none');
-                    btnLoading.classList.add('d-none');
-                }
-            }, 10000);
-        });
-
-        // Remember me tooltip or info
-        const rememberCheckbox = document.getElementById('remember');
-        rememberCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                console.log('Remember me enabled - user will stay logged in.');
+            if (togglePassword && password) {
+                togglePassword.addEventListener('click', function () {
+                    // Toggle password visibility
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+                    
+                    // Toggle eye icon
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
             }
-        });
 
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                if(alert) {
-                    alert.style.transition = 'opacity 0.5s';
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
+            // Handle form submission with loading state
+            loginForm.addEventListener('submit', function(e) {
+                if (isSubmitting) {
+                    e.preventDefault();
+                    return false;
+                }
+                isSubmitting = true;
+                
+                // Show loading state
+                loginBtn.disabled = true;
+                btnText.classList.add('d-none');
+                btnLoading.classList.remove('d-none');
+                
+                setTimeout(function() {
+                    if (!isSubmitting) {
+                        loginBtn.disabled = false;
+                        btnText.classList.remove('d-none');
+                        btnLoading.classList.add('d-none');
+                    }
+                }, 10000);
+            });
+
+            // Remember me functionality
+            const rememberCheckbox = document.getElementById('remember');
+            rememberCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    console.log('Remember me enabled - user will stay logged in.');
                 }
             });
-        }, 5000);
-    });
 
-    // Forgot password info function
-    function showForgotPasswordInfo() {
-        alert('Please contact IT administrator to reset your password.\n\nEmail: it@ktushipyard.com\nWhatsApp: +62-813-7099-9910');
-    }
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    if(alert) {
+                        alert.style.transition = 'opacity 0.5s';
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.remove(), 500);
+                    }
+                });
+            }, 5000);
+        });
 
-    // Prevent multiple form submissions
-    let isSubmitting = false;
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        if (isSubmitting) {
-            e.preventDefault();
-            return false;
+        // Forgot password info function
+        function showForgotPasswordInfo() {
+            alert('Please contact IT administrator to reset your password.\n\nEmail: ferdinal.sukman@ktushipyard.com\nWhatsApp: +62-813-7099-9910');
         }
-        isSubmitting = true;
-    });
 
-    // // Enhanced security: Clear form data on page unload
-    // window.addEventListener('beforeunload', function() {
-    //     const passwordField = document.querySelector('input[name="password"]');
-    //     if (passwordField) {
-    //         passwordField.value = '';
-    //     }
-    // });
-</script>
+        // Prevent multiple form submissions
+        let isSubmitting = false;
+    </script>
 </body>
 </html>

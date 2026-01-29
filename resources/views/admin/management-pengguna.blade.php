@@ -3,7 +3,9 @@
 @section('title', 'User Management')
 
 @section('content')
-@includeWhen(session('success') || session('error') || $errors->any(), 'partials.alerts')
+@includeWhen(session('success') || session('error') || $errors->any(), 'admin.partials.alerts')
+<link rel="stylesheet" href="{{ asset('build/assets/admin-BJfupJ7l.css') }}">
+<script src="{{ asset('build/assets/admin-CBTWxBS5.js') }}"></script>
 
 <div class="card shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -69,7 +71,3 @@
 @include('admin.partials.user-modal')
 
 @endsection
-
-@push('scripts')
-    @vite(['resources/css/admin.css', 'resources/js/admin.js'])
-@endpush

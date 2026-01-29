@@ -37,15 +37,30 @@ class NewsController extends Controller
 
         return redirect()->route('it.news.index')->with('success', 'News berhasil ditambahkan!');
     }
+
+    /**
+     * UPDATE: Mengupdate news yang sudah ada.
+     * Laravel otomatis inject News model berdasarkan {news} di route
+     */
+    public function update(Request $request, News $news)
+    {
+        $request->validate([
+            'message' => 'required|string|min:10'
+        ]);
+
+        $news->update($request->only('message'));
+
+        return redirect()->route('it.news.index')->with('success', 'News berhasil diupdate!');
+    }
+
     /**
      * DELETE: Menghapus data news.
+     * Laravel otomatis inject News model berdasarkan {news} di route
      */
-public function destroy(News $news)
-{
-    // Laravel sudah otomatis menemukan data 'news' berdasarkan ID dari URL.
-    // Kita tinggal panggil delete().
-    $news->delete();
+    public function destroy(News $news)
+    {
+        $news->delete();
 
-    return redirect()->route('it.news.index')->with('success', 'News berhasil dihapus!');
-}
+        return redirect()->route('it.news.index')->with('success', 'News berhasil dihapus!');
+    }
 }

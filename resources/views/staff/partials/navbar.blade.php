@@ -6,9 +6,8 @@
             <i class="fas fa-bars"></i>
         </button>
         <a class="navbar-brand" href="{{ route('staff.dashboard') }}">
-            <img src="{{ asset('assets/image/logo-ktu.jpg') }}" alt="KTU Logo" class="me-2"
-                style="height: 35px; width: auto; object-fit: contain;">
-            IT Ticketing System
+            <img src="{{ asset('assets/image/logo-ktu.jpg') }}" alt="KTU Logo" class="me-2 navbar-logo">
+            <span class="navbar-title">IT Support Ticketing System</span>
         </a>
 
         {{-- Navbar Right --}}
@@ -82,15 +81,17 @@
         // Help Function
         window.showHelp = function() {
             const helpMessage = `
-IT Support Contact Information:
+IT Support Contact Information
 
-📧 Email: it@ktushipyard.com
+📧 Email: ferdinal.sukman@ktushipyard.com
 📱 WhatsApp: +62-813-7099-9910
-🕒 Working Hours: Mon-Sat, 08:00 - 16:00
+🕒 Working Hours:
+   • Monday–Friday : 08:00 – 16:00
+   • Saturday            : 08:00 – 14:00
 
 For urgent issues, please call our hotline.
-            `.trim();
-            
+`.trim();
+
             alert(helpMessage);
         };
 
@@ -147,7 +148,7 @@ For urgent issues, please call our hotline.
         left: 0 !important;
         right: 0 !important;
         z-index: 1030 !important;
-        background: linear-gradient(135deg, var(--primary-color), #6366f1) !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         height: var(--navbar-height);
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     }
@@ -190,59 +191,105 @@ For urgent issues, please call our hotline.
     .sidebar-overlay {
         transition: all 0.3s ease;
     }
-/* Navbar Brand & Logo */
-.navbar-custom .navbar-brand {
-    display: flex;
-    align-items: center;
-    font-weight: 700;          /* Bold teks */
-    color: #ffffff !important; /* Warna putih */
-    font-size: 1.5rem;         /* Lebih besar */
-}
 
-.navbar-custom .navbar-brand img {
-    height: 45px;              /* Logo lebih besar */
-    width: auto;
-    object-fit: contain;
-    margin-right: 0.75rem;     /* Spasi antara logo dan teks */
-}
+    /* ========================================
+       NAVBAR BRAND & LOGO - RESPONSIVE
+    ======================================== */
+    .navbar-custom .navbar-brand {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: #ffffff !important;
+        font-size: 1.1rem; /* DIKECILKAN dari 1.5rem */
+        transition: font-size 0.3s ease;
+    }
 
-/* Navbar Links */
-.navbar-nav .nav-link {
-    color: #ffffff !important;
-    font-weight: 700;           /* Bold */
-    display: flex;
-    align-items: center;
-    transition: all 0.3s ease;
-}
+    .navbar-logo {
+        height: 45px;
+        width: auto;
+        object-fit: contain;
+        margin-right: 0.75rem;
+        transition: height 0.3s ease;
+    }
 
-.navbar-nav .nav-link i {
-    color: #ffffff !important; /* Icon putih */
-    font-size: 1.2rem;
-    margin-right: 0.3rem;
-}
+    .navbar-title {
+        white-space: nowrap;
+        transition: font-size 0.3s ease;
+        font-weight: 500; /* Slightly lighter weight */
+    }
 
-/* Dropdown items */
-.navbar-nav .dropdown-item {
-    color: #000000 !important; /* Putih */
-    font-weight: 700;           /* Bold */
-    display: flex;
-    align-items: center;
-}
+    /* Navbar Links */
+    .navbar-nav .nav-link {
+        color: #ffffff !important;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
 
-.navbar-nav .dropdown-item i {
-    color: #000000 !important;
-    margin-right: 0.5rem;
-}
+    .navbar-nav .nav-link i {
+        color: #ffffff !important;
+        font-size: 1.2rem;
+        margin-right: 0.3rem;
+    }
 
-/* Dropdown hover */
-.navbar-nav .dropdown-item:hover,
-.navbar-nav .dropdown-item.active {
-    background-color: rgba(255, 255, 255, 0.15) !important;
-    color: #000000 !important;
-}
+    /* Dropdown items */
+    .navbar-nav .dropdown-item {
+        color: #000000 !important;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+    }
 
-    /* Fix dropdown positioning on mobile */
+    .navbar-nav .dropdown-item i {
+        color: #000000 !important;
+        margin-right: 0.5rem;
+    }
+
+    /* Dropdown hover */
+    .navbar-nav .dropdown-item:hover,
+    .navbar-nav .dropdown-item.active {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #000000 !important;
+    }
+
+    /* ========================================
+       RESPONSIVE BREAKPOINTS
+    ======================================== */
+    
+    /* Large tablets and small desktops (992px - 1200px) */
+    @media (max-width: 1200px) {
+        .navbar-custom .navbar-brand {
+            font-size: 1rem; /* DIKECILKAN dari 1.3rem */
+        }
+        
+        .navbar-logo {
+            height: 40px;
+        }
+    }
+
+    /* Tablets (768px - 992px) */
+    @media (max-width: 992px) {
+        .navbar-custom .navbar-brand {
+            font-size: 0.9rem; /* DIKECILKAN dari 1.1rem */
+        }
+        
+        .navbar-logo {
+            height: 35px;
+        }
+    }
+
+    /* Large phones and small tablets (576px - 768px) */
     @media (max-width: 768px) {
+        .navbar-custom .navbar-brand {
+            font-size: 0.8rem; /* DIKECILKAN dari 0.95rem */
+        }
+        
+        .navbar-logo {
+            height: 32px;
+            margin-right: 0.5rem;
+        }
+        
         .navbar-nav .dropdown-menu {
             position: absolute !important;
             right: 5px;
@@ -251,8 +298,81 @@ For urgent issues, please call our hotline.
         }
     }
 
+    /* Small phones (up to 576px) */
+    @media (max-width: 576px) {
+        .navbar-custom .navbar-brand {
+            font-size: 0.7rem; /* DIKECILKAN dari 0.85rem */
+        }
+        
+        .navbar-logo {
+            height: 28px;
+            margin-right: 0.4rem;
+        }
+    }
+
+    /* Extra small phones (up to 400px) */
+    @media (max-width: 400px) {
+        .navbar-custom .navbar-brand {
+            font-size: 0.65rem; /* DIKECILKAN dari 0.75rem */
+        }
+        
+        .navbar-logo {
+            height: 25px;
+            margin-right: 0.3rem;
+        }
+        
+        .navbar-title {
+            /* Optionally truncate very long text */
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    /* iPhone SE and similar (320px - 375px) */
+    @media (max-width: 375px) {
+        .navbar-custom .navbar-brand {
+            font-size: 0.6rem; /* DIKECILKAN dari 0.7rem */
+        }
+        
+        .navbar-logo {
+            height: 22px;
+            margin-right: 0.25rem;
+        }
+        
+        .navbar-title {
+            max-width: 120px;
+        }
+    }
+
+    /* Landscape orientation for small devices */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .navbar-custom {
+            height: 50px;
+        }
+        
+        .navbar-custom .navbar-brand {
+            font-size: 0.75rem; /* DIKECILKAN dari 0.85rem */
+        }
+        
+        .navbar-logo {
+            height: 28px;
+        }
+    }
+
     /* Ensure body has padding for fixed navbar */
     body {
         padding-top: var(--navbar-height) !important;
+    }
+
+    /* ========================================
+       iOS SPECIFIC FIXES
+    ======================================== */
+    @supports (-webkit-touch-callout: none) {
+        /* iOS Safari specific */
+        .navbar-custom .navbar-brand {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
     }
 </style>

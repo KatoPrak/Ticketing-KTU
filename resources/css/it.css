@@ -82,7 +82,7 @@ body {
 }
 
 /* ========================================
-   SIDEBAR
+   SIDEBAR - FIXED VERSION
    ======================================== */
 .sidebar {
     position: fixed;
@@ -170,40 +170,22 @@ body {
     visibility: visible;
 }
 
-body.sidebar-open {
-    overflow: hidden;
-}
-
 /* ========================================
-   MAIN CONTENT
+   MAIN CONTENT - FIXED VERSION
    ======================================== */
-/* it.css */
-
 .main-content {
-    display: flex; /* 1. Jadikan sebagai kontainer flex */
-    flex-direction: column; /* 2. Atur item agar tersusun vertikal */
+    display: flex;
+    flex-direction: column;
     min-height: calc(100vh - var(--navbar-height));
     margin-top: var(--navbar-height);
+    /* FIXED: Pastikan margin-left sama dengan lebar sidebar di desktop */
     margin-left: var(--sidebar-width);
     transition: margin-left var(--transition-speed) ease;
-    /* Hapus padding dari sini jika ada, pindahkan ke .content-wrapper */
 }
 
 .content-wrapper {
-    flex: 1; /* 3. Biarkan area konten ini "tumbuh" mengisi ruang kosong */
-    padding: 2rem; /* Pindahkan padding ke sini */
-}
-
-/* Atur juga padding untuk mode responsif */
-@media (max-width: 991px) {
-    .content-wrapper {
-        padding: 1.5rem;
-    }
-}
-@media (max-width: 767px) {
-    .content-wrapper {
-        padding: 1rem;
-    }
+    flex: 1;
+    padding: 2rem;
 }
 
 .page-title {
@@ -479,17 +461,21 @@ body.sidebar-open {
 }
 
 /* ========================================
-   RESPONSIVE - TABLET
+   RESPONSIVE - TABLET (max-width: 991px)
    ======================================== */
 @media (max-width: 991px) {
+    /* FIXED: Sembunyikan sidebar di tablet/mobile */
     .sidebar {
         left: calc(-1 * var(--sidebar-width));
     }
     .sidebar.show {
         left: 0;
     }
+    /* FIXED: Hapus margin-left di tablet/mobile */
     .main-content {
         margin-left: 0;
+    }
+    .content-wrapper {
         padding: 1.5rem;
     }
     .welcome-card {
@@ -534,7 +520,7 @@ body.sidebar-open {
 }
 
 /* ========================================
-   RESPONSIVE - MOBILE
+   RESPONSIVE - MOBILE (max-width: 767px)
    ======================================== */
 @media (max-width: 767px) {
     :root {
@@ -544,7 +530,12 @@ body.sidebar-open {
     .navbar-brand span { font-size: 0.9rem; }
     .navbar-nav .nav-link .d-none.d-sm-inline { display: inline !important; font-size: 0.85rem; }
     .navbar-brand img { height: 30px; margin-right: 0; }
-    .main-content { padding: 1rem; }
+    .main-content { 
+        margin-left: 0; /* Pastikan tidak ada margin di mobile */
+    }
+    .content-wrapper {
+        padding: 1rem;
+    }
     .welcome-card { padding: 1.25rem; text-align: center; }
     .welcome-card h2 { font-size: 1.4rem; }
     .welcome-card p { font-size: 0.9rem; }
@@ -615,9 +606,7 @@ body.sidebar-open {
     #openAddModal { width: 100%; margin-bottom: 1rem; }
     .alert { font-size: 0.85rem; padding: 0.75rem; }
 
-    /* ========================================
-       FIX: RESPONSIVE MODAL DETAIL (FINAL)
-       ======================================== */
+    /* Modal responsive fix */
     .modal-dialog.modal-lg {
         max-width: calc(100% - 1rem);
         margin: 0.5rem auto;
@@ -663,13 +652,24 @@ body.sidebar-open {
     .modal-body #d_content td {
         font-size: 1rem;
     }
+    
+    /* FIXED: Prevent body scroll when sidebar is open on mobile */
+    body.sidebar-open-mobile {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+    }
 }
 
 /* ========================================
-   RESPONSIVE - EXTRA SMALL
+   RESPONSIVE - EXTRA SMALL (max-width: 575px)
    ======================================== */
 @media (max-width: 575px) {
     .main-content {
+        padding: 0;
+        margin-left: 0; /* Pastikan tidak ada margin */
+    }
+    .content-wrapper {
         padding: 0.75rem;
     }
     .welcome-card {

@@ -15,39 +15,54 @@ class RoleRedirect
      * Middleware ini digunakan untuk:
      * 1. Mencegah user mengakses halaman role lain
      * 2. Redirect ke dashboard yang sesuai jika mencoba akses halaman yang tidak sesuai role
+     * 3. Mendukung multiple roles dan single role
      */
-    public function handle(Request $request, Closure $next, ?string $allowedRole = null): Response
+    public function handle(Request $request, Closure $next, ...$allowedRoles): Response
     {
-        // Jika belum login, biarkan auth middleware yang handle
+        // Jika belum login, redirect ke login
         if (!Auth::check()) {
-            return $next($request);
+            return redirect()->route('login');
         }
 
         $user = Auth::user();
         $userRole = strtolower($user->role ?? '');
 
         // Jika tidak ada role yang diexpect, lanjutkan request
-        if (!$allowedRole) {
+        if (empty($allowedRoles)) {
             return $next($request);
         }
 
-        $allowedRole = strtolower($allowedRole);
+        // Normalisasi roles: 'user' dan 'staff' dianggap sama
+        $normalizedUserRole = $this->normalizeRole($userRole);
+        $normalizedAllowedRoles = array_map([$this, 'normalizeRole'], $allowedRoles);
 
-        // Normalisasi: 'user' dan 'staff' dianggap sama
-        if ($userRole === 'user') {
-            $userRole = 'staff';
-        }
-        if ($allowedRole === 'user') {
-            $allowedRole = 'staff';
-        }
-
-        // Jika role sesuai, lanjutkan request
-        if ($userRole === $allowedRole) {
+        // Jika role sesuai dengan salah satu yang diizinkan, lanjutkan request
+        if (in_array($normalizedUserRole, $normalizedAllowedRoles)) {
             return $next($request);
         }
 
         // Jika role tidak sesuai, redirect ke dashboard yang tepat
-        return $this->redirectToProperDashboard($userRole);
+        return $this->redirectToProperDashboard($normalizedUserRole);
+    }
+
+    /**
+     * Normalize role names for consistency
+     */
+    private function normalizeRole(string $role): string
+    {
+        $role = strtolower(trim($role));
+        
+        // Normalisasi: 'user' dan 'staff' dianggap sama
+        if ($role === 'user') {
+            return 'staff';
+        }
+        
+        // Handle "tim it" role
+        if ($role === 'tim it' || $role === 'it') {
+            return 'tim it';
+        }
+        
+        return $role;
     }
 
     /**
@@ -58,6 +73,7 @@ class RoleRedirect
         $dashboardRoutes = [
             'admin'      => 'admin.dashboard',
             'it'         => 'it.dashboard',
+            'tim it'     => 'it.dashboard',
             'staff'      => 'staff.dashboard',
             'user'       => 'staff.dashboard', // alias untuk staff
         ];
@@ -68,19 +84,36 @@ class RoleRedirect
         if ($routeName && \Route::has($routeName)) {
             return redirect()
                 ->route($routeName)
-                ->with('warning', 'You do not have permission to access that page.');
+                ->with('warning', 'Anda tidak memiliki izin untuk mengakses halaman tersebut.');
         }
 
-        // Jika route tidak ditemukan, cek alternatif
-        // Coba redirect ke home atau logout
+         // Fallback routes
+        $fallbackRoutes = [
+            'admin' => 'admin.dashboard',
+            'tim it' => 'it.dashboard',
+            'it' => 'it.dashboard',
+            'staff' => 'staff.dashboard',
+        ];
+
+        $fallbackRoute = $fallbackRoutes[$role] ?? 'home';
+
+        if (\Route::has($fallbackRoute)) {
+            return redirect()
+                ->route($fallbackRoute)
+                ->with('warning', 'Anda tidak memiliki izin untuk mengakses halaman tersebut.');
+        }
+
+        // Jika route tidak ditemukan, coba redirect ke home
         if (\Route::has('home')) {
-            return redirect()->route('home')->with('error', 'Dashboard not configured for your role.');
+            return redirect()
+                ->route('home')
+                ->with('error', 'Dashboard tidak dikonfigurasi untuk role Anda.');
         }
 
         // Last resort: logout dan redirect ke login
         Auth::logout();
         return redirect()
             ->route('login')
-            ->with('error', 'Your account role is not properly configured. Please contact administrator.');
+            ->with('error', 'Role akun Anda tidak dikonfigurasi dengan benar. Silakan hubungi administrator.');
     }
 }

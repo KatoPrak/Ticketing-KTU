@@ -74,33 +74,42 @@
                     <div id="error-container" class="alert alert-danger d-none"></div>
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
-                            <label for="name" class="form-label fw-semibold">Name</label>
+                            <label for="name" class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
                             <input type="text" id="name" name="name" class="form-control" required>
+                            <div class="invalid-feedback">Name is required</div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label for="id_staff" class="form-label fw-semibold">ID Staff</label>
+                            <label for="id_staff" class="form-label fw-semibold">ID Staff <span class="text-danger">*</span></label>
                             <input type="text" id="id_staff" name="id_staff" class="form-control" required>
+                            <div class="invalid-feedback">ID Staff is required</div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label for="email" class="form-label fw-semibold">Email</label>
+                            <label for="email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
                             <input type="email" id="email" name="email" class="form-control" required>
+                            <div class="invalid-feedback">Valid email is required</div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label for="department_id" class="form-label fw-semibold">Department</label>
-  <select id="department_id" name="department_id" class="form-select form-select-lg shadow-sm" required>
-    <option value="">Select Department</option>
-    @foreach($departments as $dept)
-        <option value="{{ $dept->id }}">{{ strtoupper($dept->name) }}</option>
-    @endforeach
-</select>
-
-
+                            <label for="department_id" class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+                            <select id="department_id" name="department_id" class="form-select" required>
+                                <option value="">Select Department</option>
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept->id }}">{{ strtoupper($dept->name) }}</option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback">Department is required</div>
                         </div>
 
-                        <div class="col-12 col-md-6">
-                            <label for="password" class="form-label fw-semibold">Password</label>
-                            <input type="password" id="password" name="password" class="form-control">
-                            <small class="text-muted">Leave blank to keep current password</small>
+                        <!-- ✅ Password Field - Disabled dengan Info Label -->
+                        <div class="col-12">
+                            <label for="password" class="form-label fw-semibold">Default Password</label>
+                            <input type="text" id="password" name="password" class="form-control bg-light" value="STAFFKTU123" disabled readonly>
+                            <div class="d-flex align-items-start mt-2">
+                                <i class="fas fa-info-circle text-info me-2 mt-1"></i>
+                                <small class="text-muted">
+                                    All new users will receive default password: <strong class="text-primary">STAFFKTU123</strong>
+                                    <br>Users can change their password after first login.
+                                </small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -141,7 +150,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-    if(!tokenMeta) console.warn('CSRF meta tag not found! Please add <meta name="csrf-token" content=\"{{ csrf_token() }}\"> to your layout.');
+    if(!tokenMeta) console.warn('CSRF meta tag not found!');
     const token = tokenMeta ? tokenMeta.getAttribute('content') : '';
 
     const userModalEl = document.getElementById('userModal');
@@ -159,12 +168,19 @@ document.addEventListener('DOMContentLoaded', function () {
     function openUserModal(title) {
         document.getElementById('modalTitle').innerText = title;
         errorContainer.classList.add('d-none');
+        userForm.classList.remove('was-validated');
         userModal.show();
     }
+
     function closeUserModal() {
         userModal.hide();
         userForm.reset();
+        userForm.classList.remove('was-validated');
         document.getElementById('user_id').value = '';
+        errorContainer.classList.add('d-none');
+        
+        // ✅ Reset password field ke default
+        document.getElementById('password').value = 'STAFFKTU123';
     }
 
     function updateTableRow(data) {
@@ -184,8 +200,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             </td>`;
         const existingRow = document.getElementById(`row-${data.id}`);
-        if(existingRow) existingRow.innerHTML = rowHtml;
-        else {
+        if(existingRow) {
+            existingRow.innerHTML = rowHtml;
+        } else {
             const newRow = document.createElement('tr');
             newRow.id = `row-${data.id}`;
             newRow.innerHTML = rowHtml;
@@ -194,36 +211,72 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function displayErrors(errors) {
-        let html = '<ul>';
-        for (const err in errors) html += `<li>${errors[err][0]}</li>`;
+        let html = '<ul class="mb-0">';
+        for (const err in errors) {
+            errors[err].forEach(msg => {
+                html += `<li>${msg}</li>`;
+            });
+        }
         html += '</ul>';
         errorContainer.innerHTML = html;
         errorContainer.classList.remove('d-none');
     }
 
     // --- Add User ---
-    document.getElementById('openAddModal').addEventListener('click', () => openUserModal('Add User'));
+    document.getElementById('openAddModal').addEventListener('click', () => {
+        userForm.reset();
+        document.getElementById('password').value = 'STAFFKTU123'; // ✅ Set default value
+        openUserModal('Add User');
+    });
 
     userForm.addEventListener('submit', async function (e) {
         e.preventDefault();
+        e.stopPropagation();
+
+        // ✅ Bootstrap validation
+        if (!userForm.checkValidity()) {
+            userForm.classList.add('was-validated');
+            return;
+        }
+
         const id = document.getElementById('user_id').value;
         const formData = new FormData(userForm);
         const url = id ? `/it/staff/${id}` : "{{ route('it.staff.store') }}";
+        
         if(id) formData.append('_method', 'PUT');
+
+        // ✅ Untuk update, jangan kirim password (password field disabled)
+        if (id) {
+            formData.delete('password');
+        }
 
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: {'X-CSRF-TOKEN': token, 'Accept': 'application/json'},
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
                 body: formData
             });
+
             const data = await response.json();
-            if(!response.ok) { if(response.status===422) displayErrors(data.errors); throw new Error(data.message || 'Error'); }
+
+            if(!response.ok) {
+                if(response.status === 422) {
+                    displayErrors(data.errors);
+                }
+                throw new Error(data.message || 'Error saving user');
+            }
 
             updateTableRow(data);
-            alert(id ? 'User updated successfully!' : 'User added successfully!');
+            
+            alert(id ? 'User updated successfully!' : 'User added successfully with default password: STAFFKTU123');
             closeUserModal();
-        } catch(e) { console.error('User Submit Error:', e); }
+
+        } catch(e) {
+            console.error('User Submit Error:', e);
+        }
     });
 
     // --- Edit/Delete User ---
@@ -232,31 +285,52 @@ document.addEventListener('DOMContentLoaded', function () {
         if(!btn || !btn.dataset.id) return;
         const id = btn.dataset.id;
 
+        // ✅ EDIT USER
         if(btn.classList.contains('editUser')){
             try{
                 const res = await fetch(`/it/staff/${id}`);
-                if(!res.ok) throw new Error('Fetch error');
+                if(!res.ok) throw new Error('Failed to fetch user data');
+                
                 const data = await res.json();
+                
                 openUserModal('Edit User');
                 document.getElementById('user_id').value = data.id;
                 document.getElementById('name').value = data.name;
                 document.getElementById('id_staff').value = data.id_staff;
                 document.getElementById('email').value = data.email;
                 document.getElementById('department_id').value = data.department_id;
-            }catch(err){ alert(err.message); }
+                // ✅ Password tetap disabled saat edit
+                document.getElementById('password').value = 'STAFFKTU123';
+                
+            }catch(err){ 
+                alert('Error: ' + err.message); 
+            }
         }
 
+        // ✅ DELETE USER
         if(btn.classList.contains('deleteUser')){
-            if(confirm('Are you sure to delete this user?')){
+            if(confirm('Are you sure you want to delete this user?')){
                 try{
                     const res = await fetch(`/it/staff/${id}`, {
                         method:'DELETE',
-                        headers:{ 'X-CSRF-TOKEN': token, 'Accept':'application/json' }
+                        headers:{ 
+                            'X-CSRF-TOKEN': token, 
+                            'Accept':'application/json' 
+                        }
                     });
-                    if(!res.ok) throw new Error('Delete failed');
+
+                    const data = await res.json();
+
+                    if(!res.ok) {
+                        throw new Error(data.message || 'Delete failed');
+                    }
+
                     document.getElementById(`row-${id}`).remove();
                     alert('User deleted successfully!');
-                }catch(err){ alert(err.message); }
+
+                }catch(err){ 
+                    alert('Error: ' + err.message); 
+                }
             }
         }
     });
@@ -265,16 +339,28 @@ document.addEventListener('DOMContentLoaded', function () {
     searchInput.addEventListener('keyup', function(){
         clearTimeout(this.searchTimeout);
         const query = this.value.trim();
+        
         this.searchTimeout = setTimeout(async ()=>{
             try{
-                const res = await fetch(`/it/staff?search=${encodeURIComponent(query)}`, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+                const res = await fetch(`/it/staff?search=${encodeURIComponent(query)}`, {
+                    headers:{'X-Requested-With':'XMLHttpRequest'}
+                });
+                
                 if(!res.ok) throw new Error('Search failed');
+                
                 const data = await res.json();
                 userTableBody.innerHTML='';
-                if(data.length===0) userTableBody.innerHTML='<tr><td colspan="5" class="text-center text-muted">No users found.</td></tr>';
-                data.forEach(u=>updateTableRow(u));
-            }catch(e){ console.error('Search Error:', e); }
-        },300);
+                
+                if(data.length === 0) {
+                    userTableBody.innerHTML='<tr><td colspan="5" class="text-center text-muted">No users found.</td></tr>';
+                } else {
+                    data.forEach(u => updateTableRow(u));
+                }
+                
+            }catch(e){ 
+                console.error('Search Error:', e); 
+            }
+        }, 300);
     });
 
     // --- Add Department ---
@@ -292,14 +378,21 @@ document.addEventListener('DOMContentLoaded', function () {
         try{
             const response = await fetch("/it/departments", {
                 method:'POST',
-                headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN':token, 'Accept':'application/json' },
+                headers:{ 
+                    'Content-Type':'application/json', 
+                    'X-CSRF-TOKEN':token, 
+                    'Accept':'application/json' 
+                },
                 body: JSON.stringify({name:deptName})
             });
 
             const data = await response.json();
-            if(!response.ok) throw new Error(data.message || 'Dept add error');
+            
+            if(!response.ok) {
+                throw new Error(data.message || 'Failed to add department');
+            }
 
-            // Update User select dropdown
+            // ✅ Update dropdown select
             const select = document.getElementById('department_id');
             const option = document.createElement('option');
             option.value = data.id;
@@ -309,13 +402,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             deptModal.hide();
             alert('Department added successfully!');
+            
         }catch(err){ 
             console.error('Dept Error:', err);
-            // jika validasi 422, tampilkan pesan
-            if(err && err.message && err.message.includes('422')) {
-                deptErrorContainer.innerHTML = 'Validation error';
-                deptErrorContainer.classList.remove('d-none');
-            }
+            deptErrorContainer.innerHTML = `<p class="mb-0">${err.message}</p>`;
+            deptErrorContainer.classList.remove('d-none');
         }
     });
 
@@ -325,7 +416,22 @@ document.addEventListener('DOMContentLoaded', function () {
 <style>
 .table td .btn i { font-size:16px; display:inline-block; color:#fff; }
 .table-responsive{ overflow-x:auto; }
-@media (max-width:768px){ .table td .btn span{display:none;} .table td .btn{ width:36px; height:36px; border-radius:50%; padding:0; justify-content:center; align-items:center; } }
-@media (max-width:576px){ .table td .btn{ min-width:36px; padding:4px 6px; } .table td div.d-flex{ gap:0.4rem; } }
+
+/* ✅ Style untuk disabled password field */
+#password:disabled {
+    background-color: #f8f9fa !important;
+    cursor: not-allowed;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+@media (max-width:768px){ 
+    .table td .btn span{display:none;} 
+    .table td .btn{ width:36px; height:36px; border-radius:50%; padding:0; justify-content:center; align-items:center; } 
+}
+@media (max-width:576px){ 
+    .table td .btn{ min-width:36px; padding:4px 6px; } 
+    .table td div.d-flex{ gap:0.4rem; } 
+}
 </style>
 @endpush

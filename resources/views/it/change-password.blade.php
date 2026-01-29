@@ -1,17 +1,12 @@
-@extends('layouts.staff')
+@extends('layouts.it')
 
-@section('title', 'Change Password - User')
+@section('title', 'Change Password - IT Team')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 @endpush
 <style>
-    /* Reset z-index for all elements on this page */
-    * {
-        position: relative;
-    }
-
     .change-password-wrapper {
         padding: 20px;
         background: #f8f9fa;
@@ -19,15 +14,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
-        z-index: 1;
     }
 
     .change-password-container {
         max-width: 550px;
         width: 100%;
-        position: relative;
-        z-index: 1;
     }
 
     .page-header {
@@ -38,8 +29,6 @@
         color: white;
         margin-bottom: 20px;
         box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        position: relative;
-        z-index: 1;
     }
 
     .page-header i {
@@ -64,8 +53,6 @@
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         overflow: hidden;
-        position: relative;
-        z-index: 1;
     }
 
     .card-body {
@@ -75,7 +62,6 @@
     .input-wrapper {
         margin-bottom: 18px;
         position: relative;
-        z-index: 1;
     }
 
     .input-wrapper label {
@@ -88,7 +74,6 @@
 
     .input-group {
         position: relative;
-        z-index: 1;
     }
 
     .input-group input {
@@ -115,7 +100,6 @@
         transform: translateY(-50%);
         color: #a0aec0;
         font-size: 14px;
-        z-index: 2;
     }
 
     .toggle-password {
@@ -126,7 +110,7 @@
         cursor: pointer;
         color: #a0aec0;
         transition: color 0.3s;
-        z-index: 2;
+        z-index: 10;
     }
 
     .toggle-password:hover {
@@ -163,8 +147,6 @@
         padding: 15px;
         margin: 18px 0;
         border-left: 3px solid #667eea;
-        position: relative;
-        z-index: 1;
     }
 
     .requirements-box h4 {
@@ -272,7 +254,7 @@
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         transform: translateX(400px);
         transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        z-index: 10000;
+        z-index: 9999;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -288,62 +270,6 @@
 
     .notification-custom.error {
         background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-    }
-
-    /* IMPORTANT: Navbar and Dropdown Z-Index Fix */
-    nav,
-    .navbar,
-    header,
-    .top-navbar,
-    .main-navbar {
-        position: relative !important;
-        z-index: 1000 !important;
-    }
-
-    .dropdown,
-    .user-dropdown,
-    .profile-dropdown,
-    .nav-dropdown,
-    .navbar-dropdown {
-        position: relative !important;
-        z-index: 1001 !important;
-    }
-
-    .dropdown-menu,
-    .dropdown-content,
-    .user-menu,
-    .profile-menu,
-    .dropdown-list {
-        position: absolute !important;
-        z-index: 1002 !important;
-    }
-
-    .dropdown-menu.show,
-    .dropdown-content.show,
-    .user-menu.show,
-    .profile-menu.show,
-    .dropdown.active .dropdown-menu,
-    .dropdown.active .dropdown-content {
-        z-index: 1002 !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-
-    /* Force all navbar related elements to be on top */
-    .navbar *,
-    nav * {
-        position: relative;
-        z-index: inherit;
-    }
-
-    /* Ensure content doesn't overlap navbar */
-    .change-password-wrapper,
-    .change-password-container,
-    .password-card,
-    .page-header {
-        position: relative;
-        z-index: 1;
     }
 
     @media (max-width: 768px) {
@@ -381,9 +307,6 @@
     }
 </style>
 @section('content')
-@include('staff.partials.navbar')
-@include('staff.partials.sidebar')
-
 <div class="change-password-wrapper">
     <div class="change-password-container">
         <!-- Page Header -->
@@ -397,7 +320,6 @@
         <div class="password-card">
             <div class="card-body">
                 <form id="changePasswordForm">
-                    @csrf
                     <!-- Current Password -->
                     <div class="input-wrapper">
                         <label for="currentPassword">Current Password</label>
@@ -464,6 +386,9 @@
         </div>
     </div>
 </div>
+
+@include('it.components-it.sidebar-it')
+@include('it.components-it.navbar-it')
 
 <div class="notification-custom" id="notification"></div>
 @endsection
@@ -650,27 +575,17 @@
                 });
             }
         });
-    });
 
-    // Fix dropdown click event - ensure it's not blocked
-    document.addEventListener('click', function(e) {
-        // Don't interfere with dropdown clicks
-        if (e.target.closest('.dropdown, .user-dropdown, .profile-dropdown')) {
-            console.log('Dropdown clicked:', e.target);
-        }
-    }, true); // Use capture phase
-
-    // Debug dropdown
-    setTimeout(() => {
-        const dropdowns = document.querySelectorAll('.dropdown, .user-dropdown, .profile-dropdown');
-        console.log('Found dropdowns:', dropdowns.length);
-        dropdowns.forEach((dropdown, index) => {
-            console.log(`Dropdown ${index}:`, dropdown);
-            const menu = dropdown.querySelector('.dropdown-menu, .dropdown-content, .user-menu');
-            if (menu) {
-                console.log(`Dropdown ${index} has menu:`, menu);
+        // Cancel button
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to cancel?')) {
+                form.reset();
+                strengthIndicator.style.display = 'none';
+                updateRequirement(requirements.length, false);
+                
+                showNotification('Changes cancelled', 'error');
             }
         });
-    }, 500);
+    });
 </script>
 @endpush

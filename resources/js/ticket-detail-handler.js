@@ -1,9 +1,9 @@
 // ============================================
-// TICKET DETAIL MODAL HANDLER - MATCHED WITH CONTROLLER
+// TICKET DETAIL MODAL HANDLER - STAFF VERSION WITH TIMELINE & RESPONSIVE
 // ============================================
 
 $(document).ready(function() {
-    console.log('🔵 ticket-detail-handler.js loaded - Staff Version');
+    console.log('🔵 ticket-detail-handler.js loaded - Staff Version with Timeline');
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
 
@@ -28,13 +28,21 @@ $(document).ready(function() {
         if (priorityLower === 'medium') return "bg-info";
         if (priorityLower === 'high') return "bg-warning";
         if (priorityLower === 'urgent') return "bg-danger";
+        if (priorityLower === 'critical') return "bg-dark";
         return "bg-secondary";
+    }
+
+    function formatEmptyData(value, defaultText = 'Not Available') {
+        if (!value || value === '-' || value === 'N/A' || value === '' || value === null) {
+            return defaultText;
+        }
+        return value;
     }
 
     function renderAttachments(attachments) {
         try {
             if (!attachments || attachments.length === 0) {
-                return '<span class="text-muted">No attachments</span>';
+                return '<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>';
             }
             
             return attachments.map(file => {
@@ -67,10 +75,10 @@ $(document).ready(function() {
     }
 
     // ========================
-    // POPULATE MODAL - MATCHED WITH CONTROLLER RESPONSE
+    // POPULATE MODAL WITH TIMELINE & INFORMATIVE TEXT
     // ========================
     function populateDetailModal(data) {
-        console.log('Populating modal with data:', data);
+        console.log('✅ Populating modal with data:', data);
         
         const content = $('#d_content');
         const loader = $('#d_loader');
@@ -91,74 +99,83 @@ $(document).ready(function() {
 
         const ticket = data.ticket;
         
-        // Build HTML content based on controller response structure
-        let html = `
-            <table class="table table-borderless">
-                <tr>
-                    <th width="30%">Ticket ID</th>
-                    <td>${ticket.ticket_id || '-'}</td>
-                </tr>
-                <tr>
-                    <th>User</th>
-                    <td>${ticket.user?.name || '-'}</td>
-                </tr>
-                <tr>
-                    <th>Department</th>
-                    <td>${ticket.department?.name || '-'}</td>
-                </tr>
-                <tr>
-                    <th>Category</th>
-                    <td>${ticket.category?.name || '-'}</td>
-                </tr>
-                <tr>
-                    <th>Description</th>
-                    <td style="white-space: pre-wrap; background: #f8f9fa; padding: 10px; border-radius: 5px;">${ticket.description || '-'}</td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td>
-                        <span class="badge rounded-pill px-3 py-2 ${getStatusBadgeClass(ticket.status)}">
-                            ${ticket.status ? ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) : '-'}
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Priority</th>
-                    <td>
-                        <span class="badge rounded-pill px-3 py-2 ${getPriorityBadgeClass(ticket.priority)}">
-                            ${ticket.priority ? ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) : '-'}
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Created At</th>
-                    <td>${ticket.created_at || '-'}</td>
-                </tr>
-                <tr>
-                    <th>Last Updated</th>
-                    <td>${ticket.updated_at || '-'}</td>
-                </tr>
-                <tr>
-                    <th>Attachments</th>
-                    <td>${renderAttachments(ticket.attachments || [])}</td>
-                </tr>
-        `;
-
-        // Add notes if available (from controller response)
-        if (ticket.notes || ticket.resolution_notes) {
-            html += `
-                <tr>
-                    <th>Notes/Resolution</th>
-                    <td style="white-space: pre-wrap; background: #fff3cd; padding: 10px; border-radius: 5px;">
-                        ${ticket.notes || ticket.resolution_notes || ''}
-                    </td>
-                </tr>
-            `;
-        }
-
-        html += `</table>`;
+        // ✅ UPDATE BASIC INFO dengan teks informatif
+        $('#d_ticket_id').text(formatEmptyData(ticket.ticket_id, 'Not Available'));
+        $('#d_user').text(formatEmptyData(ticket.user?.name, 'Unknown User'));
+        $('#d_department').text(formatEmptyData(ticket.department?.name, 'Not Specified'));
+        $('#d_category').text(formatEmptyData(ticket.category?.name, 'Not Specified'));
+        $('#d_description').text(formatEmptyData(ticket.description, 'No description provided'));
         
-        content.html(html);
+        // ✅ UPDATE STATUS BADGE
+        const statusBadge = $('#d_status');
+        const statusText = ticket.status ? ticket.status.replace('_', ' ').toUpperCase() : 'UNKNOWN';
+        statusBadge.text(statusText);
+        statusBadge.removeClass().addClass(`badge rounded-pill px-3 py-2 ${getStatusBadgeClass(ticket.status)}`);
+        
+        // ✅ UPDATE PRIORITY BADGE
+        const priorityBadge = $('#d_priority');
+        const priorityText = ticket.priority ? ticket.priority.toUpperCase() : 'UNKNOWN';
+        priorityBadge.text(priorityText);
+        priorityBadge.removeClass().addClass(`badge rounded-pill px-3 py-2 ${getPriorityBadgeClass(ticket.priority)}`);
+        
+        // ✅ UPDATE TIMELINE DATES dengan teks informatif dan icon
+        const createdEl = $('#d_created');
+        const responseEl = $('#d_response');
+        const resolvedEl = $('#d_resolved');
+        const resolvedMarker = $('#d_resolved_marker');
+        const resolvedTitle = $('#d_resolved_title');
+        const responseMarker = $('#d_response_marker');
+        
+        // REPORTED DATE
+        const createdDate = ticket.created_at_formatted || ticket.created_at;
+        if (createdDate && createdDate !== 'N/A') {
+            createdEl.html(`<i class="fas fa-calendar-check me-1"></i>${createdDate}`);
+        } else {
+            createdEl.html(`<i class="fas fa-calendar-alt me-1"></i>Not recorded`);
+        }
+        
+        // RESPONSE DATE
+        const responseDate = ticket.response_at_formatted || ticket.updated_at;
+        if (responseDate && responseDate !== 'Not yet' && responseDate !== 'N/A') {
+            responseEl.html(`<i class="fas fa-clock me-1"></i>${responseDate}`);
+            if (responseMarker.length) {
+                responseMarker.removeClass('bg-muted').addClass('bg-warning');
+            }
+        } else {
+            responseEl.html(`<i class="fas fa-hourglass-half me-1"></i>Waiting for response`);
+            if (responseMarker.length) {
+                responseMarker.removeClass('bg-warning').addClass('bg-muted');
+            }
+        }
+        
+// RESOLVED DATE - ✅ FIXED VERSION
+if (ticket.resolved_at_formatted && 
+    ticket.resolved_at_formatted !== 'Pending' && 
+    ticket.resolved_at_formatted !== '-' &&
+    ticket.resolved_at_formatted !== null) {
+    // Ticket sudah resolved/closed
+    resolvedEl.html(`<i class="fas fa-check-double me-1"></i>${ticket.resolved_at_formatted}`);
+    resolvedMarker.removeClass('bg-muted').addClass('bg-success');
+    resolvedTitle.text(ticket.status === 'closed' ? 'Closed' : 'Resolved/Closed');
+    resolvedTitle.removeClass('text-muted').addClass('text-success');
+} else {
+    // Ticket masih pending - TAMPILKAN "Pending" dengan icon hourglass
+    resolvedEl.html(`<i class="fas fa-hourglass-half me-1"></i>Pending`);
+    resolvedMarker.removeClass('bg-success').addClass('bg-muted');
+    resolvedTitle.text('Not Yet Resolved/Closed');
+    resolvedTitle.removeClass('text-success').addClass('text-muted');
+}
+        
+        // ✅ UPDATE RESOLUTION NOTES
+        if (ticket.resolution_notes) {
+            $('#d_notes').text(ticket.resolution_notes);
+            $('#d_row_notes').removeClass('d-none');
+        } else {
+            $('#d_row_notes').addClass('d-none');
+        }
+        
+        // ✅ UPDATE ATTACHMENTS
+        $('#d_attachments').html(renderAttachments(ticket.attachments || []));
     }
 
     // ========================
@@ -166,7 +183,9 @@ $(document).ready(function() {
     // ========================
     function showErrorInModal(message) {
         $('#d_loader').addClass('d-none');
-        $('#d_content').removeClass('d-none').html(`
+        $('#d_content').removeClass('d-none');
+        
+        $('#d_content').html(`
             <div class="alert alert-danger">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 ${message}
@@ -175,13 +194,42 @@ $(document).ready(function() {
     }
 
     // ========================
-    // RESET MODAL
+    // RESET MODAL dengan teks default informatif
     // ========================
     function resetTicketModal() {
         $('#d_loader').removeClass('d-none');
-        $('#d_content').addClass('d-none').html('');
-        $('#d_ticket_id, #d_description, #d_category, #d_user, #d_created, #d_notes').text('-');
-        $('#d_status, #d_priority').removeClass().addClass('badge bg-secondary').text('-');
+        $('#d_content').addClass('d-none');
+        
+        // Reset text elements dengan teks informatif
+        $('#d_ticket_id').text('Not Available');
+        $('#d_user').text('Unknown User');
+        $('#d_department').text('Not Specified');
+        $('#d_category').text('Not Specified');
+        $('#d_description').text('No description provided');
+        
+        // Reset timeline dengan teks informatif
+        $('#d_created').html('<i class="fas fa-calendar-alt me-1"></i>Not recorded');
+        $('#d_response').html('<i class="fas fa-hourglass-half me-1"></i>Waiting for response');
+        $('#d_resolved').html('<i class="fas fa-clock me-1"></i>Not yet resolved');
+        
+        // Reset badges
+        $('#d_status').removeClass().addClass('badge rounded-pill px-3 py-2 bg-secondary').text('UNKNOWN');
+        $('#d_priority').removeClass().addClass('badge rounded-pill px-3 py-2 bg-secondary').text('UNKNOWN');
+        
+        // Reset timeline markers
+        $('#d_resolved_marker').removeClass('bg-success').addClass('bg-muted');
+        $('#d_resolved_title').removeClass('text-success').addClass('text-muted').text('Not Yet Resolved/Closed');
+        
+        if ($('#d_response_marker').length) {
+            $('#d_response_marker').removeClass('bg-warning').addClass('bg-muted');
+        }
+        
+        // Hide notes
+        $('#d_row_notes').addClass('d-none');
+        $('#d_notes').text('No notes available');
+        
+        // Reset attachments
+        $('#d_attachments').html('<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>');
     }
 
     // ========================
@@ -201,7 +249,7 @@ $(document).ready(function() {
         // Show modal
         modal.modal('show');
 
-        // AJAX request to match controller
+        // AJAX request
         $.ajax({
             url: `/staff/tickets/${ticketId}`,
             method: 'GET',
@@ -231,25 +279,15 @@ $(document).ready(function() {
                 let message = 'Failed to load ticket details.';
                 
                 if (xhr.status === 404) {
-                    message = 'Ticket not found.';
+                    message = 'Ticket not found. It may have been deleted.';
                 } else if (xhr.status === 403) {
                     message = 'You do not have permission to view this ticket.';
                 } else if (xhr.status === 500) {
-                    message = 'Server error. Please try again later.';
+                    message = 'Server error. Please try again later or contact support.';
+                } else if (xhr.status === 0) {
+                    message = 'Network error. Please check your internet connection.';
                 } else if (xhr.responseJSON && xhr.responseJSON.message) {
                     message = xhr.responseJSON.message;
-                } else {
-                    // Try to parse HTML response for Laravel errors
-                    try {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(xhr.responseText, 'text/html');
-                        const errorTitle = doc.querySelector('title');
-                        if (errorTitle) {
-                            message = `Error: ${errorTitle.textContent}`;
-                        }
-                    } catch (e) {
-                        console.log('Could not parse error response');
-                    }
                 }
 
                 showErrorInModal(message);
@@ -261,35 +299,16 @@ $(document).ready(function() {
     // CLEAR MODAL ON HIDE
     // ========================
     $('#detailTicketModal').on('hidden.bs.modal', function() {
+        console.log('📋 Modal hidden, resetting...');
         resetTicketModal();
     });
 
     // ========================
-    // DEBUG: Test function
+    // HANDLE MODAL SHOWN EVENT (Optional logging)
     // ========================
-    window.debugTicket = function(ticketId = 326) {
-        console.log('🧪 Testing ticket fetch...');
-        $.ajax({
-            url: `/staff/tickets/${ticketId}`,
-            method: 'GET',
-            dataType: 'json',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function(response) {
-                console.log('🧪 Debug Response:', response);
-                if (response.success) {
-                    console.log('✅ Ticket Data:', response.ticket);
-                } else {
-                    console.log('❌ Error:', response.message);
-                }
-            },
-            error: function(xhr) {
-                console.log('❌ Debug Error:', xhr.status, xhr.responseText);
-            }
-        });
-    };
+    $('#detailTicketModal').on('shown.bs.modal', function() {
+        console.log('📋 Modal shown successfully');
+    });
 
-    console.log('🎯 Ticket detail handler ready. Use debugTicket(326) to test.');
+    console.log('🎯 Ticket detail handler with timeline & responsive design ready!');
 });

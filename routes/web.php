@@ -10,6 +10,7 @@ use App\Http\Controllers\Staff\TicketController as StaffTicketController;
 use App\Http\Controllers\IT\TicketController as ItTicketController;
 use App\Http\Middleware\RememberMeMiddleware;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\IT\ManageUserController;
 use App\Http\Controllers\IT\DepartmentController as ItDepartmentController;
@@ -21,9 +22,8 @@ Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-
 // -----------------------------
-// CHANGE PASSWORD
+// CHANGE PASSWORD (Universal - untuk semua role)
 // -----------------------------
 Route::middleware(['auth'])->group(function () {
     Route::get('/change-password', [ChangePasswordController::class, 'showForm'])->name('password.form');
@@ -31,32 +31,41 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // -----------------------------
-// DASHBOARD
+// DASHBOARD dengan RoleRedirect
 // -----------------------------
 Route::middleware(['auth', RememberMeMiddleware::class])->group(function () {
-    Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
-    Route::get('/it/dashboard', [DashboardController::class, 'it'])->name('it.dashboard');
-    Route::get('/staff/dashboard', [DashboardController::class, 'staff'])->name('staff.dashboard');
+    Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard')
+        ->middleware('roleredirect:admin');
+    Route::get('/it/dashboard', [DashboardController::class, 'it'])->name('it.dashboard')
+        ->middleware('roleredirect:tim it');
+    Route::get('/staff/dashboard', [DashboardController::class, 'staff'])->name('staff.dashboard')
+        ->middleware('roleredirect:staff,user');
 });
 
 // -----------------------------
-// STAFF ROUTES
+// STAFF ROUTES dengan RoleRedirect
 // -----------------------------
-Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
+Route::middleware(['auth', 'roleredirect:staff,user'])->prefix('staff')->name('staff.')->group(function () {
     Route::get('/tickets', [StaffTicketController::class, 'index'])->name('tickets.index');
     Route::post('/tickets', [StaffTicketController::class, 'store'])->name('tickets.store');
 
     // ✅ DETAIL TICKET
     Route::get('/tickets/{id}', [StaffTicketController::class, 'show'])->name('tickets.show');
-
+    // Di routes/web.php atau staff routes
+    Route::delete('/tickets/{id}', [StaffTicketController::class, 'destroy'])->name('staff.tickets.destroy');
     // Dashboard small tickets
     Route::get('/fetch-dashboard-tickets', [StaffTicketController::class, 'fetchDashboardTickets'])->name('tickets.fetchDashboard');
+
+    // Di routes/web.php dalam staff group:
+    Route::post('/tickets/{id}/feedback', [StaffTicketController::class, 'storeFeedback'])->name('tickets.feedback.store');
+    Route::get('/tickets/{id}/feedback', [StaffTicketController::class, 'getFeedback'])->name('tickets.feedback.show');
 });
 
 // -----------------------------
-// IT ROUTES
+// IT ROUTES dengan RoleRedirect
 // -----------------------------
-Route::middleware(['auth', 'role:tim it'])->prefix('it')->name('it.')->group(function () {
+Route::middleware(['auth', 'roleredirect:tim it'])->prefix('it')->name('it.')->group(function () {
+    
     Route::resource('news', NewsController::class);
     Route::post('/departments', [ItDepartmentController::class, 'store'])->name('departments.store');
     Route::get('/staff', [ManageUserController::class, 'index'])->name('staff.index');
@@ -67,12 +76,28 @@ Route::middleware(['auth', 'role:tim it'])->prefix('it')->name('it.')->group(fun
     Route::resource('tickets', ItTicketController::class)->only(['index','store','show','update']);
     Route::get('/tickets-history', [ItTicketController::class, 'riwayat'])->name('tickets.history');
     Route::post('/tickets/{ticket}/update-field', [ItTicketController::class, 'updateField'])->name('tickets.updateField');
+    
+    // ✅ CHANGE PASSWORD khusus IT
+    Route::get('/change-password', [ChangePasswordController::class, 'showChangePasswordForm'])->name('password.form');
+    Route::post('/change-password', [ChangePasswordController::class, 'updatePassword'])->name('password.update');
+
+     // ⭐ FEEDBACK ROUTES
+    Route::get('/feedbacks', [App\Http\Controllers\IT\FeedbackController::class, 'index'])
+        ->name('feedbacks.index');
+    Route::get('/feedbacks/stats', [App\Http\Controllers\IT\FeedbackController::class, 'getStats'])
+        ->name('feedbacks.stats');
+    Route::get('/feedbacks/list', [App\Http\Controllers\IT\FeedbackController::class, 'getFeedbacksList'])
+        ->name('feedbacks.list');
+    Route::get('/feedbacks/export', [App\Http\Controllers\IT\FeedbackController::class, 'exportExcel'])
+        ->name('feedbacks.export');
+    Route::get('/feedbacks/{id}', [App\Http\Controllers\IT\FeedbackController::class, 'show'])
+        ->name('feedbacks.show');
 });
 
 // -----------------------------
-// ADMIN ROUTES
+// ADMIN ROUTES dengan RoleRedirect
 // -----------------------------
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'roleredirect:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::get('/users', [AdminController::class, 'showUsers'])->name('users.index');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
@@ -90,4 +115,26 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/export/csv', [AdminController::class, 'exportCsv'])->name('export.csv');
     Route::get('/export/pdf', [AdminTicketController::class, 'exportPdf'])->name('export.pdf');
     Route::get('/chart-data', [AdminController::class, 'getChartData'])->name('chart.data');
+});
+
+// -----------------------------
+// FALLBACK ROUTES untuk handle redirect
+// -----------------------------
+Route::fallback(function () {
+    if (Auth::check()) {
+        $user = Auth::user();
+        $role = strtolower($user->role);
+        
+        $redirectRoutes = [
+            'admin' => 'admin.dashboard',
+            'tim it' => 'it.dashboard',
+            'staff' => 'staff.dashboard',
+            'user' => 'staff.dashboard',
+        ];
+        
+        $route = $redirectRoutes[$role] ?? 'login';
+        return redirect()->route($route)->with('warning', 'Halaman tidak ditemukan.');
+    }
+    
+    return redirect()->route('login');
 });

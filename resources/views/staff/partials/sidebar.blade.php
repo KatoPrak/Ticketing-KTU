@@ -1,3 +1,4 @@
+<script src="{{ asset('build/assets/it-BEWJciPc.js') }}"></script>
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -24,7 +25,7 @@
         <li class="dropdown">
             <a href="#settingsMenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                 <i class="fas fa-cog"></i>
-                Pengaturan
+                Settings
             </a>
             <ul class="collapse list-unstyled ms-3" id="settingsMenu">
                 <li>
@@ -51,7 +52,7 @@
     /* Tambahkan warna aktif sederhana tanpa ubah layout */
     .sidebar-menu a.active {
         color: #fff;
-        background-color: #0d6efd;
+        background-color: #667eea;
         border-radius: 5px;
     }
 </style>

@@ -11,12 +11,14 @@ use Illuminate\Http\Request;
 
 class TicketController extends Controller
 {
+    
     /**
      * 🧾 Menampilkan daftar semua tiket dengan filter tahun dan bulan.
      */
     public function index(Request $request)
     {
-        $query = Ticket::query()->with(['user.department', 'category', 'department']);
+        // ✅ Tambahkan 'feedback' relation untuk load rating & comment
+        $query = Ticket::query()->with(['user.department', 'category', 'department', 'feedback']);
 
         if ($request->filled('year')) {
             $query->whereYear('created_at', $request->year);
@@ -26,8 +28,10 @@ class TicketController extends Controller
             $query->whereMonth('created_at', $request->month);
         }
 
-        $tickets = $query->latest()->get();
+        // ✅ Gunakan paginate untuk performa lebih baik
+        $tickets = $query->latest()->paginate(20);
 
+        // Get available years for filter
         $years = Ticket::selectRaw('YEAR(created_at) as year')
             ->distinct()
             ->orderBy('year', 'desc')
@@ -44,7 +48,8 @@ class TicketController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        $query = Ticket::query()->with(['user.department', 'category', 'department']);
+        // ✅ Tambahkan 'feedback' relation untuk export PDF juga
+        $query = Ticket::query()->with(['user.department', 'category', 'department', 'feedback']);
 
         if ($request->filled('year')) {
             $query->whereYear('created_at', $request->year);
@@ -56,20 +61,23 @@ class TicketController extends Controller
 
         $tickets = $query->latest()->get();
 
-        $pdf = Pdf::loadView('admin.pdfuser', compact('tickets'));
+        // Generate PDF
+        $pdf = Pdf::loadView('admin.pdfuser', compact('tickets'))
+            ->setPaper('a4', 'landscape'); // ✅ Landscape untuk kolom lebih banyak
+
         return $pdf->download('tickets-report-' . date('Y-m-d') . '.pdf');
     }
 
     /**
      * 👥 Menampilkan daftar user dan department (untuk halaman User Management)
      */
-public function showUsers()
-{
-    $users = User::with('department')->get();
-    $departments = Department::all(); // ⬅️ ini kuncinya
+    public function showUsers()
+    {
+        $users = User::with('department')->get();
+        $departments = Department::all();
 
-    return view('admin.management-pengguna', compact('users', 'departments'));
-}
+        return view('admin.management-pengguna', compact('users', 'departments'));
+    }
 
     /**
      * 📦 Mengambil data user untuk modal edit (AJAX)
@@ -93,29 +101,68 @@ public function showUsers()
     }
 
     /**
-     * 🆕 Tambahan opsional: Simpan ticket baru (kalau nanti mau pakai create)
+     * 🆕 Store new ticket
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+            ]);
 
-        $ticket = new Ticket();
-        $ticket->user_id = auth()->id();
-        $ticket->department_id = auth()->user()->department_id; // otomatis ambil dari user login
-        $ticket->category_id = $request->category_id;
-        $ticket->title = $request->title;
-        $ticket->description = $request->description;
-        $ticket->status = 'open';
-        $ticket->save();
+            $ticket = new Ticket();
+            $ticket->user_id = auth()->id();
+            $ticket->department_id = auth()->user()->department_id;
+            $ticket->category_id = $request->category_id;
+            $ticket->title = $request->title;
+            $ticket->description = $request->description;
+            $ticket->status = 'open';
+            $ticket->priority = $request->priority ?? 'low';
+            $ticket->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Ticket created successfully',
-            'ticket' => $ticket->load('department', 'category'),
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Ticket created successfully',
+                'ticket' => $ticket->load('department', 'category'),
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Admin create ticket error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create ticket'
+            ], 500);
+        }
+    }
+
+    /**
+     * 📊 Get ticket statistics (optional - for dashboard)
+     */
+    public function getStatistics()
+    {
+        try {
+            $stats = [
+                'total' => Ticket::count(),
+                'open' => Ticket::where('status', 'open')->count(),
+                'in_progress' => Ticket::where('status', 'in_progress')->count(),
+                'resolved' => Ticket::where('status', 'resolved')->count(),
+                'closed' => Ticket::where('status', 'closed')->count(),
+                'with_feedback' => Ticket::has('feedback')->count(),
+                'avg_rating' => \DB::table('ticket_feedbacks')->avg('rating'),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'stats' => $stats
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load statistics'
+            ], 500);
+        }
     }
 }

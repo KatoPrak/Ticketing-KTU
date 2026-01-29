@@ -2,6 +2,9 @@
 
 @section('title', 'Dashboard')
 
+{{-- ❌ HAPUS INI - Sudah di-load di layout --}}
+{{-- <script src="{{ asset('build/assets/admin-DDuIwRwy.js') }}"></script> --}}
+
 @section('content')
     <!-- Dashboard Section -->
     <div id="dashboard" class="content-section active">
@@ -11,7 +14,7 @@
             <div class="welcome-content">
                 <div class="welcome-text">
                     <h2>Welcome, {{ Auth::user()->name }}!</h2>
-                    <p>Have a great day at work! Here’s today’s system summary.</p>
+                    <p>Have a great day at work! Here's today's system summary.</p>
                     <div class="current-time" id="currentTime"></div>
                 </div>
                 <div class="welcome-icon">
@@ -96,32 +99,72 @@
                 <canvas id="ticketsChart" height="100"></canvas>
             </div>
         </div>
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const ctx = document.getElementById('ticketsChart').getContext('2d');
-                new Chart(ctx, {
-                    type: '{{ $chartType ?? "line" }}',
-                    data: {
-                        labels: @json($labels),
-                        datasets: [{
-                            label: 'Tickets',
-                            data: @json($ticketData),
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: { beginAtZero: true }
-                        }
-                    }
-                });
-            });
-        </script>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Update Current Time
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            const timeString = now.toLocaleDateString('en-US', options);
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement) {
+                timeElement.textContent = timeString;
+            }
+        }
+
+        // Update time immediately and every second
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Tickets Chart
+        const ctx = document.getElementById('ticketsChart');
+        if (ctx) {
+            new Chart(ctx.getContext('2d'), {
+                type: '{{ $chartType ?? "line" }}',
+                data: {
+                    labels: @json($labels),
+                    datasets: [{
+                        label: 'Tickets',
+                        data: @json($ticketData),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+@endpush

@@ -73,5 +73,6 @@ class Kernel extends HttpKernel
         'remember' => \App\Http\Middleware\RememberMeMiddleware::class,
 
         'role' => \App\Http\Middleware\RoleRedirect::class,
+        'roleredirect' => \App\Http\Middleware\RoleRedirect::class,
     ];
 }

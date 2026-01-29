@@ -8,9 +8,9 @@
 
         {{-- Brand --}}
         <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="{{ asset('assets/image/ktu-shadow.png') }}" alt="KTU Logo" class="me-2"
+            <img src="{{ asset('assets/image/ktu-shadow.png') }}" alt="KTU Logo" class="me-2 flex-shrink-0"
                 style="height: 35px; width: auto; object-fit: contain;">
-            <span class="fw-bold">IT Support</span>
+            <span class="fw-bold navbar-brand-text text-truncate">IT Support Ticketing System</span>
         </a>
 
         {{-- Navbar Right --}}
@@ -27,12 +27,6 @@
                             <span class="fw-bold">{{ Auth::user()->name }}</span>
                             <small class="text-muted">{{ Auth::user()->email }}</small>
                         </div>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <a class="dropdown-item" href="#" onclick="showHelp(event)">
-                            <i class="fas fa-question-circle me-2"></i>Help & Support
-                        </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
@@ -111,19 +105,6 @@ function handleLogout(event) {
     }
 }
 
-// Show Help Information
-function showHelp(event) {
-    event.preventDefault();
-    
-    alert(`IT Support Contact Information:
-
-📧 Email: it@ktushipyard.com
-📱 WhatsApp: +62-813-7099-9910
-🕒 Working Hours: Mon-Fri, 08:00 - 17:00
-
-For urgent issues, please call our hotline.`);
-}
-
 // Close sidebar with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
@@ -148,7 +129,7 @@ window.showHelp = showHelp;
 <style>
 /* Navbar Base Styles */
 .navbar-custom {
-    background: linear-gradient(135deg, var(--primary-color, #4f46e5), #6366f1) !important;
+    background: linear-gradient(135deg, var(--primary-color, #6366f1), #6366f1) !important;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     height: var(--navbar-height, 60px);
     padding: 0.75rem 1rem;
@@ -159,6 +140,18 @@ window.showHelp = showHelp;
     color: #ffffff !important;
     font-weight: 700;
     font-size: 1.3rem;
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 150px);
+}
+
+/* Responsive Brand Text */
+.navbar-brand-text {
+    font-size: clamp(0.85rem, 2.5vw, 1.3rem);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .navbar-custom .navbar-toggler {
@@ -300,6 +293,11 @@ window.showHelp = showHelp;
 
     .navbar-custom .navbar-brand {
         font-size: 1.1rem;
+        max-width: calc(100% - 120px);
+    }
+
+    .navbar-brand-text {
+        font-size: clamp(0.75rem, 2vw, 1rem);
     }
 
     .navbar-custom .navbar-brand img {
@@ -320,8 +318,12 @@ window.showHelp = showHelp;
 }
 
 @media (max-width: 576px) {
-    .navbar-custom .navbar-brand span {
-        font-size: 0.95rem;
+    .navbar-custom .navbar-brand {
+        max-width: calc(100% - 100px);
+    }
+
+    .navbar-brand-text {
+        font-size: clamp(0.7rem, 1.8vw, 0.85rem);
     }
 
     .navbar-nav .dropdown-menu {
@@ -332,6 +334,20 @@ window.showHelp = showHelp;
     .navbar-nav .dropdown-item {
         padding: 0.5rem 0.75rem;
         font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .navbar-custom .navbar-brand {
+        max-width: calc(100% - 90px);
+    }
+
+    .navbar-brand-text {
+        font-size: 0.65rem;
+    }
+    
+    .navbar-custom .navbar-brand img {
+        height: 25px !important;
     }
 }
 

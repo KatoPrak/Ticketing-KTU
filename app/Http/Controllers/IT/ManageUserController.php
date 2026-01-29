@@ -15,14 +15,13 @@ class ManageUserController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $query = User::where('role', 'user')->with('department'); // eager load
+        $query = User::where('role', 'user')->with('department');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('id_staff', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('department_id', 'like', "%{$search}%");
+                  ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -63,7 +62,7 @@ class ManageUserController extends Controller
             'email' => $validated['email'],
             'department_id' => $validated['department_id'],
             'role' => 'user',
-            'password' => Hash::make('STAFFKTU123')
+            'password' => Hash::make('STAFFKTU123') // ✅ Default password di-hash
         ]);
 
         return response()->json([
@@ -101,10 +100,23 @@ class ManageUserController extends Controller
             'id_staff' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'department_id' => 'required|exists:departments,id',
+            'password' => 'nullable|string|min:6', // ✅ Password optional
         ]);
 
-        $user->update($validated);
+        // ✅ Siapkan data untuk update
+        $updateData = [
+            'name' => $validated['name'],
+            'id_staff' => $validated['id_staff'],
+            'email' => $validated['email'],
+            'department_id' => $validated['department_id'],
+        ];
 
+        // ✅ Hanya update password jika diisi
+        if (!empty($validated['password'])) {
+            $updateData['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($updateData);
         $user->load('department');
 
         return response()->json([
@@ -121,6 +133,15 @@ class ManageUserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
+        
+        // ✅ Cek apakah user punya tiket
+        if ($user->tickets()->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete user with existing tickets.'
+            ], 400);
+        }
+
         $user->delete();
 
         return response()->json([

@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function validateFile(file) {
             const maxSize = 5 * 1024 * 1024;
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/heif'];
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/heif','image/jpg'];
 
             if (file.size > maxSize) {
                 alert('File terlalu besar (maksimum 5MB).');
@@ -171,7 +171,6 @@ function adaptTableForMobile() {
         });
     });
 }
-
 // Panggil fungsi saat load dan resize
 document.addEventListener('DOMContentLoaded', function() {
     adaptTableForMobile();

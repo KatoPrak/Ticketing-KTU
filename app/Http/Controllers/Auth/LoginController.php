@@ -32,6 +32,9 @@ class LoginController extends Controller
         $request->validate([
             'id_staff' => 'required|string',
             'password' => 'required|string',
+        ], [
+            'id_staff.required' => 'Please enter your username.',
+            'password.required' => 'Please enter your password.',
         ]);
 
         // Rate limiting key generation
@@ -39,13 +42,17 @@ class LoginController extends Controller
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
+            $minutes = ceil($seconds / 60);
+            
             throw ValidationException::withMessages([
-                'id_staff' => "Too many login attempts. Please try again in {$seconds} seconds.",
+                'id_staff' => $seconds > 60 
+                    ? "Too many failed login attempts. Please try again in {$minutes} minute(s) for security reasons."
+                    : "Too many failed login attempts. Please try again in {$seconds} seconds for security reasons.",
             ]);
         }
 
         $credentials = $request->only('id_staff', 'password');
-        $remember = $request->boolean('remember'); // ✅ safe boolean cast
+        $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
             RateLimiter::clear($key);
@@ -54,23 +61,50 @@ class LoginController extends Controller
             $user = Auth::user();
 
             // Optional: update last login timestamp
-            // Note: Ensure the 'last_login_at' column exists on your User model's table.
             if (isset($user->last_login_at)) {
                 $user->last_login_at = now();
                 $user->save();
             }
 
-            session()->flash('success', 'Login successful, welcome back ' . $user->name . '!');
+            // Enhanced welcome message with time-based greeting
+            $greeting = $this->getTimeBasedGreeting();
+            $welcomeMessage = "Welcome back, {$user->name}! {$greeting}";
+            
+            session()->flash('success', $welcomeMessage);
 
             return $this->redirectBasedOnRole($user);
         }
 
-        // If authentication fails, hit the rate limiter and redirect back.
+        // If authentication fails, hit the rate limiter and redirect back
         RateLimiter::hit($key, 60);
+        
+        $attemptsLeft = 5 - RateLimiter::attempts($key);
 
         return back()->withErrors([
-            'id_staff' => 'Staff ID or password is incorrect.',
+            'id_staff' => $attemptsLeft > 0 
+                ? "Invalid username or password. You have {$attemptsLeft} attempt(s) remaining."
+                : 'Invalid username or password.',
         ])->withInput($request->except('password'));
+    }
+
+    /**
+     * Get time-based greeting message.
+     *
+     * @return string
+     */
+    protected function getTimeBasedGreeting()
+    {
+        $hour = now()->hour;
+
+        if ($hour >= 5 && $hour < 12) {
+            return 'Have a productive morning!';
+        } elseif ($hour >= 12 && $hour < 17) {
+            return 'Have a great afternoon!';
+        } elseif ($hour >= 17 && $hour < 21) {
+            return 'Have a wonderful evening!';
+        } else {
+            return 'Working late? Take care!';
+        }
     }
 
     /**
@@ -100,12 +134,14 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        $userName = Auth::user()->name ?? 'User';
+        
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        session()->flash('success', 'You have successfully logged out. Goodbye!');
+        session()->flash('success', "Goodbye, {$userName}! You have been successfully logged out. See you again soon!");
 
         return redirect('/');
     }

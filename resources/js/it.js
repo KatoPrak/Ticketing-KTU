@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-
 // ==========================
 // BASE URL & HEADERS
 // ==========================
@@ -32,25 +31,34 @@ function getStatusBadgeClass(status) {
 function getPriorityBadgeClass(priority) {
     if (!priority) return "bg-light text-dark";
     const map = {
-        low: "bg-success", medium: "bg-info", high: "bg-warning", urgent: "bg-danger",
+        low: "bg-success", medium: "bg-info", high: "bg-warning", urgent: "bg-danger", critical:"bg-dark"
     };
     return map[priority.toLowerCase()] || "bg-light";
 }
 
+function formatEmptyData(value, defaultText = 'Not Available', defaultIcon = 'question-circle') {
+    if (!value || value === '-' || value === 'N/A' || value === '' || value === null) {
+        return `<i class="fas fa-${defaultIcon} me-1"></i>${defaultText}`;
+    }
+    return value;
+}
+
 function renderAttachments(attachments) {
     try {
-        if (!attachments || attachments.length === 0) return "<em>Tidak ada lampiran.</em>";
+        if (!attachments || attachments.length === 0) {
+            return '<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>';
+        }
         return attachments.map(file => {
             const fileUrl = `/storage/${file}`;
             const fileName = file.split("/").pop();
-            const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+            const isImage = /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(fileName);
             return isImage
                 ? `<a href="${fileUrl}" target="_blank"><img src="${fileUrl}" alt="Attachment" class="img-thumbnail" style="max-height:100px;"></a>`
                 : `<a href="${fileUrl}" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fas fa-paperclip me-1"></i> ${fileName}</a>`;
         }).join("");
     } catch (err) {
         console.error("Attachment parse error:", err);
-        return "Error loading attachments.";
+        return '<span class="text-danger">Error loading attachments</span>';
     }
 }
 
@@ -62,7 +70,6 @@ function updateSelectColor(select, status) {
     Object.values(statusTextClasses).forEach(cls => select.classList.remove(cls));
     select.classList.add(statusTextClasses[status] || 'text-dark');
 }
-
 
 // ==========================
 // MAIN MODULE
@@ -99,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             createForm.reset();
 
-            // ✅ Tambahkan SweetAlert sukses di sini
             Swal.fire({
                 title: "Tiket Berhasil Dibuat!",
                 text: "Tiket kamu sudah tersimpan dan sedang diproses.",
@@ -108,7 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 confirmButtonText: "Oke"
             });
 
-            // Tutup modal kalau ada
             const modalEl = document.getElementById("createTicketModal");
             if (modalEl) {
                 const modal = bootstrap.Modal.getInstance(modalEl);
@@ -126,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         } finally {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = `<i class="fas fa-paper-plane me-1"></i> Submit Ticket`;
+            submitBtn.innerHTML = `<i class="me-1"></i> Submit Ticket`;
         }
     };
 
@@ -182,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     tickets.forEach(ticket => {
                         const row = document.createElement("tr");
                         row.innerHTML = `
-                            <td><a href="${BASE_URL}" class="fw-semibold">${ticket.ticket_id || '-'}</a></td>
+                            <td><span class="fw-semibold text-dark">${ticket.ticket_id || '-'}</span></td>
                             <td>${(ticket.description || '-').substring(0, 40)}...</td>
                             <td><span class="badge ${getPriorityBadgeClass(ticket.priority)}">${ticket.priority || '-'}</span></td>
                             <td class="text-end"><span class="badge ${getStatusBadgeClass(ticket.status)}">${ticket.status || '-'}</span></td>`;
@@ -204,10 +209,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-// ==========================
-// LOGOUT BUTTON HANDLER
-// ==========================
-document.addEventListener("DOMContentLoaded", () => {
+    // ==========================
+    // LOGOUT BUTTON HANDLER
+    // ==========================
     const logoutBtn = document.getElementById("logoutBtn");
     const logoutForm = document.getElementById("logoutForm");
 
@@ -225,140 +229,193 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-});
-// ==========================
-// DATE FORMATTER - ADD THIS MISSING FUNCTION
-// ==========================
-function formatDateFromRaw(dateString) {
-    if (!dateString || dateString === 'N/A') return 'N/A';
-    
-    console.log('🔧 Formatting date:', dateString);
-    
-    // Handle format "28-10-2025 10:08" (DD-MM-YYYY HH:MM)
-    if (dateString.includes('-') && dateString.includes(' ')) {
-        const [datePart, timePart] = dateString.split(' ');
-        const [day, month, year] = datePart.split('-');
-        
-        if (day && month && year && timePart) {
-            // Reformat to "2025-10-28 10:08"
-            const formatted = `${year}-${month}-${day} ${timePart}`;
-            console.log('✅ Formatted date:', formatted);
-            return formatted;
-        }
-    }
-    
-    // Return original if not matching expected format
-    console.log('ℹ️ Unknown format, returning original');
-    return dateString;
-}
-// ==========================
-// TICKET DETAIL MODAL HANDLER
-// ==========================
-document.addEventListener("click", async (e) => {
-    if (e.target.closest('.btn-detail-ticket')) {
-        const button = e.target.closest('.btn-detail-ticket');
-        const ticketId = button.dataset.id;
-        
-        if (ticketId) {
-            await showTicketDetail(ticketId);
-        }
-    }
-});
 
-async function showTicketDetail(ticketId) {
-    const modal = new bootstrap.Modal(document.getElementById('detailTicketModal'));
-    const loader = document.getElementById('d_loader');
-    const content = document.getElementById('d_content');
-    
-    // Show loader, hide content
-    loader.classList.remove('d-none');
-    content.classList.add('d-none');
-    
-    try {
-        const response = await fetch(`/it/tickets/${ticketId}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
+    // ==========================
+    // TICKET DETAIL MODAL HANDLER - WITH TIMELINE SUPPORT
+    // ==========================
+    document.addEventListener("click", async (e) => {
+        if (e.target.closest('.btn-detail-ticket')) {
+            const button = e.target.closest('.btn-detail-ticket');
+            const ticketId = button.dataset.id;
+            
+            if (ticketId) {
+                await showTicketDetail(ticketId);
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Failed to fetch ticket details: ${response.status}`);
+        }
+    });
+
+    async function showTicketDetail(ticketId) {
+        const modalEl = document.getElementById('detailTicketModal');
+        if (!modalEl) {
+            console.error('❌ Modal element not found');
+            return;
         }
         
-        const ticket = await response.json();
+        const modal = new bootstrap.Modal(modalEl);
+        const loader = document.getElementById('d_loader');
+        const content = document.getElementById('d_content');
         
-        // DEBUG: Lihat data di console
-        console.log('Ticket data:', ticket);
-        console.log('Created at raw:', ticket.created_at);
-        console.log('Created at formatted:', ticket.created_at_formatted);
-        
-        // Populate modal dengan data
-        document.getElementById('d_ticket_id').textContent = ticket.ticket_id || 'N/A';
-        document.getElementById('d_user').textContent = ticket.user?.name || 'N/A';
-        document.getElementById('d_department').textContent = ticket.department?.name || 'N/A';
-        document.getElementById('d_category').textContent = ticket.category?.name || 'N/A';
-        document.getElementById('d_status').textContent = ticket.status ? ticket.status.replace('_', ' ').toUpperCase() : 'N/A';
-        document.getElementById('d_priority').textContent = ticket.priority ? ticket.priority.toUpperCase() : 'N/A';
-        document.getElementById('d_description').textContent = ticket.description || 'No description';
-        
-        // FIX: Handle date dengan multiple fallback
-        let displayDate = 'Date not available';
-        
-        if (ticket.created_at_formatted && ticket.created_at_formatted !== 'N/A') {
-            // Jika sudah ada format, gunakan langsung
-            displayDate = ticket.created_at_formatted;
-        } else if (ticket.created_at) {
-            // Format dari created_at raw
-            displayDate = formatDateFromRaw(ticket.created_at);
+        if (!loader || !content) {
+            console.error('❌ Loader or content element not found');
+            return;
         }
         
-        console.log('Final display date:', displayDate);
-        document.getElementById('d_created').textContent = displayDate;
+        // Show loader, hide content
+        loader.classList.remove('d-none');
+        content.classList.add('d-none');
         
-        // Handle resolution notes
-        const notesRow = document.getElementById('d_row_notes');
-        const notesElement = document.getElementById('d_notes');
-        if (ticket.resolution_notes) {
-            notesElement.textContent = ticket.resolution_notes;
-            notesRow.classList.remove('d-none');
-        } else {
-            notesRow.classList.add('d-none');
+        try {
+            const response = await fetch(`/it/tickets/${ticketId}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ticket details: ${response.status}`);
+            }
+            
+            const ticket = await response.json();
+            
+            console.log('✅ Ticket data loaded:', ticket);
+            
+            // ✅ POPULATE BASIC INFO dengan icon
+            const elementsToUpdate = {
+                'd_ticket_id': formatEmptyData(ticket.ticket_id, 'Not Available', 'question-circle'),
+                'd_user': formatEmptyData(ticket.user?.name, 'Unknown User', 'user-slash'),
+                'd_department': formatEmptyData(ticket.department?.name, 'Not Specified', 'ban'),
+                'd_category': formatEmptyData(ticket.category?.name, 'Not Specified', 'ban'),
+                'd_description': formatEmptyData(ticket.description, 'No description provided', 'file-alt')
+            };
+            
+            Object.entries(elementsToUpdate).forEach(([elementId, value]) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.innerHTML = value;
+                }
+            });
+            
+            // ✅ UPDATE STATUS BADGE dengan icon
+            const statusBadge = document.getElementById('d_status');
+            if (statusBadge) {
+                const statusText = ticket.status ? ticket.status.replace('_', ' ').toUpperCase() : 'UNKNOWN';
+                statusBadge.innerHTML = `<i class="me-1"></i>${statusText}`;
+                statusBadge.className = `badge rounded-pill px-3 py-2 ${getStatusBadgeClass(ticket.status)}`;
+            }
+            
+            // ✅ UPDATE PRIORITY BADGE dengan icon
+            const priorityBadge = document.getElementById('d_priority');
+            if (priorityBadge) {
+                const priorityText = ticket.priority ? ticket.priority.toUpperCase() : 'UNKNOWN';
+                priorityBadge.innerHTML = `<i class="me-1"></i>${priorityText}`;
+                priorityBadge.className = `badge rounded-pill px-3 py-2 ${getPriorityBadgeClass(ticket.priority)}`;
+            }
+            
+            // ✅ POPULATE TIMELINE DATES dengan icon
+            const createdEl = document.getElementById('d_created');
+            const responseEl = document.getElementById('d_response');
+            const resolvedEl = document.getElementById('d_resolved');
+            const resolvedMarker = document.getElementById('d_resolved_marker');
+            const resolvedTitle = document.getElementById('d_resolved_title');
+            const responseMarker = document.getElementById('d_response_marker');
+            
+            // REPORTED DATE
+            if (createdEl) {
+                const createdDate = ticket.created_at_formatted || ticket.created_at;
+                createdEl.innerHTML = createdDate && createdDate !== 'N/A'
+                    ? `<i class="fas fa-calendar-check me-1"></i>${createdDate}`
+                    : `<i class="fas fa-calendar-times me-1"></i>Not recorded`;
+            }
+            
+            // RESPONSE DATE
+            if (responseEl && responseMarker) {
+                const responseDate = ticket.response_at_formatted || ticket.updated_at;
+                if (responseDate && responseDate !== 'Not yet' && responseDate !== 'N/A') {
+                    responseEl.innerHTML = `<i class="fas fa-clock me-1"></i>${responseDate}`;
+                    responseMarker.classList.remove('bg-muted');
+                    responseMarker.classList.add('bg-warning');
+                } else {
+                    responseEl.innerHTML = `<i class="fas fa-hourglass-me-1"></i>Waiting for response`;
+                    responseMarker.classList.remove('bg-warning');
+                    responseMarker.classList.add('bg-muted');
+                }
+            }
+            
+            // ✅ RESOLVED DATE - FULL IMPLEMENTATION
+            if (resolvedEl && resolvedMarker && resolvedTitle) {
+                if (ticket.resolved_at_formatted && 
+                    ticket.resolved_at_formatted !== 'Pending' && 
+                    ticket.resolved_at_formatted !== '-' &&
+                    ticket.resolved_at_formatted !== null &&
+                    ticket.resolved_at_formatted !== 'N/A') {
+                    // ✅ Ticket sudah resolved/closed
+                    resolvedEl.innerHTML = `<i class="fas fa-check-double me-1"></i>${ticket.resolved_at_formatted}`;
+                    resolvedMarker.classList.remove('bg-muted');
+                    resolvedMarker.classList.add('bg-success');
+                    
+                    // ✅ Update title berdasarkan status dengan icon
+                    const statusText = ticket.status === 'closed' ? 'Closed' : 'Resolved';
+                    resolvedTitle.innerHTML = `<i class="me-1"></i>${statusText}`;
+                    resolvedTitle.style.color = '#198754'; // Success color
+                    
+                } else {
+                    // ✅ Ticket masih pending
+                    resolvedEl.innerHTML = `<i class="fas fa-hourglass-half me-1"></i>Pending`;
+                    resolvedMarker.classList.remove('bg-success');
+                    resolvedMarker.classList.add('bg-muted');
+                    
+                    // ✅ Update title untuk pending dengan icon
+                    resolvedTitle.innerHTML = `<i class="me-1"></i>Not Yet Resolved`;
+                    resolvedTitle.style.color = '#6c757d'; // Muted color
+                }
+            }
+            
+            // ✅ Handle resolution notes dengan icon
+            const notesRow = document.getElementById('d_row_notes');
+            const notesElement = document.getElementById('d_notes');
+            if (notesRow && notesElement) {
+                if (ticket.resolution_notes) {
+                    notesElement.innerHTML = `<i class="fas fa-pen me-1"></i>${ticket.resolution_notes}`;
+                    notesRow.classList.remove('d-none');
+                } else {
+                    notesRow.classList.add('d-none');
+                }
+            }
+            
+            // ✅ Handle attachments
+            const attachmentsContainer = document.getElementById('d_attachments');
+            if (attachmentsContainer) {
+                attachmentsContainer.innerHTML = renderAttachments(ticket.attachments || []);
+            }
+            
+            // Hide loader, show content
+            loader.classList.add('d-none');
+            content.classList.remove('d-none');
+            
+            // Show modal
+            modal.show();
+            
+        } catch (error) {
+            console.error('❌ Error loading ticket details:', error);
+            if (loader) {
+                loader.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Failed to load ticket details: ${error.message}
+                    </div>
+                `;
+            }
+            
+            modal.show();
         }
-        
-        // Handle attachments
-        const attachmentsContainer = document.getElementById('d_attachments');
-        if (ticket.attachments && ticket.attachments.length > 0) {
-            attachmentsContainer.innerHTML = renderAttachments(ticket.attachments);
-        } else {
-            attachmentsContainer.innerHTML = '<em>No attachments</em>';
-        }
-        
-        // Update badge classes
-        const statusBadge = document.getElementById('d_status');
-        const priorityBadge = document.getElementById('d_priority');
-        
-        statusBadge.className = `badge ${getStatusBadgeClass(ticket.status)}`;
-        priorityBadge.className = `badge ${getPriorityBadgeClass(ticket.priority)}`;
-        
-        // Hide loader, show content
-        loader.classList.add('d-none');
-        content.classList.remove('d-none');
-        
-        // Show modal
-        modal.show();
-        
-    } catch (error) {
-        console.error('Error loading ticket details:', error);
-        loader.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Failed to load ticket details: ${error.message}
-            </div>
-        `;
     }
-}
-    // --- Handler untuk Update Status/Priority ---
+
+    // ==========================
+    // HANDLER UPDATE STATUS/PRIORITY
+    // ==========================
+    let pendingUpdate = null;
+
     document.body.addEventListener('change', async (e) => {
         if (!e.target.classList.contains('update-ticket-field')) return;
 
@@ -368,34 +425,117 @@ async function showTicketDetail(ticketId) {
         const value = select.value;
         const old = select.dataset.originalValue;
 
-        if (!confirm(`Ubah ${field} menjadi "${value}"?`)) {
-            select.value = old;
+        // ✅ Jika status berubah ke pending/resolved/closed, tampilkan modal
+        if (field === 'status' && ['pending', 'resolved', 'closed'].includes(value)) {
+            pendingUpdate = {
+                select: select,
+                id: id,
+                field: field,
+                value: value,
+                old: old
+            };
+
+            const modalEl = document.getElementById('resolutionModal');
+            if (!modalEl) {
+                console.error('❌ Resolution modal not found');
+                select.value = old;
+                return;
+            }
+
+            const modal = new bootstrap.Modal(modalEl);
+            const notesTextarea = document.getElementById('resolutionNotes');
+            
+            notesTextarea.value = '';
+            
+            const statusLabel = value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ');
+            const modalTitle = modalEl.querySelector('.modal-title');
+            if (modalTitle) {
+                modalTitle.textContent = `Add Remark - ${statusLabel}`;
+            }
+
+            modal.show();
             return;
         }
 
-        if (field === 'status' && ['pending', 'closed'].includes(value)) {
-            const modalEl = document.getElementById('resolutionModal');
-            const modal = new bootstrap.Modal(modalEl);
-            const notesTextarea = document.getElementById('resolutionNotes');
-            notesTextarea.value = ''; // Clear previous notes
-
-            const saveBtn = document.getElementById('saveResolutionBtn');
-            const newSaveBtn = saveBtn.cloneNode(true);
-            saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
-
-            newSaveBtn.addEventListener('click', async () => {
-                const notes = notesTextarea.value.trim();
-                await updateFieldWithNotes(select, id, field, value, old, notes);
-                modal.hide();
-            });
-            modal.show();
-        } else {
-            await updateFieldWithNotes(select, id, field, value, old, null);
-        }
+        await updateFieldWithNotes(select, id, field, value, old, null);
     });
 
+    // ==========================
+    // SAVE RESOLUTION NOTES BUTTON
+    // ==========================
+    const saveResolutionBtn = document.getElementById('saveResolutionBtn');
+    if (saveResolutionBtn) {
+        saveResolutionBtn.addEventListener('click', async () => {
+            if (!pendingUpdate) {
+                console.error('❌ No pending update data');
+                return;
+            }
+
+            const notesTextarea = document.getElementById('resolutionNotes');
+            const notes = notesTextarea.value.trim();
+
+            if (!notes) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Remark Required',
+                    text: 'Please provide notes before updating the status.',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            await updateFieldWithNotes(
+                pendingUpdate.select,
+                pendingUpdate.id,
+                pendingUpdate.field,
+                pendingUpdate.value,
+                pendingUpdate.old,
+                notes
+            );
+
+            const modalEl = document.getElementById('resolutionModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            }
+
+            pendingUpdate = null;
+        });
+    }
+
+    // ==========================
+    // CANCEL MODAL
+    // ==========================
+    const resolutionModal = document.getElementById('resolutionModal');
+    if (resolutionModal) {
+        resolutionModal.addEventListener('hidden.bs.modal', () => {
+            if (pendingUpdate && pendingUpdate.select) {
+                pendingUpdate.select.value = pendingUpdate.old;
+                pendingUpdate = null;
+            }
+            
+            const notesTextarea = document.getElementById('resolutionNotes');
+            if (notesTextarea) {
+                notesTextarea.value = '';
+            }
+        });
+    }
+
+    // ==========================
+    // FUNCTION UPDATE FIELD WITH NOTES
+    // ==========================
     async function updateFieldWithNotes(select, id, field, value, old, notes) {
+        select.disabled = true;
+
         try {
+            const payload = { field, value };
+            
+            if (notes) {
+                payload.resolution_notes = notes;
+            }
+
+            console.log('📤 Sending update:', payload);
+
             const res = await fetch(`${BASE_URL}/${id}/update-field`, {
                 method: 'POST',
                 headers: {
@@ -403,27 +543,53 @@ async function showTicketDetail(ticketId) {
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': csrfToken
                 },
-                body: JSON.stringify({ field, value, resolution_notes: notes })
+                body: JSON.stringify(payload)
             });
 
             const data = await res.json();
+            
+            console.log('📥 Response:', data);
+
             if (!res.ok) {
-                let errorMsg = data.message || `Gagal memperbarui. Status: ${res.status}`;
+                let errorMsg = data.message || `Failed to update. Status: ${res.status}`;
                 if (data.errors) {
                     errorMsg += '\n' + Object.values(data.errors).map(e => e.join(', ')).join('\n');
                 }
                 throw new Error(errorMsg);
             }
-            
-            alert('Berhasil memperbarui tiket.');
+
             select.dataset.originalValue = value;
+            
             if (field === 'status') {
                 updateSelectColor(select, value);
             }
+
+            if (field === 'priority') {
+                select.classList.remove('select-priority-low', 'select-priority-medium', 'select-priority-high', 'select-priority-urgent', 'select-priority-critical');
+                select.classList.add(`select-priority-${value}`);
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Updated!',
+                text: data.message || 'Ticket updated successfully',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
         } catch (err) {
-            console.error(err);
-            alert(err.message);
+            console.error('❌ Update error:', err);
+            
             select.value = old;
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: err.message,
+                confirmButtonColor: '#d33'
+            });
+        } finally {
+            select.disabled = false;
         }
     }
 });
