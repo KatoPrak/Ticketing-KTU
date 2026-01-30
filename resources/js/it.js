@@ -31,7 +31,7 @@ function getStatusBadgeClass(status) {
 function getPriorityBadgeClass(priority) {
     if (!priority) return "bg-light text-dark";
     const map = {
-        low: "bg-success", medium: "bg-info", high: "bg-warning", urgent: "bg-danger", critical:"bg-dark"
+        low: "bg-success", medium: "bg-info", high: "bg-warning", urgent: "bg-danger", critical: "bg-dark"
     };
     return map[priority.toLowerCase()] || "bg-light";
 }
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const createForm = e.target;
         const formData = new FormData(createForm);
-        
+
         const submitBtn = createForm.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Loading...`;
@@ -93,13 +93,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "X-CSRF-TOKEN": csrfToken, "Accept": "application/json" },
                 body: formData,
             });
-            
+
             const data = await res.json();
             if (!res.ok) {
                 const msg = data?.message || `Error: ${res.status}`;
                 throw new Error(msg);
             }
-            
+
             if (reloadCallback) {
                 await reloadCallback(data.ticket);
             }
@@ -169,19 +169,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (body.classList.contains("page-staff-dashboard")) {
         console.log("📋 Staff Dashboard Active");
-        
+
         const dashboardTableBody = document.getElementById("ticket-list-body");
         const createForm = document.getElementById("createTicketForm");
 
         const loadDashboardTickets = async () => {
             if (!dashboardTableBody) return;
             dashboardTableBody.innerHTML = `<tr><td colspan="4" class="text-center"><div class="spinner-border spinner-border-sm"></div></td></tr>`;
-            
+
             try {
                 const res = await fetch("/staff/fetch-dashboard-tickets", { headers: defaultHeaders });
                 if (!res.ok) throw new Error(`Server responded with ${res.status}`);
                 const tickets = await res.json();
-                
+
                 dashboardTableBody.innerHTML = "";
                 if (tickets && tickets.length > 0) {
                     tickets.forEach(ticket => {
@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 dashboardTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Gagal memuat data.</td></tr>`;
             }
         };
-        
+
         loadDashboardTickets();
 
         if (createForm) {
@@ -237,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target.closest('.btn-detail-ticket')) {
             const button = e.target.closest('.btn-detail-ticket');
             const ticketId = button.dataset.id;
-            
+
             if (ticketId) {
                 await showTicketDetail(ticketId);
             }
@@ -250,20 +250,20 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('❌ Modal element not found');
             return;
         }
-        
+
         const modal = new bootstrap.Modal(modalEl);
         const loader = document.getElementById('d_loader');
         const content = document.getElementById('d_content');
-        
+
         if (!loader || !content) {
             console.error('❌ Loader or content element not found');
             return;
         }
-        
+
         // Show loader, hide content
         loader.classList.remove('d-none');
         content.classList.add('d-none');
-        
+
         try {
             const response = await fetch(`/it/tickets/${ticketId}`, {
                 headers: {
@@ -271,15 +271,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     'Accept': 'application/json'
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error(`Failed to fetch ticket details: ${response.status}`);
             }
-            
+
             const ticket = await response.json();
-            
+
             console.log('✅ Ticket data loaded:', ticket);
-            
+
             // ✅ POPULATE BASIC INFO dengan icon
             const elementsToUpdate = {
                 'd_ticket_id': formatEmptyData(ticket.ticket_id, 'Not Available', 'question-circle'),
@@ -288,14 +288,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 'd_category': formatEmptyData(ticket.category?.name, 'Not Specified', 'ban'),
                 'd_description': formatEmptyData(ticket.description, 'No description provided', 'file-alt')
             };
-            
+
             Object.entries(elementsToUpdate).forEach(([elementId, value]) => {
                 const element = document.getElementById(elementId);
                 if (element) {
                     element.innerHTML = value;
                 }
             });
-            
+
             // ✅ UPDATE STATUS BADGE dengan icon
             const statusBadge = document.getElementById('d_status');
             if (statusBadge) {
@@ -303,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 statusBadge.innerHTML = `<i class="me-1"></i>${statusText}`;
                 statusBadge.className = `badge rounded-pill px-3 py-2 ${getStatusBadgeClass(ticket.status)}`;
             }
-            
+
             // ✅ UPDATE PRIORITY BADGE dengan icon
             const priorityBadge = document.getElementById('d_priority');
             if (priorityBadge) {
@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 priorityBadge.innerHTML = `<i class="me-1"></i>${priorityText}`;
                 priorityBadge.className = `badge rounded-pill px-3 py-2 ${getPriorityBadgeClass(ticket.priority)}`;
             }
-            
+
             // ✅ POPULATE TIMELINE DATES dengan icon
             const createdEl = document.getElementById('d_created');
             const responseEl = document.getElementById('d_response');
@@ -319,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const resolvedMarker = document.getElementById('d_resolved_marker');
             const resolvedTitle = document.getElementById('d_resolved_title');
             const responseMarker = document.getElementById('d_response_marker');
-            
+
             // REPORTED DATE
             if (createdEl) {
                 const createdDate = ticket.created_at_formatted || ticket.created_at;
@@ -327,7 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? `<i class="fas fa-calendar-check me-1"></i>${createdDate}`
                     : `<i class="fas fa-calendar-times me-1"></i>Not recorded`;
             }
-            
+
             // RESPONSE DATE
             if (responseEl && responseMarker) {
                 const responseDate = ticket.response_at_formatted || ticket.updated_at;
@@ -341,11 +341,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     responseMarker.classList.add('bg-muted');
                 }
             }
-            
+
             // ✅ RESOLVED DATE - FULL IMPLEMENTATION
             if (resolvedEl && resolvedMarker && resolvedTitle) {
-                if (ticket.resolved_at_formatted && 
-                    ticket.resolved_at_formatted !== 'Pending' && 
+                if (ticket.resolved_at_formatted &&
+                    ticket.resolved_at_formatted !== 'Pending' &&
                     ticket.resolved_at_formatted !== '-' &&
                     ticket.resolved_at_formatted !== null &&
                     ticket.resolved_at_formatted !== 'N/A') {
@@ -353,24 +353,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     resolvedEl.innerHTML = `<i class="fas fa-check-double me-1"></i>${ticket.resolved_at_formatted}`;
                     resolvedMarker.classList.remove('bg-muted');
                     resolvedMarker.classList.add('bg-success');
-                    
+
                     // ✅ Update title berdasarkan status dengan icon
                     const statusText = ticket.status === 'closed' ? 'Closed' : 'Resolved';
                     resolvedTitle.innerHTML = `<i class="me-1"></i>${statusText}`;
                     resolvedTitle.style.color = '#198754'; // Success color
-                    
+
                 } else {
                     // ✅ Ticket masih pending
                     resolvedEl.innerHTML = `<i class="fas fa-hourglass-half me-1"></i>Pending`;
                     resolvedMarker.classList.remove('bg-success');
                     resolvedMarker.classList.add('bg-muted');
-                    
+
                     // ✅ Update title untuk pending dengan icon
                     resolvedTitle.innerHTML = `<i class="me-1"></i>Not Yet Resolved`;
                     resolvedTitle.style.color = '#6c757d'; // Muted color
                 }
             }
-            
+
             // ✅ Handle resolution notes dengan icon
             const notesRow = document.getElementById('d_row_notes');
             const notesElement = document.getElementById('d_notes');
@@ -382,20 +382,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     notesRow.classList.add('d-none');
                 }
             }
-            
+
             // ✅ Handle attachments
             const attachmentsContainer = document.getElementById('d_attachments');
             if (attachmentsContainer) {
                 attachmentsContainer.innerHTML = renderAttachments(ticket.attachments || []);
             }
-            
+
             // Hide loader, show content
             loader.classList.add('d-none');
             content.classList.remove('d-none');
-            
+
             // Show modal
             modal.show();
-            
+
         } catch (error) {
             console.error('❌ Error loading ticket details:', error);
             if (loader) {
@@ -406,7 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 `;
             }
-            
+
             modal.show();
         }
     }
@@ -444,9 +444,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const modal = new bootstrap.Modal(modalEl);
             const notesTextarea = document.getElementById('resolutionNotes');
-            
+
             notesTextarea.value = '';
-            
+
             const statusLabel = value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ');
             const modalTitle = modalEl.querySelector('.modal-title');
             if (modalTitle) {
@@ -484,22 +484,38 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            await updateFieldWithNotes(
-                pendingUpdate.select,
-                pendingUpdate.id,
-                pendingUpdate.field,
-                pendingUpdate.value,
-                pendingUpdate.old,
-                notes
-            );
+            // ➕ Add loading state
+            const originalBtnText = saveResolutionBtn.innerHTML;
+            saveResolutionBtn.disabled = true;
+            saveResolutionBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
 
-            const modalEl = document.getElementById('resolutionModal');
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            if (modal) {
-                modal.hide();
+            try {
+                await updateFieldWithNotes(
+                    pendingUpdate.select,
+                    pendingUpdate.id,
+                    pendingUpdate.field,
+                    pendingUpdate.value,
+                    pendingUpdate.old,
+                    notes
+                );
+
+                const modalEl = document.getElementById('resolutionModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) {
+                    modal.hide();
+                }
+
+                pendingUpdate = null;
+
+            } catch (err) {
+                console.error("Save resolution error:", err);
+                // Error handling is already done in updateFieldWithNotes, 
+                // but we might want to ensure the button is reset here if updateFieldWithNotes throws
+            } finally {
+                // ➕ Remove loading state
+                saveResolutionBtn.disabled = false;
+                saveResolutionBtn.innerHTML = originalBtnText;
             }
-
-            pendingUpdate = null;
         });
     }
 
@@ -513,7 +529,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 pendingUpdate.select.value = pendingUpdate.old;
                 pendingUpdate = null;
             }
-            
+
             const notesTextarea = document.getElementById('resolutionNotes');
             if (notesTextarea) {
                 notesTextarea.value = '';
@@ -529,7 +545,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             const payload = { field, value };
-            
+
             if (notes) {
                 payload.resolution_notes = notes;
             }
@@ -547,7 +563,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             const data = await res.json();
-            
+
             console.log('📥 Response:', data);
 
             if (!res.ok) {
@@ -559,7 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             select.dataset.originalValue = value;
-            
+
             if (field === 'status') {
                 updateSelectColor(select, value);
             }
@@ -579,9 +595,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error('❌ Update error:', err);
-            
+
             select.value = old;
-            
+
             Swal.fire({
                 icon: 'error',
                 title: 'Update Failed',

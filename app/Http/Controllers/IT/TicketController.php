@@ -9,6 +9,12 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Department;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TicketCreatedMail;
+use Illuminate\Support\Facades\Log;
+use App\Mail\TicketResolvedMail;
 
 class TicketController extends Controller
 {
@@ -18,6 +24,8 @@ class TicketController extends Controller
     public function index(Request $request)
     {
         $categories = Category::all();
+        // Fetch all users for the "Create Ticket on behalf of" dropdown
+        $users = User::whereIn('role', ['user', 'staff'])->orderBy('name')->get();
 
         $tickets = Ticket::with(['category', 'user', 'department'])
             ->whereNotIn('status', ['closed'])
@@ -34,7 +42,102 @@ class TicketController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('it.index-ticket', compact('categories', 'tickets'));
+        return view('it.index-ticket', compact('categories', 'tickets', 'users'));
+    }
+
+    // ============================================================
+    // ➕ STORE — Buat tiket baru (bisa atas nama user)
+    // ============================================================
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'user_id'       => 'required|exists:users,id',
+                'category_id'   => 'required|exists:categories,id',
+                'priority'      => 'required|string',
+                'description'   => 'required|string',
+                'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,heic,heif',
+            ]);
+
+            // Upload file attachments
+            $filePaths = [];
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $filePaths[] = $file->store('tickets', 'public');
+                }
+            }
+
+            // Get selected user
+            $targetUser = User::findOrFail($validated['user_id']);
+
+            // Determine department (use user's department or fallback)
+            $departmentId = $targetUser->department_id ?? Department::first()?->id;
+            
+            if (!$departmentId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User does not have a department assigned.',
+                ], 400);
+            }
+
+            // Create ticket
+            $ticket = Ticket::create([
+                'user_id'       => $targetUser->id,
+                'created_by'    => Auth::id(), // Optional: track who created it
+                'department_id' => $departmentId,
+                'category_id'   => $validated['category_id'],
+                'priority'      => strtolower($validated['priority']),
+                'description'   => $validated['description'],
+                'attachments'   => json_encode($filePaths),
+                'status'        => 'waiting',
+            ]);
+
+            // Generate ticket_id
+            $ticket->ticket_id = 'T-KTU-' . str_pad($ticket->id, 4, '0', STR_PAD_LEFT);
+            $ticket->timestamps = false;
+            $ticket->save();
+            $ticket->timestamps = true;
+
+            // Send Email Notification to IT Team in the same location
+            try {
+                $userLocationId = $targetUser->location_id;
+
+                $itEmails = User::where(function($q) {
+                        $q->where('role', 'tim it')
+                          ->orWhere('role', 'it');
+                    })
+                    ->when($userLocationId, function($q) use ($userLocationId) {
+                        return $q->where('location_id', $userLocationId);
+                    })
+                    ->pluck('email')
+                    ->toArray();
+
+                if (!empty($itEmails)) {
+                   Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
+                }
+            } catch (\Exception $e) {
+                Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Ticket created successfully for ' . $targetUser->name,
+                'ticket' => $ticket
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed!',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Failed to create ticket', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create ticket.',
+            ], 500);
+        }
     }
 
     // ============================================================
@@ -149,7 +252,21 @@ class TicketController extends Controller
                 $ticket->resolution_notes = $resolutionNotes;
             }
             
+            // Set resolved_at timestamp if status is resolved
+            if ($value === 'resolved' && !$ticket->resolved_at) {
+                $ticket->resolved_at = now();
+            }
+
             $ticket->save();
+
+            // Send Email to User ONLY if Closed
+            if ($value === 'closed') {
+                try {
+                    Mail::to($ticket->user->email)->send(new TicketResolvedMail($ticket));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send resolution email: ' . $e->getMessage());
+                }
+            }
             
         } else {
             // For priority updates

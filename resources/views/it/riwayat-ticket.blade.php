@@ -181,7 +181,7 @@
                             <span class="badge {{ $priorityColor }}">{{ ucfirst($ticket->priority) }}</span>
                         </td>
                         <td>{{ $ticket->department->name ?? '-' }}</td>
-                        <td>{{ $ticket->updated_at->format('d M Y H:i') }}</td>
+<td>{{ $ticket->resolved_at ? $ticket->resolved_at->format('d M Y H:i') : ($ticket->updated_at ? $ticket->updated_at->format('d M Y H:i') : '-') }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -207,11 +207,13 @@
 
 
 @php
-function remove_filter_url($filterName) {
-    $currentUrl = request()->fullUrl();
-    $url = preg_replace('/([?&])'.$filterName.'=[^&]+(&|$)/', '$1', $currentUrl);
-    $url = rtrim($url, '?&');
-    return $url;
+if (!function_exists('remove_filter_url')) {
+    function remove_filter_url($filterName) {
+        $currentUrl = request()->fullUrl();
+        $url = preg_replace('/([?&])'.$filterName.'=[^&]+(&|$)/', '$1', $currentUrl);
+        $url = rtrim($url, '?&');
+        return $url;
+    }
 }
 @endphp
 

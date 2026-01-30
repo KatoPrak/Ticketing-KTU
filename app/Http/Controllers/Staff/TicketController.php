@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TicketCreatedMail;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class TicketController extends Controller
 {
@@ -300,10 +301,25 @@ class TicketController extends Controller
             // Refresh dari database
             $ticket->refresh();
 
-            // Kirim email
-            $itEmails = explode(',', env('IT_TEAM_EMAILS', 'ferdinal.sukman@ktushipyard.com'));
+            // Kirim email ke IT dengan lokasi yang sama
             try {
-                Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
+                $user = Auth::user();
+                $userLocationId = $user->location_id;
+
+                // Cari IT Team di lokasi yang sama
+                $itEmails = User::whereIn('role', ['tim it', 'it'])
+                    ->when($userLocationId, function($q) use ($userLocationId) {
+                        return $q->where('location_id', $userLocationId);
+                    })
+                    ->pluck('email')
+                    ->filter() // Remove potential nulls
+                    ->toArray();
+                
+                if (!empty($itEmails)) {
+                    Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
+                } else {
+                    Log::info("Ticket created by {$user->name} (Loc: {$userLocationId}) but no IT staff found in this location.");
+                }
             } catch (\Exception $e) {
                 Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
             }

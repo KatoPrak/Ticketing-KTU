@@ -15,13 +15,8 @@
         
         /* Badges */
         .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: white; }
-        .badge-low { background-color: #10b981; }
-        .badge-medium { background-color: #f59e0b; }
-        .badge-high { background-color: #ef4444; }
-        .badge-urgent { background-color: #dc2626; }
-        .badge-critical { background-color: #991b1b; }
-        
-        .badge-status-new { background-color: #3b82f6; } /* Blue for New/Waiting */
+        .badge-resolved { background-color: #10b981; } /* Green for Resolved */
+        .badge-closed { background-color: #6b7280; } /* Gray for Closed */
         
         .btn { display: inline-block; background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 10px; text-align: center; }
         .btn:hover { background-color: #4338ca; }
@@ -37,12 +32,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>🎫 New Ticket Received</h2>
+            <h2>✅ Ticket Resolved</h2>
         </div>
 
         <div class="content">
-            <p style="margin-top: 0; font-size: 16px;">Hello <strong>IT Team</strong>,</p>
-            <p style="color: #4b5563;">A new ticket requires your attention. Here are the details:</p>
+            <p style="margin-top: 0; font-size: 16px;">Dear <strong>{{ $ticket->user->name }}</strong>,</p>
+            <p style="color: #4b5563;">Good news! Your support ticket has been marked as <strong>Resolved</strong>.</p>
 
             <div class="info-box">
                 <div class="row">
@@ -50,42 +45,34 @@
                     <span class="value" style="font-family: monospace; font-weight: 700;">{{ $ticket->ticket_id }}</span>
                 </div>
                 <div class="row">
-                    <span class="label">Requester:</span>
+                    <span class="label">Status:</span>
                     <span class="value">
-                        <strong>{{ $ticket->user->name ?? 'Unknown' }}</strong>
-                        @if($ticket->user?->department)
-                        <br><span style="font-size: 12px; color: #6b7280;">{{ $ticket->user->department->name }}</span>
-                        @endif
-                    </span>
-                </div>
-                <div class="row">
-                    <span class="label">Category:</span>
-                    <span class="value">{{ $ticket->category->name ?? '-' }}</span>
-                </div>
-                <div class="row">
-                    <span class="label">Priority:</span>
-                    <span class="value">
-                        <span class="badge badge-{{ strtolower($ticket->priority) }}">
-                            {{ strtoupper($ticket->priority) }}
+                        <span class="badge badge-{{ $ticket->status == 'resolved' ? 'resolved' : 'closed' }}">
+                            {{ strtoupper($ticket->status) }}
                         </span>
                     </span>
                 </div>
                 <div class="row">
-                    <span class="label">Status:</span>
-                    <span class="value">
-                        <span class="badge badge-status-new">WAITING</span>
-                    </span>
+                    <span class="label">Issue:</span>
+                    <span class="value">{{ $ticket->description }}</span>
                 </div>
+                
+                @if($ticket->resolution_notes)
                 <div style="margin-top: 15px; border-top: 1px dashed #d1d5db; padding-top: 15px;">
-                    <span class="label" style="display: block; margin-bottom: 5px;">Issue Description:</span>
+                    <span class="label" style="display: block; margin-bottom: 5px;">Resolution Notes:</span>
                     <div class="value" style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #e5e7eb; color: #374151;">
-                        {!! nl2br(e($ticket->description)) !!}
+                        {!! nl2br(e($ticket->resolution_notes)) !!}
                     </div>
                 </div>
+                @endif
             </div>
 
+            <p style="text-align: center; color: #4b5563; font-size: 14px;">If you have any further questions or if the issue persists, please let us know.</p>
+            
+            <p style="text-align: center; font-weight: 600;">We value your feedback! Please click below to rate our service.</p>
+
             <div style="text-align: center;">
-                <a href="{{ url('/it/tickets') }}" class="btn">View & Process Ticket</a>
+                <a href="{{ route('staff.tickets.show', $ticket->id) }}" class="btn">View Ticket & Give Feedback</a>
             </div>
         </div>
 
