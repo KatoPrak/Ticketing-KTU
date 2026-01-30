@@ -204,7 +204,7 @@
                                     <td id="d_description" style="white-space: pre-wrap;">-</td>
                                 </tr>
                                 <tr id="d_row_notes" class="d-none">
-                                    <th class="text-muted align-top">Resolution Notes</th>
+                                    <th class="text-muted align-top">Solution</th>
                                     <td>
                                         <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded">-</div>
                                     </td>

@@ -211,7 +211,7 @@
                                     </tr>
                                     <tr id="d_row_notes" class="d-none">
                                         <th class="text-muted align-top">
-                                            <i class="me-1"></i>Remark
+                                            <i class="me-1"></i>Solution
                                         </th>
                                         <td>
                                             <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border">
@@ -309,7 +309,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow-lg border-0">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Add Remark</h5>
+                <h5 class="modal-title">Add Resolution</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
