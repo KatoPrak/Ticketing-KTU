@@ -115,6 +115,9 @@ Route::middleware(['auth', 'roleredirect:admin'])->prefix('admin')->name('admin.
     Route::post('/export/csv', [AdminController::class, 'exportCsv'])->name('export.csv');
     Route::get('/export/pdf', [AdminTicketController::class, 'exportPdf'])->name('export.pdf');
     Route::get('/chart-data', [AdminController::class, 'getChartData'])->name('chart.data');
+    
+    // ✅ LOCATION ROUTES
+    Route::resource('locations', \App\Http\Controllers\Admin\LocationController::class);
 });
 
 // -----------------------------

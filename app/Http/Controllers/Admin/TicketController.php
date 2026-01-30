@@ -28,8 +28,13 @@ class TicketController extends Controller
             $query->whereMonth('created_at', $request->month);
         }
 
-        // ✅ Gunakan paginate untuk performa lebih baik
-        $tickets = $query->latest()->paginate(20);
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // ✅ Gunakan paginate dengan opsi per_page dari request
+        $perPage = $request->input('per_page', 10);
+        $tickets = $query->latest()->paginate($perPage)->appends($request->query());
 
         // Get available years for filter
         $years = Ticket::selectRaw('YEAR(created_at) as year')

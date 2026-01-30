@@ -1,0 +1,9 @@
+.remove-filter {
+    text-decoration: none;
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.remove-filter:hover {
+    color: #dc3545;
+}

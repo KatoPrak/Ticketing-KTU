@@ -56,6 +56,12 @@ class AdminController extends Controller
     $categoryStats = $this->getCategoryStatsData();
     $departmentStats = $this->getDepartmentStatsData();
 
+    // 🆕 Latest Tickets for Dashboard Monitoring
+    $latestTickets = Ticket::with(['user', 'department', 'category'])
+        ->latest()
+        ->take(5)
+        ->get();
+
     return view('admin.Admin', compact(
         'totalUsers',
         'newUsersThisMonth',
@@ -66,6 +72,7 @@ class AdminController extends Controller
         'closedTickets',
         'totalCategories',
         'users',
+        'latestTickets', // ✅ Added
         'categories',
         'monthlyTickets',
         'categoryStats',
@@ -80,10 +87,11 @@ class AdminController extends Controller
 
 public function showUsers()
 {
-    $users = User::with('department')->get();
+    $users = User::with(['department', 'location'])->get();
     $departments = Department::all();
+    $locations = \App\Models\Location::orderBy('name')->get();
 
-    return view('admin.management-pengguna', compact('users', 'departments'));
+    return view('admin.management-pengguna', compact('users', 'departments', 'locations'));
 }
 
 
@@ -94,7 +102,8 @@ public function showUsers()
         'id_staff' => 'required|string|max:50|unique:users,id_staff',
         'email' => 'required|email|unique:users,email',
         'role' => 'required|string',
-        'department_id' => 'required|exists:departments,id', // <-- ganti department jadi department_id
+        'department_id' => 'required|exists:departments,id',
+        'location_id' => 'nullable|exists:locations,id', // ✅ Optional, updated by frontend logic
     ]);
 
     $user = new User();
@@ -102,7 +111,8 @@ public function showUsers()
     $user->id_staff = $validated['id_staff'];
     $user->email = $validated['email'];
     $user->role = $validated['role'];
-    $user->department_id = $validated['department_id']; // simpan sebagai id
+    $user->department_id = $validated['department_id'];
+    $user->location_id = $validated['location_id'] ?? null; // ✅ Save location
     $user->password = Hash::make($request->input('password', 'STAFFKTU123'));
     $user->save();
 
@@ -119,7 +129,8 @@ public function showUsers()
         'id_staff' => 'required|string|max:50|unique:users,id_staff,' . $user->id,
         'email' => 'required|email|unique:users,email,' . $user->id,
         'role' => 'required|string',
-        'department_id' => 'required|exists:departments,id', // <-- ganti department jadi department_id
+        'department_id' => 'required|exists:departments,id',
+        'location_id' => 'nullable|exists:locations,id',
     ]);
 
     $user->update([
@@ -127,7 +138,8 @@ public function showUsers()
         'id_staff' => $validated['id_staff'],
         'email' => $validated['email'],
         'role' => $validated['role'],
-        'department_id' => $validated['department_id'], // simpan sebagai id
+        'department_id' => $validated['department_id'],
+        'location_id' => $validated['location_id'] ?? null,
     ]);
 
     return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui!');
@@ -155,8 +167,16 @@ public function showUsers()
 
     public function getUser($id)
     {
-        $user = User::findOrFail($id);
-        return response()->json($user);
+        $user = User::with('department')->findOrFail($id);
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'id_staff' => $user->id_staff,
+            'email' => $user->email,
+            'role' => $user->role,
+            'department_id' => $user->department_id,
+            'location_id' => $user->location_id, // ✅ Return location
+        ]);
     }
 
     public function storeCategory(Request $request)

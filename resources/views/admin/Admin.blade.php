@@ -90,13 +90,84 @@
             </div>
         </div>
 
-        <!-- 📈 Tickets Chart -->
-        <div class="card">
+        <!-- 📊 Tickets Chart -->
+        <div class="card mb-4">
             <div class="card-header">
                 <h3 class="card-title">Tickets Created ({{ $year ?? now()->year }})</h3>
             </div>
             <div class="card-body">
                 <canvas id="ticketsChart" height="100"></canvas>
+            </div>
+        </div>
+
+        <!-- 🆕 Latest Tickets Monitoring -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title"><i class="fas fa-eye me-2"></i> Latest Tickets (Monitoring)</h3>
+                <a href="{{ route('admin.tickets.index') }}" class="btn btn-sm btn-primary">
+                    View All <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Title/Issue</th>
+                                <th>Department</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($latestTickets as $ticket)
+                                <tr>
+                                    <td><span class="fw-bold text-primary">#{{ $ticket->ticket_id }}</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle bg-primary text-white me-2" style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">
+                                                {{ substr($ticket->user->name ?? 'U', 0, 1) }}
+                                            </div>
+                                            <span>{{ $ticket->user->name ?? 'Unknown' }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ Str::limit($ticket->description, 40) }}</td>
+                                    <td>{{ $ticket->department->name ?? '-' }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            @if($ticket->priority == 'critical') bg-dark
+                                            @elseif($ticket->priority == 'urgent') bg-danger
+                                            @elseif($ticket->priority == 'high') bg-warning text-dark
+                                            @elseif($ticket->priority == 'medium') bg-info text-dark
+                                            @else bg-success @endif">
+                                            {{ ucfirst($ticket->priority) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            @if($ticket->status == 'pending') bg-warning text-dark
+                                            @elseif($ticket->status == 'resolved') bg-success
+                                            @elseif($ticket->status == 'closed') bg-secondary
+                                            @else bg-primary @endif">
+                                            {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}
+                                        </span>
+                                    </td>
+                                    <td class="small">{{ $ticket->created_at->diffForHumans() }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">
+                                        <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                        No recent tickets found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

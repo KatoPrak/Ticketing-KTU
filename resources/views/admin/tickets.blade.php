@@ -789,6 +789,21 @@
                 </div>
 
                 <div class="filter-group">
+                    <label for="status">
+                        <i class="fas fa-tasks"></i> Status
+                    </label>
+                    <select name="status" id="status">
+                        <option value="">All Status</option>
+                        <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>Open</option>
+                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                        <option value="waiting" {{ request('status') == 'waiting' ? 'selected' : '' }}>Waiting</option>
+                        <option value="closed" {{ request('status') == 'closed' ? 'selected' : '' }}>Closed</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
                     <label for="per_page">
                         <i class="fas fa-list"></i> Per Page
                     </label>

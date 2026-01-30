@@ -3,6 +3,12 @@
 @section('title', 'IT Ticket History')
 
 @section('content')
+@push('styles')
+    @vite('resources/css/it-ticket-history.css')
+@endpush
+@push('scripts')
+    @vite('resources/js/it-ticket-history.js')
+@endpush
 <div class="container py-4">
 
     <!-- Header -->
@@ -198,36 +204,7 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Clear search input
-        document.getElementById('clearSearch').addEventListener('click', function() {
-            document.getElementById('search').value = '';
-            document.getElementById('filterForm').submit();
-        });
-        
-        // Set max date for end_date to today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('end_date').max = today;
-        
-        // Validate date range
-        document.getElementById('start_date').addEventListener('change', function() {
-            const endDate = document.getElementById('end_date');
-            if (this.value && endDate.value && this.value > endDate.value) {
-                endDate.value = this.value;
-            }
-        });
-        
-        document.getElementById('end_date').addEventListener('change', function() {
-            const startDate = document.getElementById('start_date');
-            if (this.value && startDate.value && this.value < startDate.value) {
-                startDate.value = this.value;
-            }
-        });
-    });
-</script>
-@endpush
+
 
 @php
 function remove_filter_url($filterName) {
@@ -238,14 +215,4 @@ function remove_filter_url($filterName) {
 }
 @endphp
 
-<style>
-    .remove-filter {
-        text-decoration: none;
-        color: #6c757d;
-        font-weight: bold;
-    }
-    .remove-filter:hover {
-        color: #dc3545;
-    }
-</style>
 @endsection

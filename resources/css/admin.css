@@ -15,9 +15,9 @@ body {
 /* Layout Container */
 .dashboard-container {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
     width: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 /* Sidebar - FIXED WIDTH, NO COLLAPSE */
@@ -29,6 +29,7 @@ body {
     transition: transform 0.3s ease;
     position: relative;
     z-index: 100;
+    overflow-y: auto;
 }
 
 .sidebar-header {
@@ -51,7 +52,8 @@ body {
     color: white;
     font-size: 18px;
     cursor: pointer;
-    display: none; /* Hidden on desktop */
+    display: none;
+    /* Hidden on desktop */
 }
 
 .sidebar-menu {
@@ -89,21 +91,23 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Important for flex items */
+    min-width: 0;
+    /* Important for flex items */
     width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 /* Top Navbar - RESPONSIVE */
 .navbar {
     background: white;
     padding: 15px 25px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    position: sticky;
-    top: 0;
+    flex-shrink: 0;
     z-index: 90;
 }
 
@@ -147,7 +151,7 @@ body {
     right: 0;
     top: 50px;
     background: #fff;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
     overflow: hidden;
     min-width: 150px;
@@ -186,7 +190,8 @@ body {
 .content {
     flex: 1;
     padding: 25px;
-    overflow-x: hidden; /* Prevent horizontal scroll */
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
     overflow-y: auto;
     width: 100%;
 }
@@ -201,8 +206,13 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* Cards */
@@ -211,7 +221,7 @@ body {
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
@@ -284,7 +294,8 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px; /* Ensures table doesn't squish too much */
+    min-width: 800px;
+    /* Ensures table doesn't squish too much */
 }
 
 th {
@@ -349,7 +360,7 @@ tbody tr:hover {
     top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .modal.show {
@@ -404,7 +415,7 @@ tbody tr:hover {
     background: white;
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     gap: 15px;
@@ -421,9 +432,17 @@ tbody tr:hover {
     color: white;
 }
 
-.stat-icon.blue { background: #3498db; }
-.stat-icon.green { background: #27ae60; }
-.stat-icon.orange { background: #f39c12; }
+.stat-icon.blue {
+    background: #3498db;
+}
+
+.stat-icon.green {
+    background: #27ae60;
+}
+
+.stat-icon.orange {
+    background: #f39c12;
+}
 
 .stat-info h3 {
     font-size: 28px;
@@ -442,13 +461,14 @@ tbody tr:hover {
 /* Tablet (768px - 1024px) */
 @media (max-width: 1024px) {
     .sidebar {
-        width: 250px; /* Keep full width */
+        width: 250px;
+        /* Keep full width */
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
-    
+
     .navbar-title {
         font-size: 20px;
     }
@@ -456,6 +476,7 @@ tbody tr:hover {
 
 /* Mobile (max-width: 768px) */
 @media (max-width: 768px) {
+
     /* Sidebar slides from left */
     .sidebar {
         position: fixed;
@@ -468,7 +489,7 @@ tbody tr:hover {
 
     .sidebar.active {
         left: 0;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
     }
 
     /* Show hamburger button */
@@ -478,7 +499,8 @@ tbody tr:hover {
 
     /* Add toggle button to navbar */
     .navbar::before {
-        content: '\f0c9'; /* FontAwesome bars icon */
+        content: '\f0c9';
+        /* FontAwesome bars icon */
         font-family: 'Font Awesome 5 Free';
         font-weight: 900;
         font-size: 20px;
@@ -490,15 +512,15 @@ tbody tr:hover {
     .main-content {
         width: 100%;
     }
-    
+
     .navbar {
         padding: 12px 15px;
     }
-    
+
     .navbar-title {
         font-size: 18px;
     }
-    
+
     .content {
         padding: 15px;
     }
@@ -511,36 +533,38 @@ tbody tr:hover {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     .stat-card {
         padding: 15px;
     }
-    
+
     .card {
         padding: 15px;
     }
-    
+
     .modal-content {
         max-width: 95%;
         width: 95%;
     }
-    
+
     .btn {
         font-size: 13px;
         padding: 8px 15px;
     }
-    
+
     table {
         font-size: 12px;
     }
-    
-    th, td {
+
+    th,
+    td {
         padding: 8px;
     }
 
     /* User info responsive */
     .user-info span {
-        display: none; /* Hide username on mobile */
+        display: none;
+        /* Hide username on mobile */
     }
 }
 
@@ -549,36 +573,36 @@ tbody tr:hover {
     .navbar-title {
         font-size: 16px;
     }
-    
+
     .card-title {
         font-size: 16px;
     }
-    
+
     .stat-info h3 {
         font-size: 22px;
     }
-    
+
     .stat-icon {
         width: 40px;
         height: 40px;
         font-size: 20px;
     }
-    
+
     .user-avatar {
         width: 30px;
         height: 30px;
         font-size: 12px;
     }
-    
+
     .modal-body {
         padding: 15px;
     }
-    
+
     .modal-footer {
         flex-direction: column;
         gap: 8px;
     }
-    
+
     .modal-footer .btn {
         width: 100%;
     }
@@ -592,7 +616,7 @@ tbody tr:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 998;
 }
 
@@ -602,17 +626,18 @@ tbody tr:hover {
 
 /* Print Styles */
 @media print {
+
     .sidebar,
     .navbar,
     .btn,
     .modal {
         display: none !important;
     }
-    
+
     .main-content {
         width: 100%;
     }
-    
+
     .content {
         padding: 0;
     }
@@ -679,13 +704,20 @@ tbody tr:hover {
     right: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     animation: pulse 15s ease-in-out infinite;
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1) rotate(0deg); }
-    50% { transform: scale(1.1) rotate(180deg); }
+
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    50% {
+        transform: scale(1.1) rotate(180deg);
+    }
 }
 
 .welcome-content {
@@ -707,7 +739,7 @@ tbody tr:hover {
     margin: 0 0 10px 0;
     font-size: 28px;
     font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .welcome-text p {
@@ -724,9 +756,19 @@ tbody tr:hover {
 }
 
 @keyframes wave {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(15deg); }
-    75% { transform: rotate(-15deg); }
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(15deg);
+    }
+
+    75% {
+        transform: rotate(-15deg);
+    }
 }
 
 .current-time {
@@ -751,11 +793,11 @@ tbody tr:hover {
         text-align: center;
         flex-direction: column;
     }
-    
+
     .welcome-text h2 {
         font-size: 22px;
     }
-    
+
     .welcome-text p {
         font-size: 14px;
     }
@@ -774,7 +816,7 @@ tbody tr:hover {
     .welcome-text h2 {
         font-size: 20px;
     }
-    
+
     .welcome-icon {
         font-size: 40px;
     }
@@ -791,12 +833,13 @@ tbody tr:hover {
 }
 
 @keyframes fadeIn {
-    from { 
-        opacity: 0; 
+    from {
+        opacity: 0;
         transform: translateY(10px);
     }
-    to { 
-        opacity: 1; 
+
+    to {
+        opacity: 1;
         transform: translateY(0);
     }
 }
@@ -850,6 +893,7 @@ tbody tr:hover {
 
 /* ===== UPDATE MOBILE STYLES ===== */
 @media (max-width: 768px) {
+
     /* Sidebar slides from left */
     .sidebar {
         position: fixed;
@@ -862,7 +906,7 @@ tbody tr:hover {
 
     .sidebar.active {
         left: 0;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
     }
 
     /* Show hamburger button IN SIDEBAR */
@@ -879,15 +923,15 @@ tbody tr:hover {
     .main-content {
         width: 100%;
     }
-    
+
     .navbar {
         padding: 12px 15px;
     }
-    
+
     .navbar-title {
         font-size: 18px;
     }
-    
+
     .content {
         padding: 15px;
     }
@@ -900,35 +944,37 @@ tbody tr:hover {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     .stat-card {
         padding: 15px;
     }
-    
+
     .card {
         padding: 15px;
     }
-    
+
     .modal-content {
         max-width: 95%;
         width: 95%;
     }
-    
+
     .btn {
         font-size: 13px;
         padding: 8px 15px;
     }
-    
+
     table {
         font-size: 12px;
     }
-    
-    th, td {
+
+    th,
+    td {
         padding: 8px;
     }
 
     /* User info responsive */
     .user-info span {
-        display: none; /* Hide username on mobile */
+        display: none;
+        /* Hide username on mobile */
     }
 }

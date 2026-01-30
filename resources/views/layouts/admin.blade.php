@@ -13,7 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Custom Admin CSS -->
-    <link rel="stylesheet" href="{{ asset('build/assets/admin-BJfupJ7l.css') }}">
+    @vite('resources/css/admin.css')
     
     <!-- Stack Styles dari Child Views -->
     @stack('styles')
@@ -48,6 +48,11 @@
                    class="menu-item {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
                     <i class="fas fa-file-pdf"></i>
                     <span>Reports</span>
+                <!-- ✅ Locations - NO data-section -->
+                <a href="{{ route('admin.locations.index') }}" 
+                   class="menu-item {{ request()->routeIs('admin.locations.*') ? 'active' : '' }}">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Locations</span>
                 </a>
             </div>
         </div>
@@ -109,7 +114,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- ✅ HANYA LOAD 1 FILE JS ADMIN -->
-    <script src="{{ asset('build/assets/admin-Dorc6cWB.js') }}"></script>
+    @vite('resources/js/admin.js')
 
     <!-- ✅ CORE JAVASCRIPT FUNCTIONS -->
     <script>

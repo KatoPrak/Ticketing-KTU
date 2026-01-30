@@ -17,6 +17,7 @@ class User extends Authenticatable
         'department_id',
         'role',
         'id_staff', 
+        'location_id',
         'status',
         'phone',
         'last_login_at'
@@ -45,6 +46,11 @@ class User extends Authenticatable
 public function department()
 {
     return $this->belongsTo(Department::class, 'department_id');
+}
+
+public function location()
+{
+    return $this->belongsTo(Location::class);
 }
 
 

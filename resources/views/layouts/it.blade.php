@@ -15,9 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ asset('assets/image/logo-ktu.jpg') }}">
 
-    <link rel="stylesheet" href="{{ asset('build/assets/it-C57zYEkR.css') }}">
-    <script src="{{ asset('build/assets/it-CFD5na1s.js') }}"></script>
-    
+    @vite(['resources/css/it.css', 'resources/js/it.js'])
+    @stack('styles')
 
 </head>
 

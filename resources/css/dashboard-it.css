@@ -1,0 +1,252 @@
+/* ========================================
+   ANIMATIONS
+======================================== */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes wave {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg); }
+    75% { transform: rotate(15deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* ========================================
+   WELCOME CARD STYLING
+======================================== */
+.welcome-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
+
+/* ========================================
+   ANIMATED ELEMENTS
+======================================== */
+.animated-greeting {
+    animation: fadeInDown 0.8s ease-out;
+    margin-bottom: 0.5rem;
+}
+
+.animated-fade-in {
+    animation: fadeIn 1s ease-out 0.3s both;
+}
+
+.animated-fade-in-delayed {
+    animation: fadeIn 1s ease-out 0.6s both;
+}
+
+.greeting-text {
+    font-size: 1.8rem;
+    font-weight: 400;
+}
+
+.user-name-highlight {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #FFFDD0 ;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    animation: slideInLeft 0.8s ease-out 0.2s both;
+}
+
+/* ========================================
+   ICON ANIMATIONS
+======================================== */
+.wave-animation {
+    display: inline-block;
+    animation: wave 2s ease-in-out infinite;
+    transform-origin: 70% 70%;
+}
+
+.pulse-animation {
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   USER ICON
+======================================== */
+.user-icon-wrapper {
+    animation: fadeIn 1s ease-out 0.5s both;
+}
+
+.user-icon {
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.9);
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+    animation: float 3s ease-in-out infinite;
+}
+
+/* ========================================
+   DATETIME DISPLAY
+======================================== */
+.datetime-display {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 0.75rem 1.25rem;
+    border-radius: 50px;
+    display: inline-block;
+    font-size: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.datetime-display span {
+    color: white;
+}
+
+/* ========================================
+   TIMELINE STYLES
+======================================== */
+.timeline-container {
+    position: relative;
+    padding-left: 40px;
+}
+
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: linear-gradient(to bottom, #0dcaf0, #198754);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -40px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 2;
+}
+
+.timeline-marker.bg-muted {
+    background-color: #6c757d !important;
+    opacity: 0.5;
+}
+
+.timeline-content {
+    flex: 1;
+    padding-left: 5px;
+}
+
+.timeline-title {
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.timeline-date {
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+@media (max-width: 768px) {
+    .welcome-card {
+        padding: 1.5rem;
+    }
+    
+    .greeting-text {
+        font-size: 1.2rem;
+    }
+    
+    .user-name-highlight {
+        font-size: 1.5rem;
+    }
+    
+    .user-icon {
+        font-size: 3rem;
+    }
+    
+    .datetime-display {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .timeline-container {
+        margin-top: 20px;
+    }
+}
