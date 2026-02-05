@@ -14,26 +14,20 @@ class LocationSeeder extends Seeder
     {
         \Illuminate\Support\Facades\DB::table('locations')->insert([
             [
-                'name' => 'Sagulung',
-                'description' => 'Sungai Binti, Sagulung, Batam',
+                'name' => 'Jakarta - Marunda',
+                'description' => 'Cilincing, Jakarta Utara (Regional 1)',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Tanjung Riau',
-                'description' => 'Kawasan Industri Sekupang, Batam',
+                'name' => 'Sagulung - Tanjung Uncang',
+                'description' => 'Sungai Binti, Sagulung, Batam (Regional 2)',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Sekupang',
-                'description' => 'Jl. RE. Martadinata KM 2, Batam',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Marunda',
-                'description' => 'Cilincing, Jakarta Utara',
+                'name' => 'Tanjung Riau - Sekupang',
+                'description' => 'Kawasan Industri Sekupang, Batam (Regional 3) ',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

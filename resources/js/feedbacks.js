@@ -162,8 +162,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         tableBody.innerHTML = feedbacks.map(fb => {
             let stars = '';
+            let starClass = fb.rating === 1 ? 'text-danger' : 'text-warning'; // 1 star = red
             for (let i = 1; i <= 5; i++) {
-                stars += i <= fb.rating ? '<i class="fas fa-star text-warning"></i> ' : '<i class="far fa-star text-muted"></i> ';
+                stars += i <= fb.rating ? `<i class="fas fa-star ${starClass}"></i> ` : '<i class="far fa-star text-muted"></i> ';
             }
 
             return `
@@ -197,14 +198,16 @@ document.addEventListener('DOMContentLoaded', function () {
     function showFeedbackModal(feedback) {
         document.getElementById('modal_ticket_id').textContent = feedback.ticket_id;
         document.getElementById('modal_user').textContent = feedback.user_name;
+        document.getElementById('modal_location').textContent = feedback.location || '-'; // ✅ Added
         document.getElementById('modal_department').textContent = feedback.department;
         document.getElementById('modal_category').textContent = feedback.category;
         document.getElementById('modal_comment').textContent = feedback.comment;
         document.getElementById('modal_date').textContent = feedback.created_at;
 
         let stars = '';
+        let starClass = feedback.rating === 1 ? 'text-danger' : 'text-warning'; // 1 star = red
         for (let i = 1; i <= 5; i++) {
-            stars += i <= feedback.rating ? '<i class="fas fa-star"></i> ' : '<i class="far fa-star text-muted"></i> ';
+            stars += i <= feedback.rating ? `<i class="fas fa-star ${starClass}"></i> ` : '<i class="far fa-star text-muted"></i> ';
         }
         document.getElementById('modal_rating').innerHTML = stars;
 

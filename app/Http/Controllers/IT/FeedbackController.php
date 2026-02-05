@@ -104,7 +104,7 @@ class FeedbackController extends Controller
     public function getFeedbacksList(Request $request)
     {
         try {
-            $query = TicketFeedback::with(['ticket.user.department', 'ticket.category', 'user']);
+            $query = TicketFeedback::with(['ticket.user.department', 'ticket.user.location', 'ticket.category', 'user']);
 
             // Filter by rating
             if ($request->filled('rating')) {
@@ -136,6 +136,7 @@ class FeedbackController extends Controller
                     'id' => $feedback->id,
                     'ticket_id' => $feedback->ticket->ticket_id ?? 'N/A',
                     'user_name' => $feedback->ticket->user->name ?? 'N/A',
+                    'location' => $feedback->ticket->user->location->name ?? 'N/A',
                     'department' => $feedback->ticket->user->department->name ?? 'N/A',
                     'category' => $feedback->ticket->category->name ?? 'N/A',
                     'rating' => $feedback->rating,
@@ -246,7 +247,7 @@ class FeedbackController extends Controller
     public function show($id)
     {
         try {
-            $feedback = TicketFeedback::with(['ticket.user.department', 'ticket.category'])
+            $feedback = TicketFeedback::with(['ticket.user.department', 'ticket.user.location', 'ticket.category'])
                 ->findOrFail($id);
 
             return response()->json([
@@ -255,6 +256,7 @@ class FeedbackController extends Controller
                     'id' => $feedback->id,
                     'ticket_id' => $feedback->ticket->ticket_id ?? 'N/A',
                     'user_name' => $feedback->ticket->user->name ?? 'N/A',
+                    'location' => $feedback->ticket->user->location->name ?? 'N/A', // ✅ Added
                     'department' => $feedback->ticket->user->department->name ?? 'N/A',
                     'category' => $feedback->ticket->category->name ?? 'N/A',
                     'rating' => $feedback->rating,

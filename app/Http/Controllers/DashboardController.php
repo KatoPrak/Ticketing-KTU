@@ -13,33 +13,56 @@ class DashboardController extends Controller
     }
 
     public function it()
-{
-    $activeTickets    = \App\Models\Ticket::whereIn('status', ['waiting','in_progress'])->count();
-    $pendingTickets   = \App\Models\Ticket::where('status', 'pending')->count();
-    $completedTickets = \App\Models\Ticket::whereIn('status', ['resolved','closed'])->count();
-    $urgentTickets    = \App\Models\Ticket::where('priority', 'urgent')
-                                          ->whereNotIn('status', ['resolved','closed'])
-                                          ->count();
+    {
+        $currentUser = Auth::user();
 
-    // ambil maksimal 3 tiket terbaru
-    $recentTickets = \App\Models\Ticket::with(['user','category'])
-        ->orderBy('created_at', 'desc')
-        ->take(3)
-        ->get();
+        // Base Query: Filter logic strictly for user's location or assignment
+        $baseQuery = \App\Models\Ticket::query()->where(function ($query) use ($currentUser) {
+            $query->where('assigned_to', $currentUser->id)
+                  ->orWhere(function ($subQuery) use ($currentUser) {
+                      $subQuery->whereNull('assigned_to')
+                               ->whereHas('user', function ($q) use ($currentUser) {
+                                   $q->where('location_id', $currentUser->location_id);
+                               });
+                  });
+        });
 
-    return view('it.IT', compact(
-        'activeTickets',
-        'pendingTickets',
-        'completedTickets',
-        'urgentTickets',
-        'recentTickets'
-    ));
-}
+        $activeTickets    = (clone $baseQuery)->whereIn('status', ['waiting','in_progress'])->count();
+        $pendingTickets   = (clone $baseQuery)->where('status', 'pending')->count();
+        $completedTickets = (clone $baseQuery)->whereIn('status', ['resolved','closed'])->count();
+        $urgentTickets    = (clone $baseQuery)->where('priority', 'urgent')
+                                              ->whereNotIn('status', ['resolved','closed'])
+                                              ->count();
+
+        // Recent tickets with location data
+        $recentTickets = (clone $baseQuery)->with(['user.location', 'category', 'department', 'assignedTo'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('it.IT', compact(
+            'activeTickets',
+            'pendingTickets',
+            'completedTickets',
+            'urgentTickets',
+            'recentTickets'
+        ));
+    }
 
     public function staff()
 {
     $categories = \App\Models\Category::all();
-    $news = \App\Models\News::latest()->take(3)->get(); // 📰 ambil 3 berita terbaru
+    $user = \Illuminate\Support\Facades\Auth::user();
+    
+    // 📰 Fetch 3 latest news (Global OR User's Location)
+    $news = \App\Models\News::where(function($q) use ($user) {
+            $q->whereNull('location_id')
+              ->orWhere('location_id', $user->location_id);
+        })
+        ->latest()
+        ->take(3)
+        ->get();
+
     return view('staff.staff', compact('categories', 'news'));
 }
 

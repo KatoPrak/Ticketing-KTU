@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Location;
 use App\Models\Department;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TicketCreatedMail;
@@ -24,11 +25,26 @@ class TicketController extends Controller
     public function index(Request $request)
     {
         $categories = Category::all();
+        $locations = Location::all(); // ✅ Load Locations
         // Fetch all users for the "Create Ticket on behalf of" dropdown
         $users = User::whereIn('role', ['user', 'staff'])->orderBy('name')->get();
 
-        $tickets = Ticket::with(['category', 'user', 'department'])
+        $currentUser = Auth::user();
+
+        $tickets = Ticket::with(['category', 'user', 'department', 'assignedTo']) // Load assignedTo
             ->whereNotIn('status', ['closed'])
+            // ✅ FILTER: Logika "Exclusive Assignment"
+            // 1. Jika assigned_to terisi, HANYA staff tersebut yang bisa melihat.
+            // 2. Jika assigned_to KOSONG, semua staff di lokasi user tersebut bisa melihat.
+            ->where(function ($query) use ($currentUser) {
+                $query->where('assigned_to', $currentUser->id)
+                      ->orWhere(function ($subQuery) use ($currentUser) {
+                          $subQuery->whereNull('assigned_to')
+                                   ->whereHas('user', function ($q) use ($currentUser) {
+                                       $q->where('location_id', $currentUser->location_id);
+                                   });
+                      });
+            })
             ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
             ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->category_id))
             ->when($request->filled('search'), function ($q) use ($request) {
@@ -42,7 +58,7 @@ class TicketController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('it.index-ticket', compact('categories', 'tickets', 'users'));
+        return view('it.index-ticket', compact('categories', 'tickets', 'users', 'locations'));
     }
 
     // ============================================================
@@ -92,8 +108,21 @@ class TicketController extends Controller
                 'status'        => 'waiting',
             ]);
 
-            // Generate ticket_id
-            $ticket->ticket_id = 'T-KTU-' . str_pad($ticket->id, 4, '0', STR_PAD_LEFT);
+            // Generate ticket_id: DDMMYYYY-XXX
+            $dateCode = now()->format('dmY');
+            $lastTicketToday = Ticket::where('ticket_id', 'like', $dateCode . '-%')
+                ->orderBy('id', 'desc')
+                ->first();
+            
+            $sequence = 1;
+            if ($lastTicketToday) {
+                $parts = explode('-', $lastTicketToday->ticket_id);
+                if (isset($parts[1])) {
+                    $sequence = intval($parts[1]) + 1;
+                }
+            }
+            
+            $ticket->ticket_id = $dateCode . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
             $ticket->timestamps = false;
             $ticket->save();
             $ticket->timestamps = true;
@@ -164,6 +193,7 @@ class TicketController extends Controller
             'description' => $ticket->description,
             'priority' => $ticket->priority,
             'status' => $ticket->status,
+            'assigned_to' => $ticket->assigned_to, // ✅ ADDED
             'attachments' => $attachments,
             'resolution_notes' => $ticket->resolution_notes ?? '',
             
@@ -184,6 +214,7 @@ class TicketController extends Controller
             // Relations
             'user' => [
                 'name' => optional($ticket->user)->name ?? 'User Deleted',
+                'location' => optional($ticket->user->location)->name ?? 'Unknown Location',
             ],
             'category' => [
                 'name' => optional($ticket->category)->name ?? 'No Category',
@@ -297,14 +328,64 @@ class TicketController extends Controller
     }
 
     // ============================================================
+    // 🚚 TRANSFER — Kirim tiket ke staff lain (berdasarkan lokasi)
+    // ============================================================
+    public function getStaffByLocation(Location $location)
+    {
+        $staff = $location->users()
+            ->whereIn('role', ['it', 'tim it', 'staff']) // Adjust roles as needed
+            ->select('id', 'name', 'email')
+            ->get();
+            
+        return response()->json($staff);
+    }
+
+    public function transfer(Request $request, Ticket $ticket)
+    {
+        $request->validate([
+            'assigned_to' => 'required|exists:users,id',
+            'note' => 'nullable|string'
+        ]);
+
+        $ticket->assigned_to = $request->assigned_to;
+        $ticket->save();
+
+        // Optional: Send email to the new assignee
+        try {
+            $newStaff = User::find($request->assigned_to);
+            // using TicketCreatedMail or a new TicketAssignedMail
+            // Mail::to($newStaff->email)->send(new TicketAssignedMail($ticket));
+        } catch (\Exception $e) {
+            // Log error
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ticket transferred successfully to ' . $newStaff->name
+        ]);
+    }
+
+    // ============================================================
     // 🗂️ RIWAYAT — Tiket yang sudah closed dengan filter lengkap
     // ============================================================
     public function riwayat(Request $request)
     {
         $categories = Category::all();
+        $currentUser = Auth::user();
 
         $tickets = Ticket::with(['category', 'user', 'department'])
             ->where('status', 'closed')
+            // ✅ FILTER LOCATION/ASSIGNED
+            ->where(function ($query) use ($currentUser) {
+                // IT Staff can see history if:
+                // 1. They were assigned the unique ticket
+                // 2. OR the ticket user is in their location (and it wasn't exclusively assigned to someone else, though for history usually we want to see all location history)
+                // Let's stick to the "Location Visibility" rule for history + Assigned
+                $query->where('assigned_to', $currentUser->id)
+                      ->orWhereHas('user', function ($q) use ($currentUser) {
+                           $q->where('location_id', $currentUser->location_id);
+                      });
+            })
             ->when($request->filled('search'), function ($q) use ($request) {
                 $search = $request->search;
                 $q->where(function($q2) use ($search) {
@@ -343,12 +424,35 @@ class TicketController extends Controller
     // ============================================================
     public function dashboard()
     {
-        $activeTickets    = Ticket::whereIn('status', ['waiting','in_progress'])->count();
-        $pendingTickets   = Ticket::where('status', 'pending')->count();
-        $completedTickets = Ticket::where('status', 'resolved')->count();
-        $urgentTickets    = Ticket::where('priority', 'urgent')->where('status', '!=', 'resolved')->count();
+        $currentUser = Auth::user();
 
-        $recentTickets = Ticket::with(['category', 'user', 'department'])
+        // Base Query with Location Filter
+        $baseQuery = Ticket::query()->where(function ($query) use ($currentUser) {
+            $query->where('assigned_to', $currentUser->id)
+                  ->orWhere(function ($subQuery) use ($currentUser) {
+                      $subQuery->whereNull('assigned_to')
+                               ->whereHas('user', function ($q) use ($currentUser) {
+                                   $q->where('location_id', $currentUser->location_id);
+                               });
+                  });
+        });
+
+        // Clone base query for counts to avoid reusing the same builder instance and its constraints incorrectly if not careful
+        $activeTickets    = (clone $baseQuery)->whereIn('status', ['waiting','in_progress'])->count();
+        $pendingTickets   = (clone $baseQuery)->where('status', 'pending')->count();
+        $completedTickets = (clone $baseQuery)->where('status', 'resolved')->count();
+        $urgentTickets    = (clone $baseQuery)->where('priority', 'urgent')->where('status', '!=', 'resolved')->count();
+
+        $recentTickets = Ticket::with(['category', 'user.location', 'department', 'assignedTo'])
+            ->where(function ($query) use ($currentUser) {
+                $query->where('assigned_to', $currentUser->id)
+                      ->orWhere(function ($subQuery) use ($currentUser) {
+                          $subQuery->whereNull('assigned_to')
+                                   ->whereHas('user', function ($q) use ($currentUser) {
+                                       $q->where('location_id', $currentUser->location_id);
+                                   });
+                      });
+            })
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();

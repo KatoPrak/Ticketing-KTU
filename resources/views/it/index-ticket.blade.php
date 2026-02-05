@@ -82,6 +82,9 @@
                     <tr class="ticket-row transition-hover" style="border-left: 5px solid {{ $rowBorderColor }};">
                         <td class="ps-3">
                             <span class="text-dark fw-bold">#{{ $ticket->ticket_id }}</span>
+                            @if($ticket->assigned_to == Auth::id())
+                                <div class="mt-1"><span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Transferred</span></div>
+                            @endif
                         </td>
                         <td>
                             <div>
@@ -95,7 +98,6 @@
                             </span>
                             <small class="text-muted">{{ $ticket->category->name ?? '-' }}</small>
                         </td>
-                        <td>
                         <td>
                             @php
                                 $statusClasses = [
@@ -128,6 +130,11 @@
                             {{ $ticket->created_at->format('d M, H:i') }}
                         </td>
                         <td class="pe-4 text-end">
+                            <button class="btn btn-icon btn-light text-warning rounded-circle btn-transfer-ticket me-1" 
+                                    data-id="{{ $ticket->id }}" 
+                                    title="Transfer Ticket">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
                             <button class="btn btn-icon btn-light text-primary rounded-circle btn-detail-ticket" data-id="{{ $ticket->id }}" title="View Details">
                                 <i class="fas fa-arrow-right"></i>
                             </button>
@@ -148,10 +155,15 @@
         </div>
         
         <!-- Pagination -->
+        <!-- Pagination -->
         @if($tickets->hasPages())
-        <div class="px-4 py-3 border-top d-flex justify-content-between align-items-center bg-light bg-opacity-10">
-            <small class="text-muted">Showing {{ $tickets->firstItem() }}-{{ $tickets->lastItem() }} of {{ $tickets->total() }}</small>
-            <div>{{ $tickets->links('pagination::simple-bootstrap-5') }}</div>
+        <div class="px-4 py-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-center bg-white">
+            <div class="text-muted small mb-2 mb-md-0">
+                Showing <span class="fw-bold text-dark">{{ $tickets->firstItem() }}</span> to <span class="fw-bold text-dark">{{ $tickets->lastItem() }}</span> of <span class="fw-bold text-dark">{{ $tickets->total() }}</span> tickets
+            </div>
+            <div class="custom-pagination">
+                {{ $tickets->onEachSide(1)->links('pagination::bootstrap-5') }}
+            </div>
         </div>
         @endif
     </div>
@@ -178,6 +190,41 @@
 .rounded-4 { border-radius: 1rem !important; }
 .form-select:focus { box-shadow: none; border-color: #cbd5e1; }
 .avatar-initial { font-family: 'Poppins', sans-serif; }
+
+/* Elegant Pagination */
+.custom-pagination .pagination {
+    margin-bottom: 0;
+    gap: 5px;
+}
+.custom-pagination .page-item .page-link {
+    border: none;
+    border-radius: 8px; /* Soft square */
+    color: #64748b; /* slate-500 */
+    font-weight: 500;
+    padding: 0.5rem 0.85rem;
+    transition: all 0.2s ease;
+    background-color: transparent;
+}
+.custom-pagination .page-item .page-link:hover {
+    background-color: #f1f5f9; /* slate-100 */
+    color: #0f172a; /* slate-900 */
+    transform: translateY(-1px);
+}
+.custom-pagination .page-item.active .page-link {
+    background-color: #0d6efd; /* Primary */
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+}
+.custom-pagination .page-item.disabled .page-link {
+    color: #cbd5e1;
+    background-color: transparent;
+}
+.custom-pagination .page-item:first-child .page-link,
+.custom-pagination .page-item:last-child .page-link {
+    border-radius: 8px; /* Maintain shape for next/prev */
+    font-size: 0.9rem;
+}
+
 </style>
 
 {{-- ✅ MODAL DETAIL WITH TIMELINE - UPDATED WITH ICONS --}}
@@ -215,6 +262,7 @@
                                             <span id="d_ticket_id" class="fw-bold text-primary">
                                                 <i class="me-1"></i>Not Available
                                             </span>
+                                            <span id="d_transferred_badge" class="ms-2"></span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -223,6 +271,14 @@
                                         </th>
                                         <td id="d_user" class="text-secondary">
                                             <i class="me-1"></i>Unknown User
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-muted">
+                                            <i class="me-1"></i>Location
+                                        </th>
+                                        <td id="d_location" class="text-secondary">
+                                            <i class="me-1"></i>Unknown Location
                                         </td>
                                     </tr>
                                     <tr>
@@ -265,8 +321,10 @@
                                         <th class="text-muted align-top">
                                             <i class="me-1"></i>Problem
                                         </th>
-                                        <td id="d_description" class="text-secondary" style="white-space: pre-wrap;">
-                                            <i class="me-1"></i>No description provided
+                                        <td>
+                                            <div id="d_description" class="p-3 rounded bg-white border shadow-sm text-dark" style="white-space: pre-wrap; font-size: 0.95rem;">
+                                                <i class="me-1"></i>No description provided
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr id="d_row_notes" class="d-none">
@@ -390,9 +448,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-plus-circle me-2"></i>Create Ticket for User
-                </h5>
+                <h5 class="modal-title fw-bold">Create Ticket for User</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="createTicketForm" enctype="multipart/form-data">
@@ -455,6 +511,49 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+{{-- ================= TRANSFER TICKET MODAL ================= --}}
+<div class="modal fade" id="transferTicketModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+             <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold"><i class="fas fa-exchange-alt me-2"></i>Transfer Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="transferTicketForm">
+                    <input type="hidden" id="transfer_ticket_id" name="ticket_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Select Location</label>
+                        <select id="transfer_location" class="form-select" required>
+                             <option value="" selected disabled>-- Choose Location --</option>
+                             @foreach($locations as $loc)
+                                <option value="{{ $loc->id }}">{{ $loc->name }}</option>
+                             @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Select IT Staff</label>
+                        <select id="transfer_staff" name="assigned_to" class="form-select" required disabled>
+                            <option value="" selected disabled>-- Select Location First --</option>
+                        </select>
+                    </div>
+
+                     <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Note (Optional)</label>
+                        <textarea name="note" class="form-control" rows="2" placeholder="Reason for transfer..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                 <button type="button" id="submitTransferBtn" class="btn btn-warning fw-bold">Transfer Ticket</button>
+            </div>
         </div>
     </div>
 </div>
@@ -527,6 +626,86 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // --------------------------------------------------------------------------
+    // TRANSFER TICKET LOGIC
+    // --------------------------------------------------------------------------
+    const transferModal = new bootstrap.Modal(document.getElementById('transferTicketModal'));
+    let transferTicketId = null;
+
+    document.querySelectorAll('.btn-transfer-ticket').forEach(btn => {
+        btn.addEventListener('click', function() {
+            transferTicketId = this.dataset.id;
+            document.getElementById('transfer_ticket_id').value = transferTicketId;
+            transferModal.show();
+        });
+    });
+
+    document.getElementById('transfer_location').addEventListener('change', function() {
+        const locId = this.value;
+        const staffSelect = document.getElementById('transfer_staff');
+        
+        staffSelect.innerHTML = '<option>Loading...</option>';
+        staffSelect.disabled = true;
+
+        fetch(`/it/locations/${locId}/staff`)
+            .then(res => res.json())
+            .then(data => {
+                staffSelect.innerHTML = '<option value="" selected disabled>-- Choose Staff --</option>';
+                data.forEach(user => {
+                    staffSelect.innerHTML += `<option value="${user.id}">${user.name}</option>`;
+                });
+                staffSelect.disabled = false;
+            })
+            .catch(err => {
+                staffSelect.innerHTML = '<option>Error loading staff</option>';
+            });
+    });
+
+    document.getElementById('submitTransferBtn').addEventListener('click', function() {
+        const form = document.getElementById('transferTicketForm');
+        if(!form.checkValidity()) { form.reportValidity(); return; }
+
+        const formData = new FormData(form);
+        const btn = this;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Transferring...';
+
+        const payload = Object.fromEntries(formData);
+
+        fetch(`/it/tickets/${transferTicketId}/transfer`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+             if(data.success) {
+                 if(typeof Swal !== 'undefined') {
+                    Swal.fire('Success', data.message, 'success').then(() => window.location.reload());
+                 } else {
+                    alert(data.message);
+                    window.location.reload();
+                 }
+                 transferModal.hide();
+             } else {
+                 throw new Error(data.message || 'Transfer failed');
+             }
+        })
+        .catch(err => {
+            if(typeof Swal !== 'undefined') Swal.fire('Error', err.message, 'error');
+            else alert(err.message);
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    });
+
 });
 </script>
 @endpush

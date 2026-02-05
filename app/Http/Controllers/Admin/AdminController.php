@@ -57,7 +57,7 @@ class AdminController extends Controller
     $departmentStats = $this->getDepartmentStatsData();
 
     // 🆕 Latest Tickets for Dashboard Monitoring
-    $latestTickets = Ticket::with(['user', 'department', 'category'])
+    $latestTickets = Ticket::with(['user.location', 'department', 'category'])
         ->latest()
         ->take(5)
         ->get();

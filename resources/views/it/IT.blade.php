@@ -17,24 +17,25 @@
         <div class="col-md-8 col-12">
             <div class="greeting-container">
                 <h2 class="animated-greeting">
-                    <i class="fas fa-hand-sparkles me-2 wave-animation"></i>
-                    <span class="greeting-text">Hi IT Team! All is Well!</span>
-                    <span class="user-name-highlight">{{ Auth::user()->name }}</span>!
+                        <i class="fas fa-hand-sparkles me-2 wave-animation"></i>
+                        <span class="greeting-text">Hi IT Team! All is Well!</span>
+                    </span>
+                    <span class="user-name-highlight text-break mt-1 mt-md-0">{{ Auth::user()->name }}!</span>
                 </h2>
                 <p class="mb-2 animated-fade-in">
-                    <i class="fas fa-building me-2"></i>
-                    {{ optional(Auth::user()->department)->name ?? '-' }} 
+                        <i class="fas fa-building me-2"></i>
+                        {{ optional(Auth::user()->department)->name ?? '-' }} 
                     <span class="badge bg-primary ms-2">{{ Auth::user()->id_staff }}</span>
                 </p>
                 <div class="datetime-display animated-fade-in-delayed">
                     <i class="fas fa-calendar-day me-2 text-primary"></i>
-                    <span id="currentDate" class="fw-semibold"></span>
+                        <span id="currentDate" class="fw-semibold"></span>
                     <span class="mx-2">•</span>
                     <i class="fas fa-clock me-2 text-primary pulse-animation"></i>
-                    <span id="currentTime" class="fw-semibold"></span>
+                        <span id="currentTime" class="fw-semibold"></span>
+                    </div>
                 </div>
             </div>
-        </div>
         <div class="col-md-4 col-12 text-center text-md-end mt-3 mt-md-0">
             <div class="user-icon-wrapper">
                 <i class="fas fa-user-tie user-icon"></i>
@@ -84,6 +85,7 @@
                 <table class="table table-hover align-middle">
                     <thead>
                         <tr>
+                            <th>Location</th>
                             <th>Ticket ID</th>
                             <th>Name</th>
                             <th>Issue/Problem</th>
@@ -96,6 +98,15 @@
                     <tbody>
                         @forelse($recentTickets as $ticket)
                             <tr>
+                                <td>
+                                    <span class="badge bg-light text-dark border" title="{{ $ticket->user->location->name ?? 'Unknown' }}">
+                                        <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                        {{ Str::limit($ticket->user->location->name ?? 'Unknown', 20) }}
+                                    </span>
+                                    @if($ticket->assigned_to == Auth::id())
+                                        <div class="mt-1"><span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Transferred</span></div>
+                                    @endif
+                                </td>
                                 <td><strong>{{ $ticket->ticket_id ?? ('#'.$ticket->id) }}</strong></td>
                                 <td>
                                     @if($ticket->user)
@@ -123,7 +134,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="8" class="text-center text-muted py-4">
                                     No recent ticket activity
                                 </td>
                             </tr>
@@ -180,6 +191,10 @@
                                     <td id="d_user">-</td>
                                 </tr>
                                 <tr>
+                                    <th class="text-muted">Location</th>
+                                    <td id="d_location">-</td>
+                                </tr>
+                                <tr>
                                     <th class="text-muted">Department</th>
                                     <td id="d_department">-</td>
                                 </tr>
@@ -200,8 +215,10 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th class="text-muted align-top">Issue/Problem</th>
-                                    <td id="d_description" style="white-space: pre-wrap;">-</td>
+                                    <th class="text-muted align-top">Problem</th><td>
+                                        <div id="d_description" class="p-3 rounded bg-white border shadow-sm text-dark" style="white-space: pre-wrap; font-size: 0.95rem;">
+                                        <i class="me-1"></i>No description provided
+                                        </div>
                                 </tr>
                                 <tr id="d_row_notes" class="d-none">
                                     <th class="text-muted align-top">Solution</th>

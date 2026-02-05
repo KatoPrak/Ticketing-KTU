@@ -284,6 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const elementsToUpdate = {
                 'd_ticket_id': formatEmptyData(ticket.ticket_id, 'Not Available', 'question-circle'),
                 'd_user': formatEmptyData(ticket.user?.name, 'Unknown User', 'user-slash'),
+                'd_location': formatEmptyData(ticket.user?.location, 'Unknown Location', 'map-marker-alt'), // ✅ Added location
                 'd_department': formatEmptyData(ticket.department?.name, 'Not Specified', 'ban'),
                 'd_category': formatEmptyData(ticket.category?.name, 'Not Specified', 'ban'),
                 'd_description': formatEmptyData(ticket.description, 'No description provided', 'file-alt')
@@ -295,6 +296,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     element.innerHTML = value;
                 }
             });
+
+            // ✅ UPDATE TRANSFERRED BADGE
+            const transferredBadge = document.getElementById('d_transferred_badge');
+            if (transferredBadge) {
+                if (ticket.assigned_to) {
+                    transferredBadge.innerHTML = '<span class="badge bg-warning text-dark">Transferred</span>';
+                } else {
+                    transferredBadge.innerHTML = '';
+                }
+            }
 
             // ✅ UPDATE STATUS BADGE dengan icon
             const statusBadge = document.getElementById('d_status');

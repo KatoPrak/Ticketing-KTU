@@ -228,6 +228,10 @@
                         <p class="form-control-plaintext" id="modal_user"></p>
                     </div>
                     <div class="col-md-6">
+                        <label class="form-label fw-bold">Location</label>
+                        <p class="form-control-plaintext" id="modal_location"></p>
+                    </div>
+                    <div class="col-md-6">
                         <label class="form-label fw-bold">Department</label>
                         <p class="form-control-plaintext" id="modal_department"></p>
                     </div>

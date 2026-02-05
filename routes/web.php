@@ -77,6 +77,10 @@ Route::middleware(['auth', 'roleredirect:tim it'])->prefix('it')->name('it.')->g
     Route::get('/tickets-history', [ItTicketController::class, 'riwayat'])->name('tickets.history');
     Route::post('/tickets/{ticket}/update-field', [ItTicketController::class, 'updateField'])->name('tickets.updateField');
     
+    // 🚚 TRANSFER ROUTES
+    Route::get('/locations/{location}/staff', [ItTicketController::class, 'getStaffByLocation'])->name('locations.staff');
+    Route::post('/tickets/{ticket}/transfer', [ItTicketController::class, 'transfer'])->name('tickets.transfer');
+    
     // ✅ CHANGE PASSWORD khusus IT
     Route::get('/change-password', [ChangePasswordController::class, 'showChangePasswordForm'])->name('password.form');
     Route::post('/change-password', [ChangePasswordController::class, 'updatePassword'])->name('password.update');

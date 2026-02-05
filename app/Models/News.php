@@ -9,5 +9,10 @@ class News extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['message'];
+    protected $fillable = ['message', 'location_id'];
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
 }

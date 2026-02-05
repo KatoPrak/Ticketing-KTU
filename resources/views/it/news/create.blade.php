@@ -43,6 +43,23 @@
 
                         {{-- Form Body --}}
                         <div class="form-body">
+                            {{-- Location Select --}}
+                            <div class="form-group-modern">
+                                <label for="location_id" class="form-label-modern">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Target Location
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control-modern form-select" name="location_id" id="location_id">
+                                    <option value="">All Locations (Global)</option>
+                                    @foreach($locations as $loc)
+                                        <option value="{{ $loc->id }}">{{ $loc->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="form-text text-muted mt-1">
+                                    <i class="fas fa-info-circle me-1"></i>Select "All Locations" to broadcast to everyone.
+                                </div>
+                            </div>
+
                             <div class="form-group-modern">
                                 <label for="message" class="form-label-modern">
                                     <i class="fas fa-comment-alt me-2"></i>Announcement Message

@@ -21,7 +21,8 @@ class NewsController extends Controller
      */
     public function create()
     {
-        return view('it.news.create');
+        $locations = \App\Models\Location::all();
+        return view('it.news.create', compact('locations'));
     }
 
     /**
@@ -30,10 +31,11 @@ class NewsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'message' => 'required|string|min:10'
+            'message' => 'required|string|min:10',
+            'location_id' => 'nullable|exists:locations,id'
         ]);
 
-        News::create($request->only('message'));
+        News::create($request->only('message', 'location_id'));
 
         return redirect()->route('it.news.index')->with('success', 'News berhasil ditambahkan!');
     }
@@ -45,10 +47,11 @@ class NewsController extends Controller
     public function update(Request $request, News $news)
     {
         $request->validate([
-            'message' => 'required|string|min:10'
+            'message' => 'required|string|min:10',
+            'location_id' => 'nullable|exists:locations,id'
         ]);
 
-        $news->update($request->only('message'));
+        $news->update($request->only('message', 'location_id'));
 
         return redirect()->route('it.news.index')->with('success', 'News berhasil diupdate!');
     }

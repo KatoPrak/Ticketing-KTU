@@ -67,7 +67,9 @@
                         <td>
                             <div class="news-message">
                                 <i class="fas fa-comment-dots me-2 text-primary"></i>
-                                <span class="message-text" title="{{ $item->message }}">{{ Str::limit($item->message, 100) }}</span>
+                                <span class="message-text" title="{{ $item->message }}" data-bs-toggle="tooltip">
+                                    {{ Str::limit($item->message, 50) }}
+                                </span>
                             </div>
                         </td>
                         <td>

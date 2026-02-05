@@ -289,8 +289,21 @@ class TicketController extends Controller
                 'status'        => 'waiting',
             ]);
 
-            // Generate ticket_id dengan timestamps disabled
-            $ticket->ticket_id = 'T-KTU-' . str_pad($ticket->id, 4, '0', STR_PAD_LEFT);
+            // Generate ticket_id: DDMMYYYY-XXX
+            $dateCode = now()->format('dmY');
+            $lastTicketToday = Ticket::where('ticket_id', 'like', $dateCode . '-%')
+                ->orderBy('id', 'desc')
+                ->first();
+            
+            $sequence = 1;
+            if ($lastTicketToday) {
+                $parts = explode('-', $lastTicketToday->ticket_id);
+                if (isset($parts[1])) {
+                    $sequence = intval($parts[1]) + 1;
+                }
+            }
+            
+            $ticket->ticket_id = $dateCode . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
             $ticket->timestamps = false;
             $ticket->save();
             $ticket->timestamps = true;

@@ -115,6 +115,7 @@
                             <tr>
                                 <th>ID</th>
                                 <th>User</th>
+                                <th>Location</th>
                                 <th>Title/Issue</th>
                                 <th>Department</th>
                                 <th>Priority</th>
@@ -133,6 +134,12 @@
                                             </div>
                                             <span>{{ $ticket->user->name ?? 'Unknown' }}</span>
                                         </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border" title="{{ $ticket->user->location->name ?? 'Unknown' }}">
+                                            <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                            {{ Str::limit($ticket->user->location->name ?? 'Unknown', 20) }}
+                                        </span>
                                     </td>
                                     <td>{{ Str::limit($ticket->description, 40) }}</td>
                                     <td>{{ $ticket->department->name ?? '-' }}</td>
@@ -159,7 +166,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">
+                                    <td colspan="8" class="text-center py-4 text-muted">
                                         <i class="fas fa-inbox fa-2x mb-2"></i><br>
                                         No recent tickets found.
                                     </td>

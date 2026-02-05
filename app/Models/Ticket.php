@@ -20,6 +20,7 @@ class Ticket extends Model
         'priority',
         'resolution_notes',
         'resolved_at',
+        'assigned_to',
     ];
 
     protected $casts = [
