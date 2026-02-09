@@ -156,6 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('id_staff').value = data.id_staff;
                     document.getElementById('email').value = data.email;
                     document.getElementById('department_id').value = data.department_id;
+                    document.getElementById('location_id').value = data.location_id || '';
                     // ✅ Password tetap disabled saat edit
                     document.getElementById('password').value = 'STAFFKTU123';
 

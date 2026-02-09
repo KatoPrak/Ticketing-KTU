@@ -4,8 +4,6 @@
 @section('body-class', 'page-it-tickets')
 <link rel="stylesheet" href="{{ asset('build/assets/list-tiket-C-bDVq2X.css') }}">
 
-<script src="{{ asset('build/assets/it-CFD5na1s.js') }}"></script>
-
 {{-- ✅ TAMBAHKAN CSRF TOKEN --}}
 <meta name="csrf-token" content="{{ csrf_token() }}">
 

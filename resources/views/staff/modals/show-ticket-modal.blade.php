@@ -52,6 +52,12 @@
                                             <span id="d_priority" class="badge rounded-pill px-3 py-2 bg-secondary">Unknown</span>
                                         </td>
                                     </tr>
+                                    <tr id="d_row_transfers" class="d-none">
+                                        <th class="text-muted align-top">Transfer History</th>
+                                        <td>
+                                            <div id="d_transfers" class="text-muted small"></div>
+                                        </td>
+                                    </tr>
                                     <tr id="d_row_notes" class="d-none">
                                         <th class="text-muted align-top">Resolution Notes</th>
                                         <td>

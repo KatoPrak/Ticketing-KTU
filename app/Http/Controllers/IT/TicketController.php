@@ -24,26 +24,42 @@ class TicketController extends Controller
     // ============================================================
     public function index(Request $request)
     {
+        $currentUser = Auth::user(); // ✅ Get current user first
         $categories = Category::all();
-        $locations = Location::all(); // ✅ Load Locations
-        // Fetch all users for the "Create Ticket on behalf of" dropdown
-        $users = User::whereIn('role', ['user', 'staff'])->orderBy('name')->get();
+        $locations = Location::all(); 
 
-        $currentUser = Auth::user();
+        // Fetch users: Only show users in the IT Staff's Region
+        // If IT Staff has NO Region, they see NO users (strict regional coverage)
+        $usersQuery = User::whereIn('role', ['user', 'staff']);
 
-        $tickets = Ticket::with(['category', 'user', 'department', 'assignedTo']) // Load assignedTo
+        if ($currentUser->region_id) {
+            $usersQuery->whereHas('location', function($q) use ($currentUser) {
+                $q->where('region_id', $currentUser->region_id);
+            });
+            $users = $usersQuery->orderBy('name')->get();
+        } else {
+            // User has no region assigned -> Cannot select users for new ticket
+            $users = collect([]); 
+        }
+
+        $tickets = Ticket::with(['category', 'user', 'department', 'assignedTo', 'transferLogs']) // Load assignedTo & logs
             ->whereNotIn('status', ['closed'])
-            // ✅ FILTER: Logika "Exclusive Assignment"
-            // 1. Jika assigned_to terisi, HANYA staff tersebut yang bisa melihat.
-            // 2. Jika assigned_to KOSONG, semua staff di lokasi user tersebut bisa melihat.
+            // ✅ FILTER: Logika "Regional Assignment"
+            // 1. Show tickets explicitly assigned to this IT staff.
+            // 2. Fallback: Show tickets in the IT staff's REGION if assigned_to is null (safety net).
             ->where(function ($query) use ($currentUser) {
-                $query->where('assigned_to', $currentUser->id)
-                      ->orWhere(function ($subQuery) use ($currentUser) {
-                          $subQuery->whereNull('assigned_to')
-                                   ->whereHas('user', function ($q) use ($currentUser) {
-                                       $q->where('location_id', $currentUser->location_id);
-                                   });
-                      });
+                $query->where('assigned_to', $currentUser->id);
+                
+                // Optional: If you want IT to see ALL tickets in their region regardless of assignment:
+                // $query->orWhere('region_id', $currentUser->region_id);
+                
+                // OR: Only if unassigned:
+                if ($currentUser->region_id) {
+                     $query->orWhere(function ($subQuery) use ($currentUser) {
+                        $subQuery->whereNull('assigned_to')
+                                 ->where('region_id', $currentUser->region_id);
+                    });
+                }
             })
             ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
             ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->category_id))
@@ -96,6 +112,27 @@ class TicketController extends Controller
                 ], 400);
             }
 
+            // ✅ REGIONAL ASSIGNMENT LOGIC
+            $regionId = null;
+            $assignedItId = null;
+
+            if ($targetUser->location_id) {
+                $location = \App\Models\Location::find($targetUser->location_id);
+                if ($location && $location->region_id) {
+                    $regionId = $location->region_id;
+                    
+                    // Auto-assign to IT in this region
+                    $assignedIt = User::whereIn('role', ['tim it', 'it'])
+                        ->where('region_id', $regionId)
+                        ->inRandomOrder() 
+                        ->first();
+                        
+                    if ($assignedIt) {
+                        $assignedItId = $assignedIt->id;
+                    }
+                }
+            }
+
             // Create ticket
             $ticket = Ticket::create([
                 'user_id'       => $targetUser->id,
@@ -106,43 +143,35 @@ class TicketController extends Controller
                 'description'   => $validated['description'],
                 'attachments'   => json_encode($filePaths),
                 'status'        => 'waiting',
+                'region_id'     => $regionId,
+                'assigned_to'   => $assignedItId,
             ]);
 
-            // Generate ticket_id: DDMMYYYY-XXX
-            $dateCode = now()->format('dmY');
-            $lastTicketToday = Ticket::where('ticket_id', 'like', $dateCode . '-%')
-                ->orderBy('id', 'desc')
-                ->first();
-            
-            $sequence = 1;
-            if ($lastTicketToday) {
-                $parts = explode('-', $lastTicketToday->ticket_id);
-                if (isset($parts[1])) {
-                    $sequence = intval($parts[1]) + 1;
-                }
-            }
-            
-            $ticket->ticket_id = $dateCode . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
+            // Generate unique ticket_id using helper
+            $ticket->ticket_id = \App\Helpers\TicketHelper::generateTicketId();
             $ticket->timestamps = false;
             $ticket->save();
             $ticket->timestamps = true;
 
-            // Send Email Notification to IT Team in the same location
+            // Send Email Notification
             try {
-                $userLocationId = $targetUser->location_id;
+                $recipients = [];
 
-                $itEmails = User::where(function($q) {
-                        $q->where('role', 'tim it')
-                          ->orWhere('role', 'it');
-                    })
-                    ->when($userLocationId, function($q) use ($userLocationId) {
-                        return $q->where('location_id', $userLocationId);
-                    })
-                    ->pluck('email')
-                    ->toArray();
+                if ($assignedItId) {
+                    $assignedIt = User::find($assignedItId);
+                    if ($assignedIt && $assignedIt->email) {
+                       $recipients[] = $assignedIt->email;
+                    }
+                } 
+                elseif ($regionId) {
+                    $recipients = User::whereIn('role', ['tim it', 'it'])
+                        ->where('region_id', $regionId)
+                        ->pluck('email')
+                        ->toArray();
+                }
 
-                if (!empty($itEmails)) {
-                   Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
+                if (!empty($recipients)) {
+                   Mail::to($recipients)->send(new TicketCreatedMail($ticket));
                 }
             } catch (\Exception $e) {
                 Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
@@ -193,9 +222,18 @@ class TicketController extends Controller
             'description' => $ticket->description,
             'priority' => $ticket->priority,
             'status' => $ticket->status,
-            'assigned_to' => $ticket->assigned_to, // ✅ ADDED
+            'assigned_to' => $ticket->assigned_to, 
             'attachments' => $attachments,
             'resolution_notes' => $ticket->resolution_notes ?? '',
+            'transfer_logs' => $ticket->transferLogs->map(function($log) {
+                return [
+                    'from' => $log->fromRegion ? $log->fromRegion->name : 'N/A',
+                    'to' => $log->toRegion ? $log->toRegion->name : 'N/A',
+                    'by' => $log->transferredBy ? $log->transferredBy->name : 'Unknown',
+                    'note' => $log->note, // Added note
+                    'date' => $log->created_at->format('d M Y H:i')
+                ];
+            }),
             
             // ✅ DATES - NULL-safe menggunakan accessor dari Model
             'report_date' => $ticket->created_at_formatted,
@@ -343,25 +381,68 @@ class TicketController extends Controller
     public function transfer(Request $request, Ticket $ticket)
     {
         $request->validate([
-            'assigned_to' => 'required|exists:users,id',
+            'region_id' => 'required|exists:regions,id', // ✅ Validate Region
             'note' => 'nullable|string'
         ]);
+        
+        $regionId = $request->region_id;
+        $assignedItId = null;
+        $regionName = 'Unknown Region';
 
-        $ticket->assigned_to = $request->assigned_to;
+        // 1. Find Region Name
+        $region = \App\Models\Region::find($regionId);
+        if ($region) {
+            $regionName = $region->name;
+            
+            // ✅ Log Transfer History
+            \App\Models\TicketTransferLog::create([
+                'ticket_id' => $ticket->id,
+                'from_region_id' => $ticket->region_id, // Old Region
+                'to_region_id' => $region->id, // New Region
+                'transferred_by' => Auth::id(),
+                'note' => $request->note // Save Reason
+            ]);
+
+            $ticket->region_id = $region->id; // ✅ Update Region
+        }
+
+        // 2. Auto-assign to IT Staff in that Region
+        // Similar to Ticket Creation logic
+        $assignedIt = User::whereIn('role', ['tim it', 'it'])
+            ->where('region_id', $regionId)
+            ->inRandomOrder() 
+            ->first();
+
+        if ($assignedIt) {
+            $assignedItId = $assignedIt->id;
+            $ticket->assigned_to = $assignedItId; // ✅ Re-assign User
+        } else {
+            // Case: No IT in that region. Leave unassigned but in the correct region.
+            $ticket->assigned_to = null;
+        }
+
         $ticket->save();
 
         // Optional: Send email to the new assignee
         try {
-            $newStaff = User::find($request->assigned_to);
-            // using TicketCreatedMail or a new TicketAssignedMail
-            // Mail::to($newStaff->email)->send(new TicketAssignedMail($ticket));
+            if ($assignedIt && $assignedIt->email) {
+                 // Send email notification about transfer
+                 // Mail::to($assignedIt->email)->send(new TicketAssignedMail($ticket));
+            }
         } catch (\Exception $e) {
             // Log error
         }
 
+        $message = "Ticket transferred to Region: {$regionName}";
+        if ($assignedIt) {
+            $message .= " (Assigned to {$assignedIt->name})";
+        } else {
+            $message .= " (Pending Assignment)";
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Ticket transferred successfully to ' . $newStaff->name
+            'message' => $message
         ]);
     }
 

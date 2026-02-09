@@ -1,4 +1,3 @@
-<script src="{{ asset('build/assets/it-BEWJciPc.js') }}"></script>
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -21,22 +20,26 @@
             </a>
         </li>
 
-        <!-- 🔧 Tambahan Menu Pengaturan -->
-        <li class="dropdown">
-            <a href="#settingsMenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                <i class="fas fa-cog"></i>
-                Settings
+        <li class="nav-item">
+            <a href="#settingsMenu" data-bs-toggle="collapse" class="nav-link d-flex align-items-center {{ Request::is('staff/profile') ? 'active' : 'collapsed' }}" aria-expanded="{{ Request::is('staff/profile') ? 'true' : 'false' }}">
+                <i class="fas fa-cog me-2"></i>
+                <span>Settings</span>
+                <i class="fas fa-chevron-down ms-auto sub-menu-arrow"></i>
             </a>
-            <ul class="collapse list-unstyled ms-3" id="settingsMenu">
-                <li>
-                    <a href="{{ route('password.form') }}">
-                        <i class="fas fa-key me-2"></i>Change Password
+            <ul id="settingsMenu" class="collapse list-unstyled ps-3 show-if-active {{ Request::is('staff/profile') ? 'show' : '' }}">
+                <li class="mt-1">
+                    <a href="{{ route('staff.profile') }}" 
+                       class="d-flex align-items-center p-2 {{ Request::is('staff/profile') ? 'active' : '' }}" style="font-size: 0.9rem;">
+                        <i class="fas fa-user-circle me-2"></i>
+                        My Profile
                     </a>
                 </li>
-                <li>
+                <li class="mt-1">
                     <a href="{{ route('logout') }}" 
+                       class="d-flex align-items-center p-2 text-danger" style="font-size: 0.9rem;"
                        onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) document.getElementById('logout-form').submit();">
-                        <i class="fas fa-sign-out-alt me-2 text-danger"></i>Logout
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        Logout
                     </a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                         @csrf
@@ -47,12 +50,45 @@
     </ul>
 </div>
 
-
 <style>
     /* Tambahkan warna aktif sederhana tanpa ubah layout */
     .sidebar-menu a.active {
-        color: #fff;
-        background-color: #667eea;
+        color: #fff !important;
+        background-color: #667eea !important;
         border-radius: 5px;
+    }
+    
+    .sidebar-menu .nav-link {
+        color: #4b5563;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-menu .nav-link:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+        border-radius: 5px;
+    }
+
+    .sub-menu-arrow {
+        transition: transform 0.3s ease;
+        font-size: 0.8rem;
+    }
+    
+    [aria-expanded="true"] .sub-menu-arrow {
+        transform: rotate(180deg);
+    }
+    
+    #settingsMenu a {
+        border-left: 2px solid transparent;
+        transition: all 0.2s ease;
+    }
+    
+    #settingsMenu a:hover {
+        border-left: 2px solid #667eea;
+        padding-left: 12px !important;
+    }
+    
+    #settingsMenu a.active {
+        border-left: 2px solid #fff;
     }
 </style>

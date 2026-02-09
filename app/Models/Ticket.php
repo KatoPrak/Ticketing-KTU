@@ -21,6 +21,7 @@ class Ticket extends Model
         'resolution_notes',
         'resolved_at',
         'assigned_to',
+        'region_id' // ✅ Added region_id
     ];
 
     protected $casts = [
@@ -85,6 +86,16 @@ class Ticket extends Model
     public function assignedTo()
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
+
+    public function transferLogs()
+    {
+        return $this->hasMany(TicketTransferLog::class)->with(['fromRegion', 'toRegion', 'transferredBy'])->latest();
     }
 
     // Scopes

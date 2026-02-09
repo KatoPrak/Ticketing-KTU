@@ -752,7 +752,7 @@
             <h3>
                 <i class="fas fa-ticket-alt"></i> Ticket Management
             </h3>
-            <a href="{{ route('admin.tickets.export.pdf', request()->query()) }}" class="btn-custom btn-export">
+            <a href="{{ route('admin.tickets.export.pdf', request()->query()) }}" class="btn-custom btn-export" target="_blank">
                 <i class="fas fa-file-pdf"></i> Export to PDF
             </a>
         </div>
@@ -832,17 +832,18 @@
                 <thead>
                     <tr>
                         <th>Ticket ID</th>
-                        <th>Description</th>
                         <th>User</th>
+                        <th>Location</th>
                         <th>Category</th>
+                        <th>Description</th>
                         <th>Priority</th>
                         <th>Status</th>
-                        <th>Rating</th>
-                        <th>Comment</th>
-                        <th>Marking</th>
                         <th>Report Date</th>
                         <th>Response Date</th>
                         <th>Resolved/Closed</th>
+                        <th>Rating</th>
+                        <th>Comment</th>
+                        <th>Marking</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -851,13 +852,19 @@
                             <td>
                                 <span class="ticket-id">{{ $ticket->ticket_id }}</span>
                             </td>
+                            <td>{{ $ticket->user->name ?? 'N/A' }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark border" title="{{ $ticket->user->location->name ?? 'Unknown' }}">
+                                    <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                    {{ Str::limit($ticket->user->location->name ?? 'Unknown', 15) }}
+                                </span>
+                            </td>
+                            <td>{{ $ticket->category->name ?? 'N/A' }}</td>
                             <td>
                                 <div class="ticket-desc" title="{{ $ticket->description }}">
                                     {{ $ticket->description }}
                                 </div>
                             </td>
-                            <td>{{ $ticket->user->name ?? 'N/A' }}</td>
-                            <td>{{ $ticket->category->name ?? 'N/A' }}</td>
                             <td>
                                 <span class="badge-custom
                                     @if($ticket->priority === 'critical') badge-critical
@@ -877,6 +884,34 @@
                                     @else badge-open @endif">
                                     {{ str_replace('_', ' ', ucfirst($ticket->status)) }}
                                 </span>
+                            </td>
+                            <td>
+                                <div class="datetime-cell">
+                                    <span class="date-part">{{ $ticket->created_at->format('d M Y') }}</span>
+                                    <span class="time-part">{{ $ticket->created_at->format('H:i:s') }}</span>
+                                </div>
+                            </td>
+                            {{-- ✅ RESPONSE DATE = updated_at --}}
+                            <td>
+                                @if($ticket->updated_at)
+                                    <div class="datetime-cell">
+                                        <span class="date-part">{{ $ticket->updated_at->format('d M Y') }}</span>
+                                        <span class="time-part">{{ $ticket->updated_at->format('H:i:s') }}</span>
+                                    </div>
+                                @else
+                                    <span class="no-date">Not yet</span>
+                                @endif
+                            </td>
+                            {{-- ✅ RESOLVED/CLOSED DATE = resolved_at --}}
+                            <td>
+                                @if($ticket->resolved_at)
+                                    <div class="datetime-cell">
+                                        <span class="date-part">{{ \Carbon\Carbon::parse($ticket->resolved_at)->format('d M Y') }}</span>
+                                        <span class="time-part">{{ \Carbon\Carbon::parse($ticket->resolved_at)->format('H:i:s') }}</span>
+                                    </div>
+                                @else
+                                    <span class="no-date">Pending</span>
+                                @endif
                             </td>
                             <td>
                                 @if($ticket->feedback)
@@ -911,38 +946,10 @@
                                     <span class="text-muted-custom">-</span>
                                 @endif
                             </td>
-                            <td>
-                                <div class="datetime-cell">
-                                    <span class="date-part">{{ $ticket->created_at->format('d M Y') }}</span>
-                                    <span class="time-part">{{ $ticket->created_at->format('H:i:s') }}</span>
-                                </div>
-                            </td>
-                            {{-- ✅ RESPONSE DATE = updated_at --}}
-                            <td>
-                                @if($ticket->updated_at)
-                                    <div class="datetime-cell">
-                                        <span class="date-part">{{ $ticket->updated_at->format('d M Y') }}</span>
-                                        <span class="time-part">{{ $ticket->updated_at->format('H:i:s') }}</span>
-                                    </div>
-                                @else
-                                    <span class="no-date">Not yet</span>
-                                @endif
-                            </td>
-                            {{-- ✅ RESOLVED/CLOSED DATE = resolved_at --}}
-                            <td>
-                                @if($ticket->resolved_at)
-                                    <div class="datetime-cell">
-                                        <span class="date-part">{{ \Carbon\Carbon::parse($ticket->resolved_at)->format('d M Y') }}</span>
-                                        <span class="time-part">{{ \Carbon\Carbon::parse($ticket->resolved_at)->format('H:i:s') }}</span>
-                                    </div>
-                                @else
-                                    <span class="no-date">Pending</span>
-                                @endif
-                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="12">
+                            <td colspan="13">
                                 <div class="no-data">
                                     <i class="fas fa-inbox"></i>
                                     <p>No tickets found</p>

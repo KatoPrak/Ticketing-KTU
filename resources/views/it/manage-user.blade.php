@@ -98,6 +98,16 @@
                             </select>
                             <div class="invalid-feedback">Department is required</div>
                         </div>
+                        <div class="col-12 col-md-6">
+                            <label for="location_id" class="form-label fw-semibold">Location <span class="text-danger">*</span></label>
+                            <select id="location_id" name="location_id" class="form-select" required>
+                                <option value="">Select Location</option>
+                                @foreach($locations as $location)
+                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback">Location is required</div>
+                        </div>
 
                         <!-- ✅ Password Field - Disabled dengan Info Label -->
                         <div class="col-12">

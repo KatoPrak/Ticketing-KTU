@@ -43,27 +43,17 @@
                     <i class="fas fa-users me-2"></i> <span>Staff</span>
                 </a>
             </li>
-            <li class="dropdown">
-                <a href="#settingsMenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                    <i class="fas fa-cog"></i>
-                    Settings
+
+            <li>
+                <a href="{{ route('logout') }}"
+                    onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) document.getElementById('logout-form').submit();">
+                    <i class="fas fa-sign-out-alt me-2 text-danger"></i><span>Logout</span>
                 </a>
-                <ul class="collapse list-unstyled ms-3" id="settingsMenu">
-                    <li>
-                        <a href="{{ route('it.password.form') }}" class="nav-link">
-                            <i class="fas fa-key me-2"></i>Change Password
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('logout') }}"
-                            onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) document.getElementById('logout-form').submit();">
-                            <i class="fas fa-sign-out-alt me-2 text-danger"></i>Logout
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                            @csrf
-                        </form>
-                    </li>
-                </ul>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                    @csrf
+                </form>
+            </li>
+        </ul>
     </nav>
 </aside>
 

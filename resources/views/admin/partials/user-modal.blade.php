@@ -86,14 +86,29 @@
             <div class="col-12" id="locationField">
               <div class="form-floating">
                 <select class="form-select" id="location_id" name="location_id">
-                  <option value="" selected>Select Location (Optional)</option>
+                  <option value="" selected disabled>Select Location</option>
                   @isset($locations)
                     @foreach($locations as $loc)
                       <option value="{{ $loc->id }}">{{ $loc->name }}</option>
                     @endforeach
                   @endisset
                 </select>
-                <label for="location_id"><i class="fas fa-map-marker-alt me-2 text-muted"></i>Location</label>
+                <label for="location_id"><i class="fas fa-map-marker-alt me-2 text-muted"></i>Location <span class="text-danger">*</span></label>
+              </div>
+            </div>
+
+            {{-- Region (For IT Staff) --}}
+            <div class="col-12" id="regionField" style="display: none;">
+              <div class="form-floating">
+                <select class="form-select" id="region_id" name="region_id">
+                    <option value="" selected disabled>Select Region Assignment</option>
+                    @isset($regions)
+                        @foreach($regions as $region)
+                            <option value="{{ $region->id }}">{{ $region->name }}</option>
+                        @endforeach
+                    @endisset
+                </select>
+                <label for="region_id"><i class="fas fa-globe me-2 text-muted"></i>Region Coverage <span class="text-danger">*</span></label>
               </div>
             </div>
           </div>

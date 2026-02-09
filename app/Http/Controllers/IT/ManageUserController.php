@@ -37,16 +37,28 @@ class ManageUserController extends Controller
                     'email' => $user->email,
                     'department_id' => $user->department_id,
                     'department_name' => $user->department->name ?? '-',
+                    'location_id' => $user->location_id,
+                    'location_name' => $user->location->name ?? '-',
                 ];
             });
             return response()->json($users);
         }
 
         $departments = Department::all();
-        return view('it.manage-user', compact('users', 'departments'));
+        
+        // ✅ Filter locations by IT user's region
+        $currentUser = auth()->user();
+        $locations = \App\Models\Location::query();
+        
+        if ($currentUser->region_id) {
+            $locations->where('region_id', $currentUser->region_id);
+        }
+        
+        $locations = $locations->orderBy('name')->get();
+        
+        return view('it.manage-user', compact('users', 'departments', 'locations'));
     }
 
-    // Menyimpan user baru
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -54,6 +66,7 @@ class ManageUserController extends Controller
             'id_staff' => 'required|string|unique:users,id_staff|max:50',
             'email' => 'required|email|unique:users,email',
             'department_id' => 'required|exists:departments,id',
+            'location_id' => 'required|exists:locations,id',
         ]);
 
         $user = User::create([
@@ -61,6 +74,7 @@ class ManageUserController extends Controller
             'id_staff' => $validated['id_staff'],
             'email' => $validated['email'],
             'department_id' => $validated['department_id'],
+            'location_id' => $validated['location_id'],
             'role' => 'user',
             'password' => Hash::make('STAFFKTU123') // ✅ Default password di-hash
         ]);
@@ -72,13 +86,15 @@ class ManageUserController extends Controller
             'email' => $user->email,
             'department_id' => $user->department_id,
             'department_name' => $user->department->name ?? '-',
+            'location_id' => $user->location_id,
+            'location_name' => $user->location->name ?? '-',
         ]);
     }
 
     // Mengambil data user untuk diedit
     public function show($id)
     {
-        $user = User::with('department')->findOrFail($id);
+        $user = User::with('department', 'location')->findOrFail($id);
 
         return response()->json([
             'id' => $user->id,
@@ -87,6 +103,8 @@ class ManageUserController extends Controller
             'email' => $user->email,
             'department_id' => $user->department_id,
             'department_name' => $user->department->name ?? '-',
+            'location_id' => $user->location_id,
+            'location_name' => $user->location->name ?? '-',
         ]);
     }
 
@@ -100,6 +118,7 @@ class ManageUserController extends Controller
             'id_staff' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'department_id' => 'required|exists:departments,id',
+            'location_id' => 'required|exists:locations,id',
             'password' => 'nullable|string|min:6', // ✅ Password optional
         ]);
 
@@ -109,6 +128,7 @@ class ManageUserController extends Controller
             'id_staff' => $validated['id_staff'],
             'email' => $validated['email'],
             'department_id' => $validated['department_id'],
+            'location_id' => $validated['location_id'],
         ];
 
         // ✅ Hanya update password jika diisi
@@ -117,7 +137,7 @@ class ManageUserController extends Controller
         }
 
         $user->update($updateData);
-        $user->load('department');
+        $user->load('department', 'location');
 
         return response()->json([
             'id' => $user->id,
@@ -126,6 +146,8 @@ class ManageUserController extends Controller
             'email' => $user->email,
             'department_id' => $user->department_id,
             'department_name' => $user->department->name ?? '-',
+            'location_id' => $user->location_id,
+            'location_name' => $user->location->name ?? '-',
         ]);
     }
 

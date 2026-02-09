@@ -25,7 +25,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Staff ID</th>
-                    <th>Email</th>
+                    <th>Location / Region</th>
                     <th>Role</th>
                     <th>Department</th>
                     <th class="text-center">Actions</th>
@@ -37,7 +37,13 @@
                         <tr>
                             <td>{{ $user->name }}</td>
                             <td class="staff-id">{{ $user->id_staff }}</td>
-                            <td>{{ $user->email }}</td>
+                            <td>
+                                @if(in_array($user->role, ['tim it', 'it']))
+                                    <span class="badge bg-primary"><i class="fas fa-globe me-1"></i> {{ $user->region->name ?? 'Unassigned' }}</span>
+                                @else
+                                    <span class="badge bg-info text-dark">{{ $user->location->name ?? '-' }}</span>
+                                @endif
+                            </td>
                             <td>{{ ucfirst($user->role) }}</td>
                             <td>
                                 <span class="badge bg-success">

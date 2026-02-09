@@ -59,6 +59,15 @@ Route::middleware(['auth', 'roleredirect:staff,user'])->prefix('staff')->name('s
     // Di routes/web.php dalam staff group:
     Route::post('/tickets/{id}/feedback', [StaffTicketController::class, 'storeFeedback'])->name('tickets.feedback.store');
     Route::get('/tickets/{id}/feedback', [StaffTicketController::class, 'getFeedback'])->name('tickets.feedback.show');
+    
+    // PROFILE ROUTES
+    Route::get('/profile', [App\Http\Controllers\Staff\ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [App\Http\Controllers\Staff\ProfileController::class, 'update'])->name('profile.update');
+    
+    // Redirect old change password route to profile
+    Route::get('/change-password', function() {
+        return redirect()->route('staff.profile');
+    })->name('password.form');
 });
 
 // -----------------------------
@@ -81,9 +90,14 @@ Route::middleware(['auth', 'roleredirect:tim it'])->prefix('it')->name('it.')->g
     Route::get('/locations/{location}/staff', [ItTicketController::class, 'getStaffByLocation'])->name('locations.staff');
     Route::post('/tickets/{ticket}/transfer', [ItTicketController::class, 'transfer'])->name('tickets.transfer');
     
-    // ✅ CHANGE PASSWORD khusus IT
-    Route::get('/change-password', [ChangePasswordController::class, 'showChangePasswordForm'])->name('password.form');
-    Route::post('/change-password', [ChangePasswordController::class, 'updatePassword'])->name('password.update');
+    // PROFILE ROUTES (includes password change)
+    Route::get('/profile', [App\Http\Controllers\IT\ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [App\Http\Controllers\IT\ProfileController::class, 'update'])->name('profile.update');
+    
+    // Redirect old change password route to profile
+    Route::get('/change-password', function() {
+        return redirect()->route('it.profile');
+    })->name('password.form');
 
      // ⭐ FEEDBACK ROUTES
     Route::get('/feedbacks', [App\Http\Controllers\IT\FeedbackController::class, 'index'])
@@ -122,6 +136,81 @@ Route::middleware(['auth', 'roleredirect:admin'])->prefix('admin')->name('admin.
     
     // ✅ LOCATION ROUTES
     Route::resource('locations', \App\Http\Controllers\Admin\LocationController::class);
+});
+
+// -----------------------------
+// DEBUG ROUTE (Temporary)
+// -----------------------------
+Route::get('/test-email-notification', function () {
+    $targetEmail = 'ferdinal.sukman@ktushipyard.com';
+    $user = App\Models\User::where('email', $targetEmail)->first();
+
+    if (!$user) {
+        return response()->json(['error' => "User {$targetEmail} not found."]);
+    }
+
+    // 1. Determine Region
+    $regionId = null;
+    $locationName = 'N/A';
+    if ($user->location_id) {
+        $location = App\Models\Location::find($user->location_id);
+        if ($location) {
+            $regionId = $location->region_id;
+            $locationName = $location->name;
+        }
+    }
+
+    if (!$regionId) {
+        return response()->json(['error' => "User {$user->name} (Location: {$locationName}) has no Region ID."]);
+    }
+
+    // 2. Collect Recipients
+    $recipients = [];
+    $logs = [];
+
+    // a) Regional Email
+    $region = App\Models\Region::find($regionId);
+    if ($region && $region->rmail) {
+        $recipients[] = $region->rmail;
+        $logs[] = "Found Regional Email: " . $region->rmail;
+    } else {
+        $logs[] = "No Regional Email (rmail) found for Region ID {$regionId}.";
+    }
+
+    // b) IT Staff Emails
+    $itEmails = App\Models\User::whereIn('role', ['tim it', 'it'])
+        ->where('region_id', $regionId)
+        ->whereNotNull('email')
+        ->pluck('email')
+        ->toArray();
+
+    $logs[] = "Found " . count($itEmails) . " IT Staff emails in Region ID {$regionId}.";
+    $recipients = array_unique(array_merge($recipients, $itEmails));
+
+    // 3. Try Sending
+    $status = "Attempting to send...";
+    
+    if (!empty($recipients)) {
+        try {
+            Mail::raw("This is a test notification check.\n\nLogic verification:\n- Region: " . ($region->name ?? 'N/A') . "\n- Recipients: " . implode(", ", $recipients), function ($msg) use ($recipients) {
+                $msg->to($recipients)
+                    ->subject("✅ Test Notification Logic Check (SSL)");
+            });
+            $status = "Email sent successfully to: " . implode(', ', $recipients);
+        } catch (\Exception $e) {
+            $status = "Failed to send email: " . $e->getMessage();
+        }
+    }
+
+    return response()->json([
+        'user' => $user->name,
+        'role' => $user->role,
+        'location' => $locationName,
+        'region' => $region ? $region->name : 'Unknown',
+        'logs' => $logs,
+        'recipients' => $recipients,
+        'status' => $status
+    ]);
 });
 
 // -----------------------------

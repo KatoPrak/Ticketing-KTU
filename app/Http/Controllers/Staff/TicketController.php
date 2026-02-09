@@ -267,15 +267,45 @@ class TicketController extends Controller
                 }
             }
 
-            $user = Auth::user();
+            // 1️⃣ DETERMINA TARGET USER (Support On-Behalf)
+            if ($request->has('user_id') && $request->user_id) {
+                // Future-proof: If admin/IT creates ticket for created user
+                $user = User::find($request->user_id);
+                if (!$user) {
+                    return response()->json(['success' => false, 'message' => 'User not found'], 404);
+                }
+            } else {
+                $user = Auth::user();
+            }
 
-            // Pastikan department_id tidak null
+            // 2️⃣ GET USER CONTEXT
             $departmentId = $user->department_id ?? Department::first()?->id;
             if (!$departmentId) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No department found. Please assign a department to this user.',
                 ], 400);
+            }
+
+            // 3️⃣ REGIONAL LOGIC
+            $regionId = null;
+            $assignedItId = null;
+
+            if ($user->location_id) {
+                $location = \App\Models\Location::find($user->location_id);
+                if ($location && $location->region_id) {
+                    $regionId = $location->region_id;
+                    
+                    // Auto-assign to IT in this region (Optional)
+                    $assignedIt = User::whereIn('role', ['tim it', 'it'])
+                        ->where('region_id', $regionId)
+                        ->inRandomOrder()
+                        ->first();
+                        
+                    if ($assignedIt) {
+                        $assignedItId = $assignedIt->id;
+                    }
+                }
             }
 
             // Create ticket
@@ -287,52 +317,49 @@ class TicketController extends Controller
                 'description'   => $validated['description'],
                 'attachments'   => json_encode($filePaths),
                 'status'        => 'waiting',
+                'region_id'     => $regionId, // 📌 SAVED TO TICKET
+                'assigned_to'   => $assignedItId,
             ]);
 
-            // Generate ticket_id: DDMMYYYY-XXX
-            $dateCode = now()->format('dmY');
-            $lastTicketToday = Ticket::where('ticket_id', 'like', $dateCode . '-%')
-                ->orderBy('id', 'desc')
-                ->first();
-            
-            $sequence = 1;
-            if ($lastTicketToday) {
-                $parts = explode('-', $lastTicketToday->ticket_id);
-                if (isset($parts[1])) {
-                    $sequence = intval($parts[1]) + 1;
-                }
-            }
-            
-            $ticket->ticket_id = $dateCode . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
-            $ticket->timestamps = false;
+            // Generate unique ticket_id using helper
+            $ticket->ticket_id = \App\Helpers\TicketHelper::generateTicketId();
+            $ticket->timestamps = false; // Disable timestamp update for ticket_id
             $ticket->save();
             $ticket->timestamps = true;
 
             // Load relations
             $ticket->load(['category', 'user.department', 'department']);
-
-            // Refresh dari database
             $ticket->refresh();
 
-            // Kirim email ke IT dengan lokasi yang sama
+            // 4️⃣ EMAIL NOTIFICATION (Based on Ticket Region)
             try {
-                $user = Auth::user();
-                $userLocationId = $user->location_id;
+                $recipients = [];
+                $targetRegionId = $ticket->region_id; // Use ticket's region
 
-                // Cari IT Team di lokasi yang sama
-                $itEmails = User::whereIn('role', ['tim it', 'it'])
-                    ->when($userLocationId, function($q) use ($userLocationId) {
-                        return $q->where('location_id', $userLocationId);
-                    })
-                    ->pluck('email')
-                    ->filter() // Remove potential nulls
-                    ->toArray();
-                
-                if (!empty($itEmails)) {
-                    Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
-                } else {
-                    Log::info("Ticket created by {$user->name} (Loc: {$userLocationId}) but no IT staff found in this location.");
+                if ($targetRegionId) {
+                    // a) Regional Email (rmail)
+                    $region = \App\Models\Region::find($targetRegionId);
+                    if ($region && $region->rmail) {
+                        $recipients[] = $region->rmail;
+                    }
+
+                    // b) IT Staff in that Region
+                    $itEmails = User::whereIn('role', ['tim it', 'it'])
+                        ->where('region_id', $targetRegionId)
+                        ->whereNotNull('email')
+                        ->pluck('email')
+                        ->toArray();
+                    
+                    $recipients = array_unique(array_merge($recipients, $itEmails));
                 }
+
+                if (!empty($recipients)) {
+                    Mail::to($recipients)->send(new TicketCreatedMail($ticket));
+                    Log::info("Ticket {$ticket->ticket_id} notification sent to: " . implode(', ', $recipients));
+                } else {
+                    Log::warning("Ticket {$ticket->ticket_id} created but no IT recipient found (Region ID: {$targetRegionId}).");
+                }
+
             } catch (\Exception $e) {
                 Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
             }
@@ -438,6 +465,21 @@ class TicketController extends Controller
                     'description'=> $ticket->description,
                     'attachments'=> $ticket->attachments,
                     
+                    'resolution_notes' => $ticket->resolution_notes,
+                    
+                    // ✅ Add Transfer Info
+                    'assigned_to' => $ticket->assigned_to,
+                    'region' => $ticket->region ? $ticket->region->name : null,
+                    'transfer_logs' => $ticket->transferLogs->map(function($log) {
+                        return [
+                            'from' => $log->fromRegion ? $log->fromRegion->name : 'N/A',
+                            'to' => $log->toRegion ? $log->toRegion->name : 'N/A',
+                            'by' => $log->transferredBy ? $log->transferredBy->name : 'Unknown',
+                            'note' => $log->note, // Added note
+                            'date' => $log->created_at->format('d M Y H:i')
+                        ];
+                    }),
+
                     // ✅ Menggunakan accessor dari Model (auto NULL-safe)
                     'created_at' => $ticket->created_at_formatted,
                     'created_at_formatted' => $ticket->created_at_formatted,

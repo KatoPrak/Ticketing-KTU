@@ -15,16 +15,16 @@
 
             {{-- User Profile Dropdown --}}
             <div class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="nav-link dropdown-toggle d-flex align-items-center border-0 bg-transparent p-0" id="userDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; z-index: 1060; color: white;">
                     <i class="fas fa-user-circle me-2" style="font-size: 28px;"></i>
                     <span class="d-none d-sm-inline">{{ Auth::user()->name }}</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    {{-- Change Password --}}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" style="z-index: 9999;">
+                    {{-- My Profile --}}
                     <li>
-                        <a class="dropdown-item" href="{{ route('password.form') }}">
-                            <i class="fas fa-key me-2"></i>Change Password
+                        <a class="dropdown-item" href="{{ route('staff.profile') }}">
+                            <i class="fas fa-user-circle me-2"></i>My Profile
                         </a>
                     </li>
                     
@@ -101,42 +101,12 @@ For urgent issues, please call our hotline.
 
         navLinks.forEach(link => {
             const href = link.getAttribute('href');
-            if (href && href !== '#' && currentPath.includes(href)) {
+            // Ensure href is valid and matches path
+            if (href && href.length > 2 && href !== '#' && currentPath.includes(href)) {
                 link.classList.add('active');
             }
         });
 
-        // Manual Dropdown Toggle (Bootstrap alternative)
-        const dropdownToggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-        
-        dropdownToggles.forEach(toggle => {
-            toggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const dropdownMenu = this.nextElementSibling;
-                const isActive = dropdownMenu.classList.contains('show');
-                
-                // Close all other dropdowns
-                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                    menu.classList.remove('show');
-                });
-                
-                // Toggle current dropdown
-                if (!isActive) {
-                    dropdownMenu.classList.add('show');
-                }
-            });
-        });
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.dropdown')) {
-                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                    menu.classList.remove('show');
-                });
-            }
-        });
     });
 </script>
 
@@ -147,7 +117,7 @@ For urgent issues, please call our hotline.
         top: 0 !important;
         left: 0 !important;
         right: 0 !important;
-        z-index: 1030 !important;
+        z-index: 1050 !important;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         height: var(--navbar-height);
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
@@ -155,7 +125,8 @@ For urgent issues, please call our hotline.
 
     /* Fix dropdown z-index */
     .navbar-nav .dropdown {
-        position: static;
+        position: relative;
+        z-index: 1051 !important;
     }
 
     .navbar-nav .dropdown-menu {

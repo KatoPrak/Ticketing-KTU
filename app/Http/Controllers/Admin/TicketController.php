@@ -54,7 +54,7 @@ class TicketController extends Controller
     public function exportPdf(Request $request)
     {
         // ✅ Tambahkan 'feedback' relation untuk export PDF juga
-        $query = Ticket::query()->with(['user.department', 'category', 'department', 'feedback']);
+        $query = Ticket::query()->with(['user.department', 'user.location', 'category', 'department', 'feedback']);
 
         if ($request->filled('year')) {
             $query->whereYear('created_at', $request->year);
@@ -70,7 +70,8 @@ class TicketController extends Controller
         $pdf = Pdf::loadView('admin.pdfuser', compact('tickets'))
             ->setPaper('a4', 'landscape'); // ✅ Landscape untuk kolom lebih banyak
 
-        return $pdf->download('tickets-report-' . date('Y-m-d') . '.pdf');
+        // ✅ Stream PDF untuk preview di browser (bukan langsung download)
+        return $pdf->stream('tickets-report-' . date('Y-m-d') . '.pdf');
     }
 
     /**

@@ -17,7 +17,7 @@
                     <tr>
                         <th style="width: 50px;">No</th>
                         <th>Name</th>
-                        <th>Description</th>
+                        <th>Region</th>
                         <th class="text-center" style="width: 150px;">Action</th>
                     </tr>
                 </thead>
@@ -26,7 +26,13 @@
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td class="fw-bold text-primary">{{ $location->name }}</td>
-                            <td>{{ $location->description ?? '-' }}</td>
+                            <td>
+                                @if($location->region)
+                                    <span class="badge bg-secondary">{{ $location->region->name }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                             <td class="text-center">
                                 <button class="btn btn-sm btn-info text-white me-1" onclick="editLocation({{ $location->id }})">
                                     <i class="fas fa-edit"></i>
@@ -38,7 +44,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center py-4 text-muted">
+                            <td colspan="3" class="text-center py-4 text-muted">
                                 <i class="fas fa-map-marker-slash fa-2x mb-2"></i><br>
                                 No locations found.
                             </td>
@@ -66,9 +72,15 @@
                     <input type="text" name="name" id="name" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+                    <label class="form-label">Region <span class="text-danger">*</span></label>
+                    <select name="region_id" id="region_id" class="form-select" required>
+                        <option value="">Select Region</option>
+                        @foreach($regions as $region)
+                            <option value="{{ $region->id }}">{{ $region->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -93,7 +105,7 @@
             .then(res => res.json())
             .then(data => {
                 document.getElementById('name').value = data.name;
-                document.getElementById('description').value = data.description;
+                document.getElementById('region_id').value = data.region_id;
                 document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
                 document.getElementById('locationForm').action = `/admin/locations/${id}`;
                 document.getElementById('modalTitle').innerText = 'Edit Location';

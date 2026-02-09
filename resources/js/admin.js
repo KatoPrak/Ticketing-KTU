@@ -187,13 +187,19 @@ function editUser(id) {
             // Handle Location Field
             const locationField = document.getElementById('locationField');
             const locationSelect = document.getElementById('location_id');
+            const regionSelect = document.getElementById('region_id');
 
-            // Always show location field
-            if (locationField) locationField.style.display = 'block';
-            if (locationSelect) {
-                locationSelect.value = user.location_id || '';
-                // Optional: make required only for IT if needed, or always optional
-                locationSelect.required = (user.role === 'tim it' || user.role === 'it');
+            // Set values
+            if (locationSelect) locationSelect.value = user.location_id || '';
+            if (regionSelect) regionSelect.value = user.region_id || '';
+
+            // Update visibility based on loaded role
+            if (typeof updateFieldsVisibility === 'function') {
+                updateFieldsVisibility();
+            } else {
+                // Fallback if function not yet defined (rare)
+                const roleSelect = form.querySelector('#role');
+                if (roleSelect) roleSelect.dispatchEvent(new Event('change'));
             }
 
             // Make password optional for edit
@@ -355,27 +361,7 @@ function showAlert(type, message) {
     }
 }
 
-// ================================
-// USER DROPDOWN TOGGLE
-// ================================
-function initializeUserDropdown() {
-    const userInfo = document.querySelector(".navbar-user .user-info");
-    const dropdown = document.getElementById("userDropdown");
 
-    if (userInfo && dropdown) {
-        userInfo.addEventListener("click", (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle("show");
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener("click", (e) => {
-            if (!userInfo.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove("show");
-            }
-        });
-    }
-}
 
 // ================================
 // NAVBAR HAMBURGER TOGGLE
@@ -403,8 +389,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize search functionality
     initializeSearch();
 
-    // Initialize user dropdown
-    initializeUserDropdown();
+
 
     // Initialize navbar toggle for mobile
     initializeNavbarToggle();
@@ -489,26 +474,52 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Role change event to toggle location field
-    // Role change event to toggle location field
-    // Removed to allow location selection for all users
-    /*
+    // Role change event to toggle location/region fields
     const roleSelect = document.getElementById('role');
     const locationField = document.getElementById('locationField');
+    const regionField = document.getElementById('regionField');
+    const locationSelect = document.getElementById('location_id');
+    const regionSelect = document.getElementById('region_id');
 
-    if (roleSelect && locationField) {
-        roleSelect.addEventListener('change', function () {
-            if (this.value === 'tim it') {
-                locationField.style.display = 'block';
-                document.getElementById('location_id').required = true;
-            } else {
-                locationField.style.display = 'none';
-                document.getElementById('location_id').required = false;
-                document.getElementById('location_id').value = '';
+    function updateFieldsVisibility() {
+        if (!roleSelect) return;
+
+        const role = roleSelect.value;
+        const isIT = (role === 'tim it' || role === 'it');
+        const isUser = (role === 'user' || role === 'staff');
+
+        // Logic based on requirements:
+        // User -> Location (Required), Region (Hidden)
+        // IT -> Region (Required), Location (Hidden or Optional?) 
+        // User said: "Staff IT tidak pegang lokasi, tapi pegang REGIONAL"
+
+        if (isIT) {
+            if (regionField) regionField.style.display = 'block';
+            if (locationField) locationField.style.display = 'none';
+
+            if (regionSelect) regionSelect.required = true;
+            if (locationSelect) {
+                locationSelect.required = false;
+                locationSelect.value = ''; // Clear location for IT
             }
-        });
+        } else {
+            // Default (User/Staff)
+            if (regionField) regionField.style.display = 'none';
+            if (locationField) locationField.style.display = 'block';
+
+            if (regionSelect) {
+                regionSelect.required = false;
+                regionSelect.value = ''; // Clear region for User
+            }
+            if (locationSelect) locationSelect.required = true;
+        }
     }
-    */
+
+    if (roleSelect) {
+        roleSelect.addEventListener('change', updateFieldsVisibility);
+        // Initial check
+        updateFieldsVisibility();
+    }
 
     // Ensure backdrop and form are cleaned up when modal closes
     const userModalEl = document.getElementById('userModal');
@@ -517,6 +528,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('userForm');
             if (form) form.reset();
             currentEditUserId = null;
+
+            // Reset visibility
+            updateFieldsVisibility();
+
+            // Remove any stuck backdrops
 
             // Remove any stuck backdrops
             document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());

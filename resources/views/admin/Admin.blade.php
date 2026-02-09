@@ -56,49 +56,6 @@
             </div>
         </div>
 
-        <!-- 🎯 Ticket Chart Filter -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3 class="card-title">Ticket Chart Filter</h3>
-            </div>
-            <div class="card-body">
-                <form method="GET" action="{{ route('admin.dashboard') }}" class="form-row">
-                    <div class="form-group mr-3">
-                        <label class="form-label">Filter By</label>
-                        <select class="form-control" name="filter">
-                            <option value="week" {{ request('filter') == 'week' ? 'selected' : '' }}>This Week</option>
-                            <option value="month" {{ request('filter') == 'month' ? 'selected' : '' }}>This Month</option>
-                            <option value="year" {{ request('filter') == 'year' ? 'selected' : '' }}>This Year</option>
-                        </select>
-                    </div>
-                    <div class="form-group mr-3">
-                        <label class="form-label">Year</label>
-                        <select class="form-control" name="year">
-                            @foreach(range(now()->year, now()->year - 5) as $y)
-                                <option value="{{ $y }}" {{ request('year', now()->year) == $y ? 'selected' : '' }}>
-                                    {{ $y }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group align-self-end">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Apply
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- 📊 Tickets Chart -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3 class="card-title">Tickets Created ({{ $year ?? now()->year }})</h3>
-            </div>
-            <div class="card-body">
-                <canvas id="ticketsChart" height="100"></canvas>
-            </div>
-        </div>
 
         <!-- 🆕 Latest Tickets Monitoring -->
         <div class="card">
@@ -129,9 +86,6 @@
                                     <td><span class="fw-bold text-primary">#{{ $ticket->ticket_id }}</span></td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <div class="avatar-circle bg-primary text-white me-2" style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">
-                                                {{ substr($ticket->user->name ?? 'U', 0, 1) }}
-                                            </div>
                                             <span>{{ $ticket->user->name ?? 'Unknown' }}</span>
                                         </div>
                                     </td>
@@ -175,6 +129,50 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        <!-- 🎯 Ticket Chart Filter -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">Ticket Chart Filter</h3>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ route('admin.dashboard') }}" class="form-row">
+                    <div class="form-group mr-3">
+                        <label class="form-label">Filter By</label>
+                        <select class="form-control" name="filter">
+                            <option value="week" {{ request('filter') == 'week' ? 'selected' : '' }}>This Week</option>
+                            <option value="month" {{ request('filter') == 'month' ? 'selected' : '' }}>This Month</option>
+                            <option value="year" {{ request('filter') == 'year' ? 'selected' : '' }}>This Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group mr-3">
+                        <label class="form-label">Year</label>
+                        <select class="form-control" name="year">
+                            @foreach(range(now()->year, now()->year - 5) as $y)
+                                <option value="{{ $y }}" {{ request('year', now()->year) == $y ? 'selected' : '' }}>
+                                    {{ $y }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group align-self-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Apply
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 📊 Tickets Chart -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">Tickets Created ({{ $year ?? now()->year }})</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="ticketsChart" height="100"></canvas>
             </div>
         </div>
     </div>

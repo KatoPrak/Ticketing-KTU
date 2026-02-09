@@ -17,16 +17,23 @@
         <div class="navbar-nav ms-auto">
             {{-- User Profile Dropdown --}}
             <div class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" id="userDropdown" onclick="toggleDropdown(event)">
-                    <i class="fas fa-user-circle me-1"></i>
+                <button class="nav-link dropdown-toggle d-flex align-items-center border-0 bg-transparent p-0" id="userDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; z-index: 1105; color: white;">
+                    <i class="fas fa-user-circle me-1" style="font-size: 1.2rem;"></i>
                     <span class="d-none d-sm-inline">{{ Auth::user()->name }}</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm" id="userDropdownMenu">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown" style="z-index: 9999;">
                     <li class="dropdown-header">
                         <div class="d-flex flex-column">
                             <span class="fw-bold">{{ Auth::user()->name }}</span>
                             <small class="text-muted">{{ Auth::user()->email }}</small>
                         </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('it.profile') }}">
+                            <i class="fas fa-user-circle me-2"></i>My Profile
+                        </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
@@ -65,34 +72,10 @@ function closeSidebar() {
     if (overlay) overlay.classList.remove('show');
 }
 
-// Dropdown Toggle Function
-function toggleDropdown(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const dropdownMenu = document.getElementById('userDropdownMenu');
-    const allDropdowns = document.querySelectorAll('.dropdown-menu');
-    
-    // Close all other dropdowns
-    allDropdowns.forEach(menu => {
-        if (menu !== dropdownMenu) {
-            menu.classList.remove('show');
-        }
-    });
-    
-    // Toggle current dropdown
-    dropdownMenu.classList.toggle('show');
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    const dropdown = document.querySelector('.dropdown');
-    const dropdownMenu = document.getElementById('userDropdownMenu');
-    
-    if (dropdown && !dropdown.contains(event.target)) {
-        if (dropdownMenu) {
-            dropdownMenu.classList.remove('show');
-        }
+// Close sidebar with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeSidebar();
     }
 });
 
@@ -105,25 +88,10 @@ function handleLogout(event) {
     }
 }
 
-// Close sidebar with Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeSidebar();
-        
-        // Also close dropdown
-        const dropdownMenu = document.getElementById('userDropdownMenu');
-        if (dropdownMenu) {
-            dropdownMenu.classList.remove('show');
-        }
-    }
-});
-
 // Make functions available globally
 window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
-window.toggleDropdown = toggleDropdown;
 window.handleLogout = handleLogout;
-window.showHelp = showHelp;
 </script>
 
 <style>
@@ -191,9 +159,11 @@ window.showHelp = showHelp;
     position: relative;
 }
 
+/* Standard Bootstrap Dropdown - removing custom transitions that might be causing visibility issues */
 .navbar-nav .dropdown-menu {
+    display: none;
     position: absolute !important;
-    top: calc(100% + 0.5rem) !important;
+    top: 100% !important;
     right: 0 !important;
     left: auto !important;
     background: #ffffff !important;
@@ -201,20 +171,13 @@ window.showHelp = showHelp;
     border-radius: 8px;
     min-width: 250px;
     padding: 0.5rem 0;
-    margin: 0;
+    margin: 0.5rem 0 0 0 !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
     z-index: 9999 !important;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.2s ease;
-    display: block !important;
 }
 
 .navbar-nav .dropdown-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    display: block !important;
 }
 
 .navbar-nav .dropdown-header {

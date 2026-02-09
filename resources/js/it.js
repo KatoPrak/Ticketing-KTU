@@ -2,8 +2,6 @@
 // it.js — FINAL & CONSOLIDATED (ALL FUNCTIONS INCLUDED)
 // ==========================================================
 import Swal from 'sweetalert2';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 // ==========================
 // BASE URL & HEADERS
@@ -300,27 +298,25 @@ document.addEventListener("DOMContentLoaded", () => {
             // ✅ UPDATE TRANSFERRED BADGE
             const transferredBadge = document.getElementById('d_transferred_badge');
             if (transferredBadge) {
-                if (ticket.assigned_to) {
-                    transferredBadge.innerHTML = '<span class="badge bg-warning text-dark">Transferred</span>';
+                // Check transfer logs to determine if it's a transferred ticket
+                if (ticket.transfer_logs && ticket.transfer_logs.length > 0) {
+                    // It has been transferred. Show current region.
+                    // We need 'region' name from the ticket response. 
+                    // Since I didn't add 'region' to IT TicketController response yet, I must assume I need to either add it there OR rely on the latest log's TO destination (which is risky if logs are missing but I just added them).
+                    // Best is to use the `ticket.region.name` if I add it to the controller.
+                    // Let's rely on transfer_logs last entry 'to' for now, OR better, let's update IT Controller to send region name.
+                    // But wait, IT Controller sends `transfer_logs` with names.
+
+                    // Simplify badge as requested: just "Transferred" without details
+                    transferredBadge.innerHTML = `<span class="badge bg-warning text-dark">Transferred</span>`;
+                } else if (ticket.assigned_to) {
+                    // Determine if this assigned_to is a result of transfer or initial assignment?
+                    // Initial assignment is not a transfer.
+                    // So if no logs, empty.
+                    transferredBadge.innerHTML = '';
                 } else {
                     transferredBadge.innerHTML = '';
                 }
-            }
-
-            // ✅ UPDATE STATUS BADGE dengan icon
-            const statusBadge = document.getElementById('d_status');
-            if (statusBadge) {
-                const statusText = ticket.status ? ticket.status.replace('_', ' ').toUpperCase() : 'UNKNOWN';
-                statusBadge.innerHTML = `<i class="me-1"></i>${statusText}`;
-                statusBadge.className = `badge rounded-pill px-3 py-2 ${getStatusBadgeClass(ticket.status)}`;
-            }
-
-            // ✅ UPDATE PRIORITY BADGE dengan icon
-            const priorityBadge = document.getElementById('d_priority');
-            if (priorityBadge) {
-                const priorityText = ticket.priority ? ticket.priority.toUpperCase() : 'UNKNOWN';
-                priorityBadge.innerHTML = `<i class="me-1"></i>${priorityText}`;
-                priorityBadge.className = `badge rounded-pill px-3 py-2 ${getPriorityBadgeClass(ticket.priority)}`;
             }
 
             // ✅ POPULATE TIMELINE DATES dengan icon
@@ -350,6 +346,32 @@ document.addEventListener("DOMContentLoaded", () => {
                     responseEl.innerHTML = `<i class="fas fa-hourglass-me-1"></i>Waiting for response`;
                     responseMarker.classList.remove('bg-warning');
                     responseMarker.classList.add('bg-muted');
+                }
+            }
+
+            // ✅ POPULATE TRANSFER TIMELINE
+            const timelineTransfers = document.getElementById('d_timeline_transfers');
+            if (timelineTransfers) {
+                timelineTransfers.innerHTML = ''; // Clear previous
+                if (ticket.transfer_logs && ticket.transfer_logs.length > 0) {
+                    ticket.transfer_logs.forEach(log => {
+                        const transferHtml = `
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title text-info fw-bold">
+                                        Transferred
+                                    </div>
+                                    <div class="text-dark small mb-1">
+                                        <strong>${log.from}</strong> <i class="fas fa-arrow-right mx-1 text-muted"></i> <strong>${log.to}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        timelineTransfers.insertAdjacentHTML('beforeend', transferHtml);
+                    });
                 }
             }
 
@@ -394,6 +416,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
+            // ✅ Handle Transfer History
+            const transfersRow = document.getElementById('d_row_transfers');
+            const transfersElement = document.getElementById('d_transfers');
+            if (transfersRow && transfersElement) {
+                if (ticket.transfer_logs && ticket.transfer_logs.length > 0) {
+                    const logsHtml = ticket.transfer_logs.map(log =>
+                        `<div class="mb-2 p-2 bg-light border rounded">
+                            <div class="fw-bold"><i class="fas fa-exchange-alt me-1 text-primary"></i> ${log.from} &rarr; ${log.to}</div>
+                            ${log.note ? `<div class="text-muted small fst-italic mb-1"><i class="fas fa-quote-left me-1" style="font-size: 0.8em;"></i>${log.note}</div>` : ''}
+                            <div class="text-muted" style="font-size: 0.85em;">
+                                <i class="fas fa-user-clock me-1"></i> by ${log.by} on ${log.date}
+                            </div>
+                         </div>`
+                    ).join('');
+                    transfersElement.innerHTML = logsHtml;
+                    transfersRow.classList.remove('d-none');
+                } else {
+                    transfersRow.classList.add('d-none');
+                }
+            }
+
             // ✅ Handle attachments
             const attachmentsContainer = document.getElementById('d_attachments');
             if (attachmentsContainer) {
@@ -411,11 +454,11 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error('❌ Error loading ticket details:', error);
             if (loader) {
                 loader.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        < div class="alert alert-danger" >
+                            <i class="fas fa-exclamation-triangle me-2"></i>
                         Failed to load ticket details: ${error.message}
-                    </div>
-                `;
+                    </div >
+                        `;
             }
 
             modal.show();
@@ -461,7 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const statusLabel = value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ');
             const modalTitle = modalEl.querySelector('.modal-title');
             if (modalTitle) {
-                modalTitle.textContent = `Add Remark - ${statusLabel}`;
+                modalTitle.textContent = `Add Remark - ${statusLabel} `;
             }
 
             modal.show();
@@ -563,7 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             console.log('📤 Sending update:', payload);
 
-            const res = await fetch(`${BASE_URL}/${id}/update-field`, {
+            const res = await fetch(`${BASE_URL} /${id}/update - field`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -578,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log('📥 Response:', data);
 
             if (!res.ok) {
-                let errorMsg = data.message || `Failed to update. Status: ${res.status}`;
+                let errorMsg = data.message || `Failed to update.Status: ${res.status} `;
                 if (data.errors) {
                     errorMsg += '\n' + Object.values(data.errors).map(e => e.join(', ')).join('\n');
                 }
@@ -593,7 +636,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (field === 'priority') {
                 select.classList.remove('select-priority-low', 'select-priority-medium', 'select-priority-high', 'select-priority-urgent', 'select-priority-critical');
-                select.classList.add(`select-priority-${value}`);
+                select.classList.add(`select - priority - ${value} `);
             }
 
             Swal.fire({

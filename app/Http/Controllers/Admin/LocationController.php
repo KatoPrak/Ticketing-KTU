@@ -9,18 +9,19 @@ class LocationController extends Controller
 {
     public function index()
     {
-        $locations = \App\Models\Location::orderBy('name')->get();
-        return view('admin.locations', compact('locations'));
+        $locations = \App\Models\Location::with('region')->orderBy('name')->get();
+        $regions = \App\Models\Region::all();
+        return view('admin.locations', compact('locations', 'regions'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:locations,name',
-            'description' => 'nullable|string',
+            'region_id' => 'required|exists:regions,id',
         ]);
 
-        \App\Models\Location::create($request->all());
+        \App\Models\Location::create($request->only('name', 'region_id'));
 
         return redirect()->back()->with('success', 'Location created successfully!');
     }
@@ -31,10 +32,10 @@ class LocationController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255|unique:locations,name,' . $location->id,
-            'description' => 'nullable|string',
+            'region_id' => 'required|exists:regions,id',
         ]);
 
-        $location->update($request->all());
+        $location->update($request->only('name', 'region_id'));
 
         return redirect()->back()->with('success', 'Location updated successfully!');
     }

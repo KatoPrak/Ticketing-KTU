@@ -21,6 +21,11 @@
                         </div>
 
                         <div class="col-md-6">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" value="{{ Auth::user()->location?->name ?? 'Not set' }}" disabled>
+                        </div>
+
+                        <div class="col-md-6">
                             <label class="form-label">Category <span class="text-danger">*</span></label>
                             <select class="form-select" name="category_id" required>
                                 <option value="">Select Category</option>

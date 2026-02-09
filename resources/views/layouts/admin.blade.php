@@ -71,12 +71,12 @@
 
 <div class="navbar-user">
     <div class="dropdown">
-        <div class="user-info" id="userDropdownToggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="user-info border-0 bg-transparent p-0" id="userDropdownToggle" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
             <span>{{ Auth::user()->name }}</span>
             <div class="user-avatar">
                 <i class="fas fa-user"></i>
             </div>
-        </div>
+        </button>
 
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdownToggle">
             <li>
@@ -135,23 +135,6 @@
             sidebar.classList.remove('active');
             overlay.classList.remove('active');
         }
-
-        // Toggle User Dropdown
-        function toggleUserDropdown(event) {
-            event.stopPropagation();
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            const dropdown = document.getElementById('userDropdown');
-            const userInfo = document.querySelector('.user-info');
-            
-            if (dropdown && userInfo && !userInfo.contains(e.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
 
         // Close sidebar on window resize to desktop
         window.addEventListener('resize', function() {

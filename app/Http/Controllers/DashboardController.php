@@ -50,21 +50,21 @@ class DashboardController extends Controller
     }
 
     public function staff()
-{
-    $categories = \App\Models\Category::all();
-    $user = \Illuminate\Support\Facades\Auth::user();
-    
-    // 📰 Fetch 3 latest news (Global OR User's Location)
-    $news = \App\Models\News::where(function($q) use ($user) {
-            $q->whereNull('location_id')
-              ->orWhere('location_id', $user->location_id);
-        })
-        ->latest()
-        ->take(3)
-        ->get();
+    {
+        $categories = \App\Models\Category::all();
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // 📰 Fetch 3 latest news (Global OR User's Location)
+        $news = \App\Models\News::where(function($q) use ($user) {
+                $q->whereNull('location_id')
+                  ->orWhere('location_id', $user->location_id);
+            })
+            ->latest()
+            ->take(3)
+            ->get();
 
-    return view('staff.staff', compact('categories', 'news'));
-}
+        return view('staff.staff', compact('categories', 'news'));
+    }
 
 
     public function index()

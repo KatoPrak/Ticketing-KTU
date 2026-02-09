@@ -20,7 +20,8 @@ class User extends Authenticatable
         'location_id',
         'status',
         'phone',
-        'last_login_at'
+        'last_login_at',
+        'region_id'
     ];
 
     protected $hidden = [
@@ -53,6 +54,10 @@ public function location()
     return $this->belongsTo(Location::class);
 }
 
+public function region()
+{
+    return $this->belongsTo(Region::class);
+}
 
 public function user() {
     return $this->belongsTo(User::class);

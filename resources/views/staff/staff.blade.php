@@ -3,7 +3,6 @@
 @section('title', 'Staff Dashboard')
 @section('body-class', 'page-staff-dashboard')
 
-<script src="{{ asset('build/assets/it-CFD5na1s.js') }}"></script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @section('content')
@@ -57,6 +56,7 @@
         </div>
     </div>
 </div>
+
 
 <style>
 /* ========================================
@@ -685,14 +685,20 @@ if (window.orientation !== undefined) {
                     <p class="text-muted mb-0 small">Stay updated with latest information</p>
                 </div>
             </div>
-            @if($news->count() > 0)
-            <span class="badge bg-warning text-dark announcement-badge">
-                {{ $news->count() }} {{ $news->count() > 1 ? 'Updates' : 'Update' }}
-            </span>
-            @endif
+            <div class="d-flex align-items-center gap-2">
+                @if($news->count() > 0)
+                <span class="badge bg-warning text-dark announcement-badge">
+                    {{ $news->count() }} {{ $news->count() > 1 ? 'Updates' : 'Update' }}
+                </span>
+                @endif
+                <button class="btn btn-sm btn-outline-secondary toggle-announcements-btn collapsed" type="button" title="Hide/Show Announcements">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
         </div>
 
         {{-- Announcements List --}}
+        <div id="announcementsContainer" class="announcements-wrapper collapsed">
         @if($news->count() > 0)
             <div class="announcements-container">
                 @foreach($news as $index => $item)
@@ -701,8 +707,26 @@ if (window.orientation !== undefined) {
                         <i class="fas fa-info-circle"></i>
                     </div>
                     <div class="announcement-content">
-                        <h6 class="announcement-message">{{ $item->message }}</h6>
-                        <div class="announcement-meta">
+                        @php
+                            $message = $item->message;
+                            $maxLength = 150; // Maximum characters before truncate
+                            $isLong = strlen($message) > $maxLength;
+                            $shortMessage = $isLong ? substr($message, 0, $maxLength) . '...' : $message;
+                        @endphp
+                        
+                        <h6 class="announcement-message">
+                            <span class="message-short" data-full="{{ $message }}" data-short="{{ $shortMessage }}">
+                                {{ $shortMessage }}
+                            </span>
+                        </h6>
+                        
+                        @if($isLong)
+                        <button class="btn btn-link btn-sm p-0 text-primary read-more-btn" style="font-size: 0.85rem; text-decoration: none;">
+                            <i class="fas fa-chevron-down me-1"></i>Read More
+                        </button>
+                        @endif
+                        
+                        <div class="announcement-meta mt-2">
                             <i class="far fa-clock me-1"></i>
                             <span>{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
                         </div>
@@ -721,6 +745,7 @@ if (window.orientation !== undefined) {
                 <p class="empty-subtitle">There are no news or announcements at the moment.</p>
             </div>
         @endif
+        </div>{{-- End announcements-wrapper --}}
     </div>
 </div>
 
@@ -975,6 +1000,78 @@ if (window.orientation !== undefined) {
     50% {
         transform: translateY(-10px);
     }
+}
+
+/* ========================================
+   READ MORE BUTTON
+======================================== */
+.read-more-btn {
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.read-more-btn:hover {
+    transform: translateX(3px);
+    color: #0056b3 !important;
+}
+
+.read-more-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.read-more-btn i {
+    transition: transform 0.3s ease;
+}
+
+.read-more-btn.expanded i {
+    transform: rotate(180deg);
+}
+
+.message-short {
+    display: inline;
+    transition: all 0.3s ease;
+}
+
+/* ========================================
+   TOGGLE ANNOUNCEMENTS BUTTON
+======================================== */
+.toggle-announcements-btn {
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.toggle-announcements-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+    transform: scale(1.05);
+}
+
+.toggle-announcements-btn i {
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.toggle-announcements-btn.collapsed i {
+    transform: rotate(180deg);
+}
+
+.announcements-wrapper {
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    max-height: 2000px;
+    opacity: 1;
+}
+
+.announcements-wrapper.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0 !important;
 }
 
 /* ========================================
@@ -1274,7 +1371,7 @@ if (window.orientation !== undefined) {
                             <i class="fas fa-bolt text-primary me-2"></i>Quick Actions
                         </h5>
                         <div class="d-grid gap-3">
-                            <button type="button" class="btn btn-primary btn-quick-action" data-bs-toggle="modal" data-bs-target="#createTicketModal">
+                            <button type="button" class="btn btn-primary btn-quick-action mb-2" data-bs-toggle="modal" data-bs-target="#createTicketModal">
                                 <div class="d-flex align-items-center justify-content-start">
                                     <div class="icon-circle bg-white text-primary rounded-circle d-flex align-items-center justify-content-center me-3">
                                         <i class="fas fa-plus"></i>
@@ -1388,7 +1485,6 @@ if (window.orientation !== undefined) {
     transform: translateY(0);
 }
 
-/* Icon Circle */
 .icon-circle {
     width: 40px;
     height: 40px;
@@ -1396,8 +1492,25 @@ if (window.orientation !== undefined) {
     transition: all 0.3s ease;
 }
 
-.btn-quick-action:hover .icon-circle {
-    transform: rotate(90deg);
+.btn-quick-action-outline {
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    background: white;
+    text-decoration: none;
+}
+
+.btn-quick-action-outline:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.btn-quick-action:hover .icon-circle,
+.btn-quick-action-outline:hover .icon-circle {
+    transform: rotate(15deg) scale(1.1);
 }
 
 /* Action Text */
@@ -1699,6 +1812,149 @@ if (window.orientation !== undefined) {
     }
 }
 </style>
+
+<script>
+// ========================================
+// READ MORE / READ LESS FUNCTIONALITY
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Read More/Less for news messages
+    const readMoreButtons = document.querySelectorAll('.read-more-btn');
+    
+    readMoreButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const messageSpan = this.previousElementSibling.querySelector('.message-short');
+            const isExpanded = this.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Collapse - show short message
+                messageSpan.textContent = messageSpan.dataset.short;
+                this.innerHTML = '<i class="fas fa-chevron-down me-1"></i>Read More';
+                this.classList.remove('expanded');
+            } else {
+                // Expand - show full message
+                messageSpan.textContent = messageSpan.dataset.full;
+                this.innerHTML = '<i class="fas fa-chevron-up me-1"></i>Read Less';
+                this.classList.add('expanded');
+            }
+        });
+    });
+    
+    // ========================================
+    // TOGGLE ANNOUNCEMENTS CONTAINER
+    // ========================================
+    const toggleBtn = document.querySelector('.toggle-announcements-btn');
+    const announcementsContainer = document.getElementById('announcementsContainer');
+    
+    if (toggleBtn && announcementsContainer) {
+        // Check localStorage for saved state, default to collapsed (true)
+        const savedState = localStorage.getItem('announcementsCollapsed');
+        const isCollapsed = savedState === null ? true : savedState === 'true';
+        
+        // Apply saved state or default
+        if (isCollapsed) {
+            announcementsContainer.classList.add('collapsed');
+            toggleBtn.classList.add('collapsed');
+        } else {
+            announcementsContainer.classList.remove('collapsed');
+            toggleBtn.classList.remove('collapsed');
+        }
+        
+        toggleBtn.addEventListener('click', function() {
+            const isCurrentlyCollapsed = announcementsContainer.classList.contains('collapsed');
+            
+            if (isCurrentlyCollapsed) {
+                // Expand
+                announcementsContainer.classList.remove('collapsed');
+                toggleBtn.classList.remove('collapsed');
+                localStorage.setItem('announcementsCollapsed', 'false');
+            } else {
+                // Collapse
+                announcementsContainer.classList.add('collapsed');
+                toggleBtn.classList.add('collapsed');
+                localStorage.setItem('announcementsCollapsed', 'true');
+            }
+        });
+    }
+
+    // ========================================
+    // FETCH DASHBOARD TICKETS
+    // ========================================
+    function fetchDashboardTickets() {
+        const ticketListBody = document.getElementById('ticket-list-body');
+        const loadingRow = document.getElementById('tickets-loading');
+        const emptyMessage = document.getElementById('no-tickets-message');
+
+        fetch("{{ route('staff.tickets.fetchDashboard') }}", {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (loadingRow) loadingRow.classList.add('d-none');
+            
+            if (!data || data.length === 0) {
+                if (emptyMessage) emptyMessage.classList.remove('d-none');
+                return;
+            }
+
+            if (ticketListBody) {
+                ticketListBody.innerHTML = ''; // Clear loading spinner
+                data.forEach(ticket => {
+                    const row = document.createElement('tr');
+                    
+                    // Priority Badge
+                    let priorityBadgeClass = 'bg-info';
+                    if (ticket.priority === 'urgent') priorityBadgeClass = 'bg-danger';
+                    if (ticket.priority === 'medium') priorityBadgeClass = 'bg-warning text-dark';
+                    
+                    // Status Badge
+                    let statusBadgeClass = 'bg-secondary';
+                    if (ticket.status === 'waiting') statusBadgeClass = 'bg-info';
+                    if (ticket.status === 'in_progress') statusBadgeClass = 'bg-warning text-dark';
+                    if (ticket.status === 'resolved') statusBadgeClass = 'bg-success';
+                    
+                    row.innerHTML = `
+                        <td class="py-3">
+                            <span class="fw-bold text-dark">#${ticket.ticket_id || ticket.id}</span>
+                            <div class="small text-muted">${ticket.created_at_formatted || ''}</div>
+                        </td>
+                        <td class="py-3">
+                            <div class="text-dark fw-medium text-truncate" style="max-width: 250px;">
+                                ${ticket.description ? ticket.description.substring(0, 50) + (ticket.description.length > 50 ? '...' : '') : '-'}
+                            </div>
+                            <small class="text-muted d-block">${ticket.category ? ticket.category.name : '-'}</small>
+                        </td>
+                        <td class="py-3">
+                            <span class="badge ${priorityBadgeClass} px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.7rem;">
+                                ${ticket.priority ? ticket.priority.toUpperCase() : '-'}
+                            </span>
+                        </td>
+                        <td class="py-3 text-end">
+                            <span class="badge ${statusBadgeClass} px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.7rem;">
+                                ${ticket.status ? ticket.status.replace('_', ' ').toUpperCase() : '-'}
+                            </span>
+                        </td>
+                    `;
+                    ticketListBody.appendChild(row);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching tickets:', error);
+            if (loadingRow) {
+                loadingRow.querySelector('p').textContent = 'Failed to load tickets. Please refresh.';
+                loadingRow.querySelector('.spinner-border').classList.add('text-danger');
+            }
+        });
+    }
+
+    // Initial fetch
+    fetchDashboardTickets();
+});
+</script>
 
 {{-- Ticket Modal --}}
 @include('staff.modals.form-ticket')

@@ -87,11 +87,12 @@ class AdminController extends Controller
 
 public function showUsers()
 {
-    $users = User::with(['department', 'location'])->get();
+    $users = User::with(['department', 'location', 'region'])->get();
     $departments = Department::all();
     $locations = \App\Models\Location::orderBy('name')->get();
+    $regions = \App\Models\Region::orderBy('name')->get();
 
-    return view('admin.management-pengguna', compact('users', 'departments', 'locations'));
+    return view('admin.management-pengguna', compact('users', 'departments', 'locations', 'regions'));
 }
 
 
@@ -103,7 +104,8 @@ public function showUsers()
         'email' => 'required|email|unique:users,email',
         'role' => 'required|string',
         'department_id' => 'required|exists:departments,id',
-        'location_id' => 'nullable|exists:locations,id', // ✅ Optional, updated by frontend logic
+        'location_id' => 'nullable|exists:locations,id',
+        'region_id' => 'nullable|exists:regions,id',
     ]);
 
     $user = new User();
@@ -112,7 +114,8 @@ public function showUsers()
     $user->email = $validated['email'];
     $user->role = $validated['role'];
     $user->department_id = $validated['department_id'];
-    $user->location_id = $validated['location_id'] ?? null; // ✅ Save location
+    $user->location_id = $validated['location_id'];
+    $user->region_id = $validated['region_id'] ?? null;
     $user->password = Hash::make($request->input('password', 'STAFFKTU123'));
     $user->save();
 
@@ -131,6 +134,7 @@ public function showUsers()
         'role' => 'required|string',
         'department_id' => 'required|exists:departments,id',
         'location_id' => 'nullable|exists:locations,id',
+        'region_id' => 'nullable|exists:regions,id',
     ]);
 
     $user->update([
@@ -139,7 +143,8 @@ public function showUsers()
         'email' => $validated['email'],
         'role' => $validated['role'],
         'department_id' => $validated['department_id'],
-        'location_id' => $validated['location_id'] ?? null,
+        'location_id' => $validated['location_id'],
+        'region_id' => $validated['region_id'] ?? null,
     ]);
 
     return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui!');
@@ -175,7 +180,8 @@ public function showUsers()
             'email' => $user->email,
             'role' => $user->role,
             'department_id' => $user->department_id,
-            'location_id' => $user->location_id, // ✅ Return location
+            'location_id' => $user->location_id,
+            'region_id' => $user->region_id,
         ]);
     }
 
