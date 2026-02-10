@@ -6,51 +6,7 @@
 
 @push('styles')
     @vite('resources/css/dashboard-it.css')
-    <style>
-        /* Responsive Table Action (Mobile Sticky Columns) */
-        @media (max-width: 767.98px) {
-            /* Sticky Status Column (4th column) - Simple style */
-            .table-responsive th:nth-child(4),
-            .table-responsive td:nth-child(4) {
-                position: sticky !important;
-                right: 100px !important; /* Width of Action column for dashboard */
-                background-color: #fff !important;
-                z-index: 6 !important;
-            }
-            
-            /* Status header */
-            .table-responsive thead th:nth-child(4) {
-                background-color: #f8f9fa !important;
-                z-index: 16 !important;
-            }
-            
-            /* Hover state for status column */
-            .table-hover tbody tr:hover td:nth-child(4) {
-                background-color: inherit !important;
-            }
-            
-            /* Sticky Action Column */
-            .table-responsive th:last-child, 
-            .table-responsive td:last-child {
-                position: sticky;
-                right: 0;
-                background-color: #fff;
-                z-index: 5;
-                box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-                border-left: 1px solid #f0f0f0;
-                text-align: center !important;
-                padding-left: 0.5rem;
-                padding-right: 0.5rem;
-            }
-            .table-hover tbody tr:hover td:last-child {
-                background-color: #f8f9fa;
-            }
-            /* Header slightly different bg */
-            .table-responsive th:last-child {
-                background-color: #f8f9fa;
-            }
-        }
-    </style>
+    @vite('resources/css/mobile-table.css')
 @endpush
 
 @push('scripts')
@@ -126,12 +82,12 @@
     <div class="col-lg-8 col-12">
         <div class="dashboard-card p-3">
             <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Recent Activity</h5>
-            <div class="table-responsive">
+            <div class="table-responsive mobile-card-table">
                 <table class="table table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>Location</th>
                             <th>Ticket ID</th>
+                            <th>Location</th>
                             <th>Name</th>
                             <th>Issue/Problem</th>
                             <th>Status</th>
@@ -143,17 +99,19 @@
                     <tbody>
                         @forelse($recentTickets as $ticket)
                             <tr>
-                                <td>
-                                    <span class="badge bg-light text-dark border" title="{{ $ticket->user->location->name ?? 'Unknown' }}">
-                                        <i class="fas fa-map-marker-alt me-1 text-danger"></i>
-                                        {{ Str::limit($ticket->user->location->name ?? 'Unknown', 20) }}
-                                    </span>
+                                <td data-label="Ticket ID">
+                                    <strong>{{ $ticket->ticket_id ?? ('#'.$ticket->id) }}</strong>
                                     @if($ticket->assigned_to == Auth::id())
                                         <div class="mt-1"><span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Transferred</span></div>
                                     @endif
                                 </td>
-                                <td><strong>{{ $ticket->ticket_id ?? ('#'.$ticket->id) }}</strong></td>
-                                <td>
+                                <td data-label="Location">
+                                    <span class="badge bg-light text-dark border" title="{{ $ticket->user->location->name ?? 'Unknown' }}">
+                                        <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                        {{ Str::limit($ticket->user->location->name ?? 'Unknown', 20) }}
+                                    </span>
+                                </td>
+                                <td data-label="Requester">
                                     @if($ticket->user)
                                         <span>{{ $ticket->user->name }}</span>
                                     @elseif($ticket->customer)
@@ -162,18 +120,18 @@
                                         <span class="text-muted">-</span>
                                     @endif
                                 </td>
-                                <td>{{ \Illuminate\Support\Str::limit($ticket->description, 30) }}</td>
-                                <td>
+                                <td data-label="Issue">{{ \Illuminate\Support\Str::limit($ticket->description, 30) }}</td>
+                                <td data-label="Status">
                                     <span class="badge bg-secondary">{{ ucfirst(str_replace('_',' ', $ticket->status)) }}</span>
                                 </td>
-                                <td>
+                                <td data-label="Priority">
                                     <span class="badge bg-info text-dark">{{ ucfirst($ticket->priority) }}</span>
                                 </td>
-                                <td>{{ optional($ticket->created_at)->format('Y-m-d H:i') }}</td>
-                                <td>
+                                <td data-label="Date">{{ optional($ticket->created_at)->format('Y-m-d H:i') }}</td>
+                                <td data-label="Action">
                                     <button type="button" class="btn btn-sm btn-outline-primary btn-detail-ticket"
                                         data-id="{{ $ticket->id }}">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="fas fa-eye"></i> View
                                     </button>
                                 </td>
                             </tr>
