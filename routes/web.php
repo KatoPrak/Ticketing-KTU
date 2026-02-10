@@ -142,75 +142,19 @@ Route::middleware(['auth', 'roleredirect:admin'])->prefix('admin')->name('admin.
 // DEBUG ROUTE (Temporary)
 // -----------------------------
 Route::get('/test-email-notification', function () {
-    $targetEmail = 'ferdinal.sukman@ktushipyard.com';
-    $user = App\Models\User::where('email', $targetEmail)->first();
+    // SECURITY: Disabled for production
+    abort(404);
+});
 
-    if (!$user) {
-        return response()->json(['error' => "User {$targetEmail} not found."]);
-    }
-
-    // 1. Determine Region
-    $regionId = null;
-    $locationName = 'N/A';
-    if ($user->location_id) {
-        $location = App\Models\Location::find($user->location_id);
-        if ($location) {
-            $regionId = $location->region_id;
-            $locationName = $location->name;
-        }
-    }
-
-    if (!$regionId) {
-        return response()->json(['error' => "User {$user->name} (Location: {$locationName}) has no Region ID."]);
-    }
-
-    // 2. Collect Recipients
-    $recipients = [];
-    $logs = [];
-
-    // a) Regional Email
-    $region = App\Models\Region::find($regionId);
-    if ($region && $region->rmail) {
-        $recipients[] = $region->rmail;
-        $logs[] = "Found Regional Email: " . $region->rmail;
-    } else {
-        $logs[] = "No Regional Email (rmail) found for Region ID {$regionId}.";
-    }
-
-    // b) IT Staff Emails
-    $itEmails = App\Models\User::whereIn('role', ['tim it', 'it'])
-        ->where('region_id', $regionId)
-        ->whereNotNull('email')
-        ->pluck('email')
-        ->toArray();
-
-    $logs[] = "Found " . count($itEmails) . " IT Staff emails in Region ID {$regionId}.";
-    $recipients = array_unique(array_merge($recipients, $itEmails));
-
-    // 3. Try Sending
-    $status = "Attempting to send...";
-    
-    if (!empty($recipients)) {
-        try {
-            Mail::raw("This is a test notification check.\n\nLogic verification:\n- Region: " . ($region->name ?? 'N/A') . "\n- Recipients: " . implode(", ", $recipients), function ($msg) use ($recipients) {
-                $msg->to($recipients)
-                    ->subject("✅ Test Notification Logic Check (SSL)");
-            });
-            $status = "Email sent successfully to: " . implode(', ', $recipients);
-        } catch (\Exception $e) {
-            $status = "Failed to send email: " . $e->getMessage();
-        }
-    }
-
-    return response()->json([
-        'user' => $user->name,
-        'role' => $user->role,
-        'location' => $locationName,
-        'region' => $region ? $region->name : 'Unknown',
-        'logs' => $logs,
-        'recipients' => $recipients,
-        'status' => $status
-    ]);
+// -----------------------------
+// DEBUG IT STAFF (Who receives emails?)
+// -----------------------------
+// -----------------------------
+// DEBUG IT TARGET (Who are these users?)
+// -----------------------------
+Route::get('/debug-it-target', function () {
+    // SECURITY: Disabled for production
+    abort(404);
 });
 
 // -----------------------------

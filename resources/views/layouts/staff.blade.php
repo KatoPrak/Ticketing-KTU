@@ -12,11 +12,13 @@
     <link rel="icon" type="image/png" href="{{ asset('assets/image/logo-ktu.jpg') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- ✅ Load manual -->
-    <link rel="stylesheet" href="{{ asset('build/assets/user-DyA1Sup2.css') }}">
-    <script src="{{ asset('build/assets/ticket-detail-handler-BwfrPxmv.js') }}"></script>
-    <script src="{{ asset('build/assets/staff-DPXN43Eb.js') }}"></script>
-    <script src="{{ asset('build/assets/user-C_vAJbQx.js') }}"></script>
+    <!-- ✅ Load via Vite (Hot Reload Support) -->
+    @vite([
+        'resources/css/user.css', 
+        'resources/js/ticket-detail-handler.js', 
+        'resources/js/staff.js', 
+        'resources/js/user.js'
+    ])
 
     @yield('styles')
 </head>

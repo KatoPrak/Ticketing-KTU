@@ -124,9 +124,9 @@ class TicketController extends Controller
      */
     public function fetchDashboardTickets()
     {
-        $tickets = Ticket::with(['category', 'user.department', 'department'])
+        $tickets = Ticket::with(['category', 'department'])
             ->where('user_id', auth()->id())
-            ->latest()
+            ->orderByRaw('GREATEST(created_at, IFNULL(updated_at, created_at)) DESC')
             ->take(5)
             ->get();
 
@@ -308,6 +308,21 @@ class TicketController extends Controller
                 }
             }
 
+            // ✅ ANTI-DUPLICATE CHECK
+            // Prevent double submit (Same User + Same Category + Same Description + < 1 min)
+            $isDuplicate = Ticket::where('user_id', $user->id)
+                ->where('category_id', $validated['category_id'])
+                ->where('description', $validated['description'])
+                ->where('created_at', '>=', now()->subMinutes(1))
+                ->exists();
+
+            if ($isDuplicate) {
+                 return response()->json([
+                    'success' => false,
+                    'message' => 'Duplicate ticket detected. Please wait a moment before resubmitting.',
+                ], 429);
+            }
+
             // Create ticket
             $ticket = Ticket::create([
                 'user_id'       => $user->id,
@@ -354,10 +369,9 @@ class TicketController extends Controller
                 }
 
                 if (!empty($recipients)) {
+                    // Optimized: Send single email with multiple recipients (reduces SMTP connection overhead)
                     Mail::to($recipients)->send(new TicketCreatedMail($ticket));
-                    Log::info("Ticket {$ticket->ticket_id} notification sent to: " . implode(', ', $recipients));
-                } else {
-                    Log::warning("Ticket {$ticket->ticket_id} created but no IT recipient found (Region ID: {$targetRegionId}).");
+                    Log::info("Ticket {$ticket->ticket_id} notification sent to " . count($recipients) . " recipients.");
                 }
 
             } catch (\Exception $e) {
@@ -435,8 +449,8 @@ class TicketController extends Controller
                 ->where('user_id', Auth::id())
                 ->findOrFail($id);
 
-            // Handle attachments
-            $ticket->attachments = json_decode($ticket->attachments, true) ?? [];
+            // Handle attachments (Auto-casted by Model)
+            // $ticket->attachments is already an array or null
 
             // ✅ RESPONSE menggunakan accessor dari Model
             return response()->json([

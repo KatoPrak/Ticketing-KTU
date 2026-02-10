@@ -41,33 +41,49 @@ $(document).ready(function () {
 
     function renderAttachments(attachments) {
         try {
-            if (!attachments || attachments.length === 0) {
+            // Robust parsing: Handle if API returns JSON string instead of array
+            if (typeof attachments === 'string') {
+                if (attachments.trim() === '' || attachments === 'null') return '<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>';
+                try {
+                    attachments = JSON.parse(attachments);
+                } catch (e) {
+                    console.warn("Failed to parse attachments JSON string:", e);
+                    return '<span class="text-danger">Invalid attachment format</span>';
+                }
+            }
+
+            if (!attachments || !Array.isArray(attachments) || attachments.length === 0) {
                 return '<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>';
             }
 
-            return attachments.map(file => {
-                const fileUrl = `/storage/${file}`;
-                const fileName = file.split('/').pop();
+            return '<div class="d-flex flex-wrap gap-2">' + attachments.map(file => {
+                // Remove 'public/' prefix if exists (legacy check)
+                const cleanPath = file.replace(/^public\//, '');
+                const fileUrl = `/storage/${cleanPath}`;
+                const fileName = cleanPath.split('/').pop();
                 const isImage = /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(fileName);
 
                 if (isImage) {
                     return `
-                        <div class="mb-2">
-                            <a href="${fileUrl}" target="_blank" class="d-inline-block">
-                                <img src="${fileUrl}" alt="${fileName}" class="img-thumbnail" style="max-height: 100px; max-width: 150px;">
+                        <div class="attachment-item position-relative group">
+                            <a href="${fileUrl}" target="_blank" class="d-block border rounded overflow-hidden shadow-sm transition-transform hover:scale-105" style="width: 100px; height: 100px;" title="${fileName}">
+                                <img src="${fileUrl}" alt="${fileName}" class="w-100 h-100" style="object-fit: cover;">
                             </a>
                         </div>
                     `;
                 } else {
                     return `
-                        <div class="mb-2">
-                            <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-download me-1"></i> ${fileName}
+                        <div class="attachment-item">
+                            <a href="${fileUrl}" target="_blank" class="btn btn-outline-light text-dark border d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px;" title="${fileName}">
+                                <div class="text-center overflow-hidden w-100 px-1">
+                                    <i class="fas fa-file-alt text-secondary mb-1 fa-2x"></i><br>
+                                    <small class="d-block text-truncate w-100" style="font-size: 0.7rem;">${fileName}</small>
+                                </div>
                             </a>
                         </div>
                     `;
                 }
-            }).join('');
+            }).join('') + '</div>';
         } catch (err) {
             console.error("Attachment render error:", err);
             return '<span class="text-danger">Error loading attachments</span>';

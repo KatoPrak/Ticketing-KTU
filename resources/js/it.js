@@ -437,6 +437,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
+
+
             // ✅ Handle attachments
             const attachmentsContainer = document.getElementById('d_attachments');
             if (attachmentsContainer) {
@@ -606,7 +608,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             console.log('📤 Sending update:', payload);
 
-            const res = await fetch(`${BASE_URL} /${id}/update - field`, {
+            const res = await fetch(`${BASE_URL}/${id}/update-field`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -636,7 +638,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (field === 'priority') {
                 select.classList.remove('select-priority-low', 'select-priority-medium', 'select-priority-high', 'select-priority-urgent', 'select-priority-critical');
-                select.classList.add(`select - priority - ${value} `);
+                select.classList.add(`select-priority-${value}`);
             }
 
             Swal.fire({

@@ -48,6 +48,7 @@
                    class="menu-item {{ request()->routeIs('admin.tickets.*') ? 'active' : '' }}">
                     <i class="fas fa-file-pdf"></i>
                     <span>Reports</span>
+                </a>
                 <!-- ✅ Locations - NO data-section -->
                 <a href="{{ route('admin.locations.index') }}" 
                    class="menu-item {{ request()->routeIs('admin.locations.*') ? 'active' : '' }}">

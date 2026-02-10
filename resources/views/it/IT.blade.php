@@ -6,6 +6,51 @@
 
 @push('styles')
     @vite('resources/css/dashboard-it.css')
+    <style>
+        /* Responsive Table Action (Mobile Sticky Columns) */
+        @media (max-width: 767.98px) {
+            /* Sticky Status Column (4th column) - Simple style */
+            .table-responsive th:nth-child(4),
+            .table-responsive td:nth-child(4) {
+                position: sticky !important;
+                right: 100px !important; /* Width of Action column for dashboard */
+                background-color: #fff !important;
+                z-index: 6 !important;
+            }
+            
+            /* Status header */
+            .table-responsive thead th:nth-child(4) {
+                background-color: #f8f9fa !important;
+                z-index: 16 !important;
+            }
+            
+            /* Hover state for status column */
+            .table-hover tbody tr:hover td:nth-child(4) {
+                background-color: inherit !important;
+            }
+            
+            /* Sticky Action Column */
+            .table-responsive th:last-child, 
+            .table-responsive td:last-child {
+                position: sticky;
+                right: 0;
+                background-color: #fff;
+                z-index: 5;
+                box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+                border-left: 1px solid #f0f0f0;
+                text-align: center !important;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            .table-hover tbody tr:hover td:last-child {
+                background-color: #f8f9fa;
+            }
+            /* Header slightly different bg */
+            .table-responsive th:last-child {
+                background-color: #f8f9fa;
+            }
+        }
+    </style>
 @endpush
 
 @push('scripts')

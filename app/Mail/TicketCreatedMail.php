@@ -5,9 +5,10 @@ namespace App\Mail;
 use App\Models\Ticket;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
 
-class TicketCreatedMail extends Mailable
+class TicketCreatedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

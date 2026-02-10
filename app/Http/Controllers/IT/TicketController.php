@@ -154,24 +154,33 @@ class TicketController extends Controller
             $ticket->timestamps = true;
 
             // Send Email Notification
+            // Send Email Notification to ALL IT in Region
             try {
                 $recipients = [];
 
+                // 1. Get All IT Staff in Region
+                if ($regionId) {
+                    $itEmails = User::whereIn('role', ['tim it', 'it'])
+                        ->where('region_id', $regionId)
+                        ->whereNotNull('email')
+                        ->pluck('email')
+                        ->toArray();
+                    $recipients = array_merge($recipients, $itEmails);
+                }
+
+                // 2. Add Assigned IT (Safety net)
                 if ($assignedItId) {
                     $assignedIt = User::find($assignedItId);
                     if ($assignedIt && $assignedIt->email) {
                        $recipients[] = $assignedIt->email;
                     }
-                } 
-                elseif ($regionId) {
-                    $recipients = User::whereIn('role', ['tim it', 'it'])
-                        ->where('region_id', $regionId)
-                        ->pluck('email')
-                        ->toArray();
                 }
+                
+                $recipients = array_unique($recipients);
 
                 if (!empty($recipients)) {
-                   Mail::to($recipients)->send(new TicketCreatedMail($ticket));
+                    // Optimized: Send single email with multiple recipients
+                    Mail::to($recipients)->send(new TicketCreatedMail($ticket));
                 }
             } catch (\Exception $e) {
                 Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
@@ -507,14 +516,12 @@ class TicketController extends Controller
     {
         $currentUser = Auth::user();
 
-        // Base Query with Location Filter
+        // ✅ Base Query with Correct Region Filter
         $baseQuery = Ticket::query()->where(function ($query) use ($currentUser) {
             $query->where('assigned_to', $currentUser->id)
                   ->orWhere(function ($subQuery) use ($currentUser) {
                       $subQuery->whereNull('assigned_to')
-                               ->whereHas('user', function ($q) use ($currentUser) {
-                                   $q->where('location_id', $currentUser->location_id);
-                               });
+                               ->where('region_id', $currentUser->region_id);
                   });
         });
 
@@ -526,12 +533,11 @@ class TicketController extends Controller
 
         $recentTickets = Ticket::with(['category', 'user.location', 'department', 'assignedTo'])
             ->where(function ($query) use ($currentUser) {
+                // Same logic for recent tickets
                 $query->where('assigned_to', $currentUser->id)
                       ->orWhere(function ($subQuery) use ($currentUser) {
                           $subQuery->whereNull('assigned_to')
-                                   ->whereHas('user', function ($q) use ($currentUser) {
-                                       $q->where('location_id', $currentUser->location_id);
-                                   });
+                                   ->where('region_id', $currentUser->region_id);
                       });
             })
             ->orderBy('created_at', 'desc')

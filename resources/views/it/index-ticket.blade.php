@@ -53,7 +53,7 @@
     </div>
 
     <!-- Ticket Table Section -->
-    <div class="bg-white rounded-4 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-4 shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-secondary small text-uppercase">
@@ -80,13 +80,13 @@
                         $rowBorderColor = $priorityColors[$ticket->priority] ?? '#6c757d';
                     @endphp
                     <tr class="ticket-row transition-hover" style="border-left: 5px solid {{ $rowBorderColor }};">
-                        <td class="ps-3">
+                        <td class="ps-3" data-label="Ticket">
                             <span class="text-dark fw-bold">#{{ $ticket->ticket_id }}</span>
                             @if($ticket->transferLogs->isNotEmpty())
                                 <div class="mt-1"><span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Transferred</span></div>
                             @endif
                         </td>
-                        <td>
+                        <td data-label="Requester">
                             <div>
                                 <h6 class="mb-0 small fw-semibold text-dark">{{ $ticket->user->name ?? 'Unknown' }}</h6>
                                 <span class="text-muted extra-small" style="font-size: 11px;">
@@ -94,13 +94,13 @@
                                 </span>
                             </div>
                         </td>
-                        <td style="max-width: 250px;">
+                        <td style="max-width: 250px;" data-label="Issue">
                             <span class="d-block text-truncate text-secondary" style="font-size: 0.95rem;">
                                 {{ $ticket->description }}
                             </span>
                             <small class="text-muted">{{ $ticket->category->name ?? '-' }}</small>
                         </td>
-                        <td>
+                        <td data-label="Status">
                             @php
                                 $statusClasses = [
                                     'waiting' => 'text-secondary bg-light',
@@ -112,14 +112,14 @@
                                 $currStatusClass = $statusClasses[$ticket->status] ?? 'text-secondary bg-light';
                             @endphp
                             <select class="form-select form-select-sm border-0 shadow-none fw-bold {{ $currStatusClass }} update-ticket-field px-3" 
-                                    style="width: auto; cursor: pointer; border-radius: 20px;" 
+                                    style="width: 100%; cursor: pointer; border-radius: 20px;" 
                                     data-id="{{ $ticket->id }}" data-field="status" data-original-value="{{ $ticket->status }}">
                                 @foreach(['waiting','in_progress','pending','resolved','closed'] as $s)
                                 <option value="{{ $s }}" @selected($ticket->status == $s)>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
                                 @endforeach
                             </select>
                         </td>
-                        <td>
+                        <td data-label="Priority">
                             <select class="form-select form-select-sm border-0 shadow-none select-priority-{{$ticket->priority}} update-ticket-field" 
                                     style="width: 100px; cursor: pointer;"
                                     data-id="{{ $ticket->id }}" data-field="priority" data-original-value="{{ $ticket->priority }}">
@@ -128,18 +128,18 @@
                                 @endforeach
                             </select>
                         </td>
-                        <td class="text-muted small">
+                        <td class="text-muted small" data-label="Date">
                             {{ $ticket->created_at->format('d M, H:i') }}
                         </td>
-                        <td class="pe-4 text-end">
+                        <td class="pe-4 text-end" data-label="Action">
                             <button class="btn btn-icon btn-light text-warning rounded-circle btn-transfer-ticket me-1" 
                                     data-id="{{ $ticket->id }}" 
                                     data-region-id="{{ $ticket->region_id }}"
                                     title="Transfer Ticket">
                                 <i class="fas fa-exchange-alt"></i>
                             </button>
-                            <button class="btn btn-icon btn-light text-primary rounded-circle btn-detail-ticket" data-id="{{ $ticket->id }}" title="View Details">
-                                <i class="fas fa-arrow-right"></i>
+                            <button class="btn btn-sm btn-outline-primary btn-detail-ticket" data-id="{{ $ticket->id }}" title="View Details">
+                                <i class="fas fa-eye"></i>
                             </button>
                         </td>
                     </tr>
@@ -173,6 +173,213 @@
 </div>
 
 <style>
+
+/* Mobile Responsive Enhancements */
+@media (max-width: 767.98px) {
+    /* Ensure table-responsive allows sticky positioning */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+        max-width: 100vw;
+    }
+    
+    /* Force table to allow horizontal scroll */
+    .table-responsive table {
+        min-width: 100%;
+        width: max-content;
+    }
+    
+    /* Sticky Table Header - Always visible while scrolling */
+    .table-responsive thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa !important;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* ========================================
+       MOBILE CARD LAYOUT - Show All Columns
+       ======================================== */
+    
+    /* Hide table header on mobile */
+    .table-responsive thead {
+        display: none;
+    }
+    
+    /* Transform table to card layout */
+    .table-responsive,
+    .table-responsive table,
+    .table-responsive tbody {
+        display: block;
+        width: 100%;
+    }
+    
+    .table-responsive tr {
+        display: block;
+        margin-bottom: 1rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 1rem;
+        border-left: 5px solid #0d6efd; /* Keep priority color indicator */
+    }
+    
+    .table-responsive td {
+        display: block;
+        width: 100% !important;
+        padding: 0.5rem 0 !important;
+        border: none !important;
+        text-align: left !important;
+        position: relative !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    
+    /* Add labels before each field - STRENGTHENED */
+    .table-responsive td:before {
+        content: attr(data-label) !important;
+        font-weight: 700 !important;
+        font-size: 0.75rem !important;
+        color: #6c757d !important;
+        text-transform: uppercase !important;
+        display: block !important;
+        margin-bottom: 0.25rem !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ticket ID - First item, larger */
+    .table-responsive td:nth-child(1) {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0d6efd;
+        padding-bottom: 0.75rem !important;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Requester info */
+    .table-responsive td:nth-child(2) {
+        font-size: 0.9rem;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Issue/Problem - FORCE DISPLAY */
+    .table-responsive td:nth-child(3) {
+        font-size: 0.85rem !important;
+        color: #495057 !important;
+        padding-bottom: 0.75rem !important;
+        border-bottom: 1px solid #e9ecef !important;
+        margin-bottom: 0.5rem !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        max-width: 100% !important;
+    }
+    
+    .table-responsive td:nth-child(3) * {
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    /* Status - FORCE DISPLAY */
+    .table-responsive td:nth-child(4) {
+        padding: 0.75rem 0 !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .table-responsive td:nth-child(4) * {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .table-responsive td:nth-child(4) .form-select {
+        font-size: 0.85rem !important;
+        padding: 0.5rem !important;
+        font-weight: 600 !important;
+        width: 100% !important;
+    }
+    
+    /* Priority */
+    .table-responsive td:nth-child(5) {
+        padding: 0.75rem 0 !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    .table-responsive td:nth-child(5) .form-select {
+        font-size: 0.85rem !important;
+        padding: 0.5rem !important;
+        width: 100% !important;
+    }
+    
+    /* Date */
+    .table-responsive td:nth-child(6) {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    /* Action buttons */
+    .table-responsive td:nth-child(7) {
+        padding-top: 1rem !important;
+        border-top: 1px solid #e9ecef;
+        margin-top: 0.5rem;
+        display: flex !important;
+        gap: 0.5rem;
+        justify-content: flex-start;
+    }
+    
+    .table-responsive td:nth-child(7):before {
+        display: none; /* Hide "Action" label */
+    }
+    
+    .table-responsive td:nth-child(7) .btn {
+        flex: 1;
+        margin: 0 !important;
+    }
+    
+    /* Remove sticky positioning on mobile */
+    .table-responsive th,
+    .table-responsive td {
+        position: static !important;
+        right: auto !important;
+    }
+}
+
+    
+    /* Action header needs higher z-index */
+    .table-responsive thead th:last-child {
+        background-color: #f8f9fa !important;
+        z-index: 15 !important;
+    }
+    
+    /* Hover state */
+    .table-hover tbody tr:hover td:last-child {
+        background-color: #f8fafc !important;
+    }
+    
+    /* Ensure buttons are visible and properly sized */
+    .table-responsive td:last-child .btn {
+        margin: 0 2px !important;
+        display: inline-block !important;
+        visibility: visible !important;
+    }
+    
+    /* Make sure action column header text is visible */
+    .table-responsive th:last-child {
+        font-size: 0.75rem !important;
+    }
+}
+
+
+
 /* Custom Tweaks for "Simpler Modern" look */
 .table-hover tbody tr:hover {
     background-color: #f8fafc;
@@ -227,6 +434,8 @@
     border-radius: 8px; /* Maintain shape for next/prev */
     font-size: 0.9rem;
 }
+
+
 
 </style>
 
@@ -469,18 +678,21 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get current region from data-region-id attribute on the button
             const currentRegionId = this.dataset.regionId;
             
-            document.getElementById('transfer_ticket_id').value = transferTicketId;
+            const inputTicketId = document.getElementById('transfer_ticket_id');
+            if (inputTicketId) inputTicketId.value = transferTicketId;
             
             // Filter options
             const select = document.getElementById('transfer_region');
-            Array.from(select.options).forEach(option => {
-                if(option.value == currentRegionId) {
-                    option.style.display = 'none';
-                    if(option.selected) select.value = "";
-                } else {
-                    option.style.display = '';
-                }
-            });
+            if(select) {
+                select.value = ""; // Reset logic
+                Array.from(select.options).forEach(option => {
+                    if(option.value == currentRegionId) {
+                        option.style.display = 'none';
+                    } else {
+                        option.style.display = '';
+                    }
+                });
+            }
 
             transferModal.show();
         });
@@ -535,6 +747,22 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = false;
             btn.innerHTML = originalText;
         });
+    });
+
+    // --------------------------------------------------------------------------
+    // FIX ARIA-HIDDEN ACCESSIBILITY WARNINGS
+    // --------------------------------------------------------------------------
+    // Remove focus from modal elements before they are hidden
+    document.getElementById('transferTicketModal')?.addEventListener('hide.bs.modal', function() {
+        if (document.activeElement && this.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+    });
+    
+    document.getElementById('detailTicketModal')?.addEventListener('hide.bs.modal', function() {
+        if (document.activeElement && this.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
     });
 
 });
