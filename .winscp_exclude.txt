@@ -1,0 +1,57 @@
+# File dan folder yang TIDAK perlu di-upload ke server
+# Gunakan ini sebagai referensi saat upload via WinSCP
+
+# Dependencies (akan di-install di server)
+node_modules/
+vendor/
+
+# Environment files (gunakan .env.production sebagai template)
+.env
+
+# Cache dan temporary files
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+bootstrap/cache/*
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Debug files
+debug_notification.json
+debug_staff.txt
+logread.js
+
+# Build files (akan di-build di server)
+public/build/
+public/hot
+
+# Testing
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Documentation (opsional, bisa di-upload jika diperlukan)
+README.md
+DEPLOYMENT_GUIDE.md
+
+# IDE Helper (tidak diperlukan di production)
+_ide_helper.php
+.phpstorm.meta.php
+
+# Package lock files (sudah ada composer.lock dan package-lock.json)
+# Tapi tetap upload composer.lock dan package-lock.json!
