@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TicketCreatedMail;
 use Illuminate\Support\Facades\Log;
 use App\Mail\TicketResolvedMail;
+use App\Mail\TicketClosedNotification;
 
 class TicketController extends Controller
 {
@@ -340,9 +341,16 @@ class TicketController extends Controller
             // Send Email to User ONLY if Closed
             if ($value === 'closed') {
                 try {
-                    Mail::to($ticket->user->email)->send(new TicketResolvedMail($ticket));
+                    $ticket->load('user'); // Ensure user is loaded
+                    if ($ticket->user && $ticket->user->email) {
+                        Mail::to($ticket->user->email)->send(new TicketClosedNotification(
+                            $ticket, 
+                            Auth::user()->name,
+                            $ticket->resolution_notes
+                        ));
+                    }
                 } catch (\Exception $e) {
-                    Log::error('Failed to send resolution email: ' . $e->getMessage());
+                    Log::error('Failed to send ticket closed email: ' . $e->getMessage());
                 }
             }
             
