@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TicketCreatedMail;
 use Illuminate\Support\Facades\Log;
 use App\Mail\TicketResolvedMail;
+use App\Mail\TicketTransferredNotification;
 use App\Mail\TicketClosedNotification;
 
 class TicketController extends Controller
@@ -455,14 +456,43 @@ class TicketController extends Controller
 
         $ticket->save();
 
-        // Optional: Send email to the new assignee
+        // Send Email to New Region IT Staff
         try {
+            $recipients = [];
+
+            // 1. Get All IT Staff in New Region
+            $newRegionITs = User::whereIn('role', ['tim it', 'it'])
+                ->where('region_id', $regionId)
+                ->whereNotNull('email')
+                ->pluck('email')
+                ->toArray();
+            $recipients = array_merge($recipients, $newRegionITs);
+
+            // 2. Add Assigned IT (Safety net)
             if ($assignedIt && $assignedIt->email) {
-                 // Send email notification about transfer
-                 // Mail::to($assignedIt->email)->send(new TicketAssignedMail($ticket));
+                $recipients[] = $assignedIt->email;
+            }
+
+            $recipients = array_unique($recipients);
+
+            if (!empty($recipients)) {
+                // Get Old Region Data safely
+                $oldRegionId = $ticket->transferLogs->last()->from_region_id ?? null;
+                $oldRegion = $oldRegionId ? \App\Models\Region::find($oldRegionId) : new \stdClass();
+                if (!isset($oldRegion->name)) $oldRegion->name = "Unknown Region";
+
+                Log::info("Sending Transfer Email to: " . implode(',', $recipients));
+                
+                Mail::to($recipients)->send(new TicketTransferredNotification(
+                    $ticket,
+                    Auth::user()->name,
+                    $oldRegion, // From Region object
+                    $region,    // To Region object
+                    $request->note
+                ));
             }
         } catch (\Exception $e) {
-            // Log error
+            Log::error('Failed to send transfer email: ' . $e->getMessage());
         }
 
         $message = "Ticket transferred to Region: {$regionName}";
