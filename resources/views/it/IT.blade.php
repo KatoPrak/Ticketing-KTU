@@ -89,7 +89,7 @@
                             <th>Ticket ID</th>
                             <th>Location</th>
                             <th>Name</th>
-                            <th>Issue/Problem</th>
+                            <th>Problem</th>
                             <th>Status</th>
                             <th>Priority</th>
                             <th>Report Date</th>

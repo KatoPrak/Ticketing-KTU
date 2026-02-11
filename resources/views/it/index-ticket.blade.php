@@ -58,9 +58,9 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-secondary small text-uppercase">
                     <tr>
-                        <th class="py-3 ps-4 border-0 rounded-start-4">Ticket</th>
+                        <th class="py-3 ps-4 border-0 rounded-start-4">Ticket ID</th>
                         <th class="py-3 border-0">Requester</th>
-                        <th class="py-3 border-0">Issue</th>
+                        <th class="py-3 border-0">Problem</th>
                         <th class="py-3 border-0">Status</th>
                         <th class="py-3 border-0">Priority</th>
                         <th class="py-3 border-0">Date</th>
@@ -81,7 +81,7 @@
                     @endphp
                     <tr class="ticket-row transition-hover" style="border-left: 5px solid {{ $rowBorderColor }};">
                         <td class="ps-3" data-label="Ticket">
-                            <span class="text-dark fw-bold">#{{ $ticket->ticket_id }}</span>
+                            <span class="text-dark fw-bold">{{ $ticket->ticket_id }}</span>
                             @if($ticket->transferLogs->isNotEmpty())
                                 <div class="mt-1"><span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Transferred</span></div>
                             @endif
