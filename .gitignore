@@ -7,7 +7,6 @@
 /vendor
 .env
 .env.backup
-.env.production
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
@@ -17,3 +16,28 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Laravel cache and logs
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/bootstrap/cache/*
+
+# Keep .gitkeep files
+!**/.gitkeep
+
+# Debug files
+debug_notification.json
+debug_staff.txt
+logread.js
+
+# IDE helper files
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,8 +1,8 @@
-# Panduan Deployment Laravel ke Ubuntu Server
+# Panduan Deployment Laravel ke Ubuntu Server (via Git)
 
-## Persiapan Sebelum Upload
+## Persiapan Sebelum Push ke Git
 
-### 1. File yang TIDAK perlu di-upload (sudah ada di .gitignore):
+### 1. File yang TIDAK akan di-commit (sudah ada di .gitignore):
 - `node_modules/` - akan di-install ulang di server
 - `vendor/` - akan di-install ulang di server
 - `.env` - gunakan `.env.production` sebagai template
@@ -11,11 +11,34 @@
 - `storage/framework/views/*`
 - `storage/logs/*`
 
-### 2. Pastikan file berikut ada:
+### 2. Pastikan file berikut sudah di-commit:
 - `.env.production` (template untuk production)
 - `deploy.sh` (script deployment)
 - `composer.json` dan `composer.lock`
 - `package.json` dan `package-lock.json`
+- `nginx.conf` (konfigurasi Nginx)
+
+### 3. Setup Git Repository (jika belum)
+
+```bash
+# Di Windows (local)
+cd d:\laragon\www\ticketing
+
+# Initialize git (jika belum)
+git init
+
+# Add semua file
+git add .
+
+# Commit
+git commit -m "Initial commit for production deployment"
+
+# Add remote repository (GitHub/GitLab/Bitbucket)
+git remote add origin https://github.com/username/ticketing.git
+
+# Push ke repository
+git push -u origin main
+```
 
 ## Langkah-langkah Deployment
 
@@ -70,20 +93,38 @@ sudo mkdir -p /var/www/ticketing
 sudo chown -R $USER:$USER /var/www/ticketing
 ```
 
-### B. Upload Project via WinSCP
+### B. Clone Project dari Git Repository
 
-#### 1. Koneksi WinSCP
-- **Host**: IP Server Ubuntu Anda
-- **Port**: 22
-- **Username**: username SSH Anda
-- **Password**: password SSH Anda
-- **Protocol**: SFTP
+#### 1. SSH ke Server Ubuntu
 
-#### 2. Upload Files
-- Upload semua file KECUALI: `node_modules/`, `vendor/`, `.env`
-- Upload ke direktori: `/var/www/ticketing`
+```bash
+# Dari Windows, gunakan PowerShell atau PuTTY
+ssh username@your-server-ip
+```
 
-#### 3. File yang Harus Di-upload:
+#### 2. Install Git (jika belum ada)
+
+```bash
+sudo apt install git -y
+```
+
+#### 3. Clone Repository
+
+```bash
+# Masuk ke direktori web
+cd /var/www
+
+# Clone repository (gunakan URL repository Anda)
+sudo git clone https://github.com/username/ticketing.git ticketing
+
+# Atau jika menggunakan SSH key
+sudo git clone git@github.com:username/ticketing.git ticketing
+
+# Set ownership
+sudo chown -R $USER:$USER /var/www/ticketing
+```
+
+#### 4. Struktur Project yang Akan Ter-clone:
 ```
 /var/www/ticketing/
 ├── app/
@@ -103,6 +144,7 @@ sudo chown -R $USER:$USER /var/www/ticketing
 ├── package.json
 ├── package-lock.json
 ├── deploy.sh
+├── nginx.conf
 ├── vite.config.js
 └── README.md
 ```
@@ -269,11 +311,45 @@ php artisan view:clear
 
 ## Maintenance Commands
 
-### Update Aplikasi
+### Update Aplikasi (dari Git)
 ```bash
+# SSH ke server
+ssh username@your-server-ip
+
+# Masuk ke direktori project
 cd /var/www/ticketing
-git pull origin main  # jika menggunakan git
+
+# Pull perubahan terbaru dari Git
+git pull origin main
+
+# Jalankan deployment script
 ./deploy.sh
+
+# Atau manual:
+composer install --optimize-autoloader --no-dev
+npm install
+npm run build
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+### Push Update dari Local ke Server
+```bash
+# Di Windows (local)
+cd d:\laragon\www\ticketing
+
+# Add perubahan
+git add .
+
+# Commit
+git commit -m "Deskripsi perubahan"
+
+# Push ke repository
+git push origin main
+
+# Kemudian di server, jalankan git pull
 ```
 
 ### Backup Database
@@ -295,10 +371,13 @@ sudo tail -f /var/log/nginx/error.log
 
 ## Checklist Deployment
 
+- [ ] Git repository sudah dibuat (GitHub/GitLab/Bitbucket)
+- [ ] Project sudah di-push ke Git repository
 - [ ] Server Ubuntu sudah terinstall dan bisa diakses via SSH
+- [ ] Git sudah terinstall di server
 - [ ] PHP 8.1, Nginx, MySQL, Composer, Node.js sudah terinstall
 - [ ] Database MySQL sudah dibuat
-- [ ] Project sudah di-upload via WinSCP
+- [ ] Project sudah di-clone dari Git repository
 - [ ] File `.env` sudah dikonfigurasi dengan benar
 - [ ] Script `deploy.sh` sudah dijalankan
 - [ ] Nginx sudah dikonfigurasi dan restart
