@@ -340,18 +340,25 @@ class TicketController extends Controller
 
             // Send Email to User ONLY if Closed
             if ($value === 'closed') {
+                Log::info('Ticket status changed to CLOSED. Attempting to send email for Ticket ID: ' . $ticket->id);
                 try {
                     $ticket->load('user'); // Ensure user is loaded
                     if ($ticket->user && $ticket->user->email) {
+                        Log::info('Sending email to: ' . $ticket->user->email);
                         Mail::to($ticket->user->email)->send(new TicketClosedNotification(
                             $ticket, 
                             Auth::user()->name,
                             $ticket->resolution_notes
                         ));
+                        Log::info('Email sent successfully.');
+                    } else {
+                        Log::warning('User email not found for ticket: ' . $ticket->id);
                     }
                 } catch (\Exception $e) {
                     Log::error('Failed to send ticket closed email: ' . $e->getMessage());
                 }
+            } else {
+                Log::info('Status update: ' . $value . ' (Not trigger closed email)');
             }
             
         } else {
