@@ -6,7 +6,6 @@
 
 @push('styles')
     @vite('resources/css/dashboard-it.css')
-    @vite('resources/css/mobile-table.css')
 @endpush
 
 @push('scripts')
