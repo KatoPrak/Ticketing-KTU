@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Ticket List')
+@section('title', 'All Tickets')
+
 
 @push('styles')
 

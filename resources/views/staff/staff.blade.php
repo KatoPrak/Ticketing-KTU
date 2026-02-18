@@ -1,6 +1,7 @@
 @extends('layouts.staff')
 
 @section('title', 'Staff Dashboard')
+
 @section('body-class', 'page-staff-dashboard')
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -1420,15 +1421,18 @@ if (window.orientation !== undefined) {
                                                 <th scope="col" class="border-0 text-uppercase text-muted small fw-semibold py-3">
                                                     <i class="fas fa-flag me-2"></i>Priority
                                                 </th>
-                                                <th scope="col" class="border-0 text-uppercase text-muted small fw-semibold py-3 text-end">
+                                                <th scope="col" class="border-0 text-uppercase text-muted small fw-semibold py-3">
                                                     <i class="fas fa-info-circle me-2"></i>Status
+                                                </th>
+                                                <th scope="col" class="border-0 text-uppercase text-muted small fw-semibold py-3 text-end">
+                                                    Action
                                                 </th>
                                             </tr>
                                         </thead>
                                         <tbody id="ticket-list-body">
                                             {{-- Loading State --}}
                                             <tr id="tickets-loading">
-                                                <td colspan="4" class="text-center py-5">
+                                                <td colspan="5" class="text-center py-5">
                                                     <div class="spinner-border text-primary" role="status">
                                                         <span class="visually-hidden">Loading...</span>
                                                     </div>
@@ -1907,25 +1911,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     const row = document.createElement('tr');
                     
                     // Priority Badge
-                    let priorityBadgeClass = 'bg-info';
-                    if (ticket.priority === 'urgent') priorityBadgeClass = 'bg-danger';
-                    if (ticket.priority === 'medium') priorityBadgeClass = 'bg-warning text-dark';
-                    
+                    const p = (ticket.priority || '').toLowerCase();
+                    let priorityBadgeClass = 'bg-secondary';
+                    if (p === 'low')      priorityBadgeClass = 'bg-success';
+                    if (p === 'medium')   priorityBadgeClass = 'bg-warning text-dark';
+                    if (p === 'high')     priorityBadgeClass = 'bg-danger';
+                    if (p === 'urgent')   priorityBadgeClass = 'bg-danger';
+                    if (p === 'critical') priorityBadgeClass = 'bg-dark';
+
                     // Status Badge
+                    const s = (ticket.status || '').toLowerCase();
                     let statusBadgeClass = 'bg-secondary';
-                    if (ticket.status === 'waiting') statusBadgeClass = 'bg-info';
-                    if (ticket.status === 'in_progress') statusBadgeClass = 'bg-warning text-dark';
-                    if (ticket.status === 'resolved') statusBadgeClass = 'bg-success';
+                    if (s === 'open')        statusBadgeClass = 'bg-success';
+                    if (s === 'waiting')     statusBadgeClass = 'bg-info';
+                    if (s === 'in_progress') statusBadgeClass = 'bg-warning text-dark';
+                    if (s === 'pending')     statusBadgeClass = 'bg-warning text-dark';
+                    if (s === 'resolved')    statusBadgeClass = 'bg-primary';
+                    if (s === 'closed')      statusBadgeClass = 'bg-secondary';
                     
                     row.innerHTML = `
-                        <td class="py-3 ps-3 align-middle">
+                        <td class="py-2 ps-3 align-middle">
                             <div class="d-flex align-items-center">
                                 <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                     <i class="fas fa-ticket-alt text-primary"></i>
                                 </div>
                                 <div>
                                     <a href="#" class="fw-bold text-dark text-decoration-none btn-detail-ticket" data-id="${ticket.id}">
-                                        #${ticket.ticket_id || ticket.id}
+                                        ${ticket.ticket_id || ticket.id}
                                     </a>
                                     <div class="small text-muted" style="font-size: 0.75rem;">
                                         <i class="fas fa-history me-1"></i>${ticket.updated_at_formatted || ticket.created_at_formatted || 'Just now'}
@@ -1933,7 +1945,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3 align-middle">
+                        <td class="py-2 align-middle">
                             <div class="d-flex flex-column">
                                 <div class="text-dark fw-medium text-truncate" style="max-width: 220px;" title="${ticket.description || ''}">
                                     ${ticket.description ? ticket.description : '-'}
@@ -1943,20 +1955,20 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3 align-middle">
+                        <td class="py-2 align-middle">
                             <span class="badge ${priorityBadgeClass} rounded-pill px-3 py-2" style="font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px;">
                                 ${ticket.priority ? ticket.priority.toUpperCase() : '-'}
                             </span>
                         </td>
-                        <td class="py-3 align-middle text-end pe-3">
-                            <div class="d-flex flex-column align-items-end">
-                                <span class="badge ${statusBadgeClass} rounded-pill px-3 py-2 mb-2" style="font-size: 0.7rem; font-weight: 600;">
-                                    ${ticket.status ? ticket.status.replace('_', ' ').toUpperCase() : '-'}
-                                </span>
-                                <button class="btn btn-sm btn-outline-primary btn-detail-ticket rounded-pill px-3 py-1" data-id="${ticket.id}" style="font-size: 0.75rem;">
-                                    <i class="fas fa-eye me-1"></i>View
-                                </button>
-                            </div>
+                        <td class="py-2 align-middle">
+                            <span class="badge ${statusBadgeClass} rounded-pill px-3 py-2" style="font-size: 0.7rem; font-weight: 600;">
+                                ${ticket.status ? ticket.status.replace('_', ' ').toUpperCase() : '-'}
+                            </span>
+                        </td>
+                        <td class="py-2 align-middle text-end pe-3">
+                            <button class="btn btn-sm btn-outline-primary btn-detail-ticket rounded-pill px-3 py-1" data-id="${ticket.id}" style="font-size: 0.75rem;">
+                                <i class="fas fa-eye me-1"></i>View
+                            </button>
                         </td>
                     `;
                     ticketListBody.appendChild(row);
@@ -1976,6 +1988,8 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchDashboardTickets();
 });
 </script>
+
+
 
 </div> <!-- end zoom -->
 

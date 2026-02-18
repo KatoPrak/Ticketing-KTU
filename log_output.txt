@@ -1,0 +1,46 @@
+=== Last 5 'notifikasi' entries ===
+--- Match 1 ---
+naldi2@gmail.com","user":"Staff User"} 
+[2025-10-13 23:30:22] local.INFO: Email notifikasi tiket berhasil dikirim {"ticket_id":"T-KTU-107","to":"irvanronaldi2@gmail.com","user":"Staff User"} 
+[2025-10-13 23:35:08] local.ERROR: Undefined variable $historyTickets {"view":{"view":"D:\\laragon\\www\\Ticketing-KTU\\resources\\views\\
+
+--- Match 2 ---
+soleOutput))
+#33 {main}
+"} 
+[2026-02-18 14:30:07] local.INFO: Ticket 260218-004 notifikasi terkirim ke ghilfal.bq@gmail.com (Region: Regional 3).  
+[2026-02-18 14:30:10] local.ERROR: Failed to authenticate on SMTP server with username "ferdinal.sukman@ktushipyard.com" using the following authenticators: "LOGIN", "PLAIN", "XOAUTH
+
+--- Match 3 ---
+soleOutput))
+#33 {main}
+"} 
+[2026-02-18 14:48:46] local.INFO: Ticket 260218-005 notifikasi terkirim ke 1 Tim IT: wakuwakuuu70@gmail.com  
+[2026-02-18 14:48:49] local.ERROR: Failed to authenticate on SMTP server with username "ferdinal.sukman@ktushipyard.com" using the following authenticators: "LOGIN", "PLAIN", "XOAUTH2". Authen
+
+--- Match 4 ---
+soleOutput))
+#33 {main}
+"} 
+[2026-02-18 14:58:00] local.INFO: Ticket 260218-006 notifikasi terkirim ke 1 Tim IT: wakuwakuuu70@gmail.com  
+[2026-02-18 14:58:05] local.ERROR: Failed to authenticate on SMTP server with username "ferdinal.sukman@ktushipyard.com" using the following authenticators: "LOGIN", "PLAIN", "XOAUTH2". Authen
+
+--- Match 5 ---
+soleOutput))
+#33 {main}
+"} 
+[2026-02-18 14:59:38] local.INFO: Ticket 260218-007 notifikasi terkirim ke 1 Tim IT: wakuwakuuu70@gmail.com  
+[2026-02-18 14:59:43] local.ERROR: Failed to authenticate on SMTP server with username "ferdinal.sukman@ktushipyard.com" using the following authenticators: "LOGIN", "PLAIN", "XOAUTH2". Authen
+
+
+=== Last 'gagal dikirim' ===
+a period of time, or established connection failed because connected host has failed to respond)"} 
+[2026-02-11 13:55:39] local.WARNING: Email ticket gagal dikirim {"error":"Connection could not be established with host \"ssl://smtp.gmail.com:465\": stream_socket_client(): Unable to connect to ssl://smtp.gmail.com:465 (A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond)"} 
+[2026-02-11 15:32:22] local.ERROR: Failed to send ticket closed email: Connection could not 
+
+=== Last '535' error ===
+ to
+
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ad1a741e5bsm118765645ad.40 - gsmtp\".\". Authenticator \"PLAIN\" returned \"Expected response code \"235\" but got code \"535\", with message \"535-5.7.8 Username and Password not accepted. For more information, go to
+
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2ad1a741e5bsm118765645ad.40 - gsmtp\".\". Authenticator \"XOAUTH2\" returned \"Expected response code \"235\" but got code \"334\", with message \"334 eyJzdGF0dXMiOiI0MDAiLCJzY2hlbWVzIjoiQmVhcmVyIiwic2NvcGUiOiJodHRwczovL21haWwuZ29vZ2xlLmNvbS8ifQ==\".\". in D:\\laragon\\www\\ticketing\\vendor\\symfony\\mailer\\Transport\\Smt

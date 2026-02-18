@@ -1,6 +1,7 @@
 @extends('layouts.staff')
 
-@section('title', 'Ticket List')
+@section('title', 'My Tickets')
+
 @section('body-class', 'page-it-tickets')
 <link rel="stylesheet" href="{{ asset('build/assets/list-tiket-C-bDVq2X.css') }}">
 
@@ -588,14 +589,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
 
         
-        // TICKET DETAIL HANDLER
-        if (e.target.closest('.btn-detail-ticket')) {
-            const button = e.target.closest('.btn-detail-ticket');
-            const ticketId = button.getAttribute('data-id');
-            console.log('👁️ View details for ticket:', ticketId);
-            // Add your detail modal logic here
-        }
+        // TICKET DETAIL HANDLER is managed by ticket-detail-handler.js (loaded globally)
     });
+
 
     // ⭐ STAR RATING HANDLER
     const stars = document.querySelectorAll('.star-rating .star');

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin - @yield('title', 'Dashboard')</title>
+    <title>@yield('title', 'Dashboard') | KTU Ticketing</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="{{ asset('assets/image/logo-ktu.jpg') }}">
     
@@ -49,11 +49,17 @@
                     <i class="fas fa-file-pdf"></i>
                     <span>Reports</span>
                 </a>
-                <!-- ✅ Locations - NO data-section -->
+                <!-- ✅ Locations -->
                 <a href="{{ route('admin.locations.index') }}" 
                    class="menu-item {{ request()->routeIs('admin.locations.*') ? 'active' : '' }}">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>Locations</span>
+                </a>
+                <!-- ✅ Regions -->
+                <a href="{{ route('admin.regions.index') }}" 
+                   class="menu-item {{ request()->routeIs('admin.regions.*') ? 'active' : '' }}">
+                    <i class="fas fa-globe-asia"></i>
+                    <span>Regions</span>
                 </a>
             </div>
         </div>

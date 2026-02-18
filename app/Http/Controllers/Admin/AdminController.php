@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -99,24 +100,25 @@ public function showUsers()
     public function storeUser(Request $request)
 {
     $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'id_staff' => 'required|string|max:50|unique:users,id_staff',
-        'email' => 'required|email|unique:users,email',
-        'role' => 'required|string',
+        'name'          => 'required|string|max:255',
+        'id_staff'      => 'required|string|max:50|unique:users,id_staff',
+        'email'         => 'nullable|email|unique:users,email',
+        'role'          => 'required|string',
         'department_id' => 'required|exists:departments,id',
-        'location_id' => 'nullable|exists:locations,id',
-        'region_id' => 'nullable|exists:regions,id',
+        'location_id'   => 'nullable|exists:locations,id',
+        'region_id'     => 'nullable|exists:regions,id',
+        'password'      => 'required|string|min:6',
     ]);
 
     $user = new User();
-    $user->name = $validated['name'];
-    $user->id_staff = $validated['id_staff'];
-    $user->email = $validated['email'];
-    $user->role = $validated['role'];
+    $user->name          = $validated['name'];
+    $user->id_staff      = Str::lower($validated['id_staff']);
+    $user->email         = $validated['email'] ?? null;
+    $user->role          = $validated['role'];
     $user->department_id = $validated['department_id'];
-    $user->location_id = $validated['location_id'];
-    $user->region_id = $validated['region_id'] ?? null;
-    $user->password = Hash::make($request->input('password', 'STAFFKTU123'));
+    $user->location_id   = $validated['location_id'] ?? null;
+    $user->region_id     = $validated['region_id'] ?? null;
+    $user->password      = Hash::make($validated['password']);
     $user->save();
 
     return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan!');
@@ -128,24 +130,33 @@ public function showUsers()
     $user = User::findOrFail($id);
 
     $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'id_staff' => 'required|string|max:50|unique:users,id_staff,' . $user->id,
-        'email' => 'required|email|unique:users,email,' . $user->id,
-        'role' => 'required|string',
+        'name'          => 'required|string|max:255',
+        'id_staff'      => 'required|string|max:50|unique:users,id_staff,' . $user->id,
+        'email'         => 'nullable|email|unique:users,email,' . $user->id,
+        'role'          => 'required|string',
         'department_id' => 'required|exists:departments,id',
-        'location_id' => 'nullable|exists:locations,id',
-        'region_id' => 'nullable|exists:regions,id',
+        'location_id'   => 'nullable|exists:locations,id',
+        'region_id'     => 'nullable|exists:regions,id',
+        'password'      => 'nullable|string|min:6',
     ]);
 
-    $user->update([
-        'name' => $validated['name'],
-        'id_staff' => $validated['id_staff'],
-        'email' => $validated['email'],
-        'role' => $validated['role'],
+    $updateData = [
+        'name'          => $validated['name'],
+        'id_staff'      => Str::lower($validated['id_staff']),
+        'email'         => $validated['email'] ?? null,
+        'role'          => $validated['role'],
         'department_id' => $validated['department_id'],
-        'location_id' => $validated['location_id'],
-        'region_id' => $validated['region_id'] ?? null,
-    ]);
+        'location_id'   => $validated['location_id'] ?? null,
+        'region_id'     => $validated['region_id'] ?? null,
+    ];
+
+    // Only update password if a new one was submitted
+    $newPassword = $request->input('password');
+    if (!empty($newPassword)) {
+        $updateData['password'] = Hash::make($newPassword);
+    }
+
+    $user->update($updateData);
 
     return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui!');
 }

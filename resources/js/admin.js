@@ -66,30 +66,28 @@ function openUserModal() {
 
     // Remove _method input if exists (for add mode)
     const methodInput = form.querySelector('input[name="_method"]');
-    if (methodInput) {
-        methodInput.remove();
-    }
+    if (methodInput) methodInput.remove();
 
     // Reset user_id hidden field
     const userIdInput = form.querySelector('#user_id');
-    if (userIdInput) {
-        userIdInput.value = '';
-    }
-
-    // Clear password requirement message
-    const passwordHelp = form.querySelector('#passwordHelp');
-    if (passwordHelp) {
-        passwordHelp.textContent = 'Leave blank to keep current password';
-        passwordHelp.style.display = 'none';
-    }
-
-    // Make password required for new user
-    const passwordInput = form.querySelector('#password');
-    if (passwordInput) {
-        passwordInput.required = true;
-    }
+    if (userIdInput) userIdInput.value = '';
 
     currentEditUserId = null;
+
+    // ── PASSWORD: show ADD section, hide EDIT section ──
+    document.getElementById('passwordAddSection').style.display = 'block';
+    document.getElementById('passwordEditSection').style.display = 'none';
+
+    // Reset to default password mode
+    const useDefault = document.getElementById('useDefaultPassword');
+    const manualField = document.getElementById('manualPasswordField');
+    const defaultInput = document.getElementById('defaultPasswordInput');
+    const passwordInput = document.getElementById('password');
+
+    if (useDefault) useDefault.checked = true;
+    if (manualField) manualField.style.display = 'none';
+    if (defaultInput) defaultInput.value = 'STAFFKTU123';
+    if (passwordInput) passwordInput.value = '';
 
     // Show modal
     const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -202,17 +200,17 @@ function editUser(id) {
                 if (roleSelect) roleSelect.dispatchEvent(new Event('change'));
             }
 
-            // Make password optional for edit
-            if (passwordInput) {
-                passwordInput.required = false;
-                passwordInput.value = '';
-            }
+            // ── PASSWORD: switch to EDIT section ──
+            document.getElementById('passwordAddSection').style.display = 'none';
+            document.getElementById('passwordEditSection').style.display = 'block';
 
-            // Show password help text
-            if (passwordHelp) {
-                passwordHelp.textContent = 'Leave blank to keep current password';
-                passwordHelp.style.display = 'block';
-            }
+            // Reset change-password checkbox
+            const changePasswordCb = document.getElementById('changePassword');
+            const editPasswordField = document.getElementById('editPasswordField');
+            const editPasswordInput = document.getElementById('editPassword');
+            if (changePasswordCb) changePasswordCb.checked = false;
+            if (editPasswordField) editPasswordField.style.display = 'none';
+            if (editPasswordInput) { editPasswordInput.disabled = true; editPasswordInput.value = ''; }
 
             // Remove loading state
             if (modalBody) {
@@ -487,15 +485,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const role = roleSelect.value;
         const isIT = (role === 'tim it' || role === 'it');
         const isUser = (role === 'user' || role === 'staff');
-
-        // Logic based on requirements:
-        // User -> Location (Required), Region (Hidden)
-        // IT -> Region (Required), Location (Hidden or Optional?) 
-        // User said: "Staff IT tidak pegang lokasi, tapi pegang REGIONAL"
+        const emailItNote = document.getElementById('emailItNote');
 
         if (isIT) {
             if (regionField) regionField.style.display = 'block';
             if (locationField) locationField.style.display = 'none';
+            if (emailItNote) emailItNote.style.display = 'block';
 
             if (regionSelect) regionSelect.required = true;
             if (locationSelect) {
@@ -506,6 +501,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Default (User/Staff)
             if (regionField) regionField.style.display = 'none';
             if (locationField) locationField.style.display = 'block';
+            if (emailItNote) emailItNote.style.display = 'none';
 
             if (regionSelect) {
                 regionSelect.required = false;
@@ -521,7 +517,85 @@ document.addEventListener('DOMContentLoaded', function () {
         updateFieldsVisibility();
     }
 
-    // Ensure backdrop and form are cleaned up when modal closes
+    // ── PASSWORD CHECKBOX LOGIC ──
+
+    // References
+    const useDefaultCb = document.getElementById('useDefaultPassword');
+    const manualPasswordField = document.getElementById('manualPasswordField');
+    const defaultPasswordInput = document.getElementById('defaultPasswordInput'); // the ONE hidden input with name="password"
+    const manualPasswordInput = document.getElementById('password');             // no name, just for typing
+
+    const changePasswordCb = document.getElementById('changePassword');
+    const editPasswordField = document.getElementById('editPasswordField');
+    const editPasswordInput = document.getElementById('editPassword');            // no name, just for typing
+
+    // ADD mode: toggle between default and manual password
+    if (useDefaultCb) {
+        useDefaultCb.addEventListener('change', function () {
+            if (this.checked) {
+                // Revert to default
+                manualPasswordField.style.display = 'none';
+                manualPasswordInput.value = '';
+                defaultPasswordInput.value = 'STAFFKTU123';
+            } else {
+                // Show manual input
+                manualPasswordField.style.display = 'block';
+                defaultPasswordInput.value = ''; // clear so manual value takes over on submit
+                manualPasswordInput.focus();
+            }
+        });
+
+        // Sync manual input → hidden input in real-time
+        if (manualPasswordInput) {
+            manualPasswordInput.addEventListener('input', function () {
+                if (!useDefaultCb.checked) {
+                    defaultPasswordInput.value = this.value;
+                }
+            });
+        }
+    }
+
+    // ADD mode: show/hide password visibility
+    const toggleVisibilityCb = document.getElementById('togglePasswordVisibility');
+    if (toggleVisibilityCb && manualPasswordInput) {
+        toggleVisibilityCb.addEventListener('change', function () {
+            manualPasswordInput.type = this.checked ? 'text' : 'password';
+        });
+    }
+
+    // EDIT mode: toggle change password
+    if (changePasswordCb) {
+        changePasswordCb.addEventListener('change', function () {
+            if (this.checked) {
+                editPasswordField.style.display = 'block';
+                editPasswordInput.focus();
+            } else {
+                editPasswordField.style.display = 'none';
+                editPasswordInput.value = '';
+                // Clear the hidden input so no password is sent
+                defaultPasswordInput.value = '';
+            }
+        });
+
+        // Sync edit password input → hidden input in real-time
+        if (editPasswordInput) {
+            editPasswordInput.addEventListener('input', function () {
+                if (changePasswordCb.checked) {
+                    defaultPasswordInput.value = this.value;
+                }
+            });
+        }
+    }
+
+    // EDIT mode: show/hide password visibility
+    const toggleEditVisibilityCb = document.getElementById('toggleEditPasswordVisibility');
+    if (toggleEditVisibilityCb && editPasswordInput) {
+        toggleEditVisibilityCb.addEventListener('change', function () {
+            editPasswordInput.type = this.checked ? 'text' : 'password';
+        });
+    }
+
+    // ── MODAL CLOSE CLEANUP ──
     const userModalEl = document.getElementById('userModal');
     if (userModalEl) {
         userModalEl.addEventListener('hidden.bs.modal', function () {
@@ -532,7 +606,16 @@ document.addEventListener('DOMContentLoaded', function () {
             // Reset visibility
             updateFieldsVisibility();
 
-            // Remove any stuck backdrops
+            // Reset password sections to ADD mode defaults
+            document.getElementById('passwordAddSection').style.display = 'block';
+            document.getElementById('passwordEditSection').style.display = 'none';
+            if (useDefaultCb) useDefaultCb.checked = true;
+            if (manualPasswordField) manualPasswordField.style.display = 'none';
+            if (defaultPasswordInput) defaultPasswordInput.value = 'STAFFKTU123';
+            if (manualPasswordInput) manualPasswordInput.value = '';
+            if (changePasswordCb) changePasswordCb.checked = false;
+            if (editPasswordField) editPasswordField.style.display = 'none';
+            if (editPasswordInput) editPasswordInput.value = '';
 
             // Remove any stuck backdrops
             document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
@@ -541,6 +624,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.style.paddingRight = '';
         });
     }
+
 
     console.log('✅ Admin.js loaded successfully');
 });

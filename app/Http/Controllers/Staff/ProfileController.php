@@ -32,19 +32,19 @@ class ProfileController extends Controller
         $user = auth()->user();
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'department_id' => 'required|exists:departments,id',
-            'location_id' => 'required|exists:locations,id',
+            'name'             => 'required|string|max:255',
+            'email'            => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
+            'department_id'    => 'required|exists:departments,id',
+            'location_id'      => 'nullable|exists:locations,id',
             'current_password' => 'nullable|required_with:new_password',
-            'new_password' => 'nullable|min:6|confirmed',
+            'new_password'     => 'nullable|min:6|confirmed',
         ]);
 
         // Update basic info
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
+        $user->name          = $validated['name'];
+        $user->email         = $validated['email'] ?? null;
         $user->department_id = $validated['department_id'];
-        $user->location_id = $validated['location_id'];
+        $user->location_id   = $validated['location_id'] ?? null;
 
         // Update password if provided
         if ($request->filled('current_password')) {

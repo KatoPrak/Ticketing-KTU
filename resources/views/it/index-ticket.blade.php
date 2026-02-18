@@ -1,6 +1,7 @@
 @extends('layouts.it')
 
-@section('title', 'IT Ticket List')
+@section('title', 'Ticket Queue')
+
 
 @section('content')
 {{-- FIXED: Hapus container atau ganti dengan container-fluid --}}

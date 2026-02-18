@@ -1,6 +1,7 @@
 @extends('layouts.it')
 
-@section('title', 'Manage User')
+@section('title', 'Manage Users')
+
 
 @section('content')
 <div class="container-fluid mt-4">

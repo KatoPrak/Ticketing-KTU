@@ -1,6 +1,7 @@
 @extends('layouts.it')
 
-@section('title', 'Add New News')
+@section('title', 'Create News')
+
 
 @section('content')
 <div class="container py-4">

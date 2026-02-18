@@ -1,6 +1,7 @@
 @extends('layouts.it')
 
-@section('title', 'Feedbacks Dashboard')
+@section('title', 'Feedback Overview')
+
 @section('body-class', 'page-it-feedbacks')
 
 @push('styles')

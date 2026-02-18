@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ManageUserController extends Controller
@@ -70,13 +71,13 @@ class ManageUserController extends Controller
         ]);
 
         $user = User::create([
-            'name' => $validated['name'],
-            'id_staff' => $validated['id_staff'],
-            'email' => $validated['email'],
+            'name'          => $validated['name'],
+            'id_staff'      => Str::lower($validated['id_staff']),
+            'email'         => $validated['email'],
             'department_id' => $validated['department_id'],
-            'location_id' => $validated['location_id'],
-            'role' => 'user',
-            'password' => Hash::make('STAFFKTU123') // ✅ Default password di-hash
+            'location_id'   => $validated['location_id'],
+            'role'          => 'user',
+            'password'      => Hash::make('STAFFKTU123')
         ]);
 
         return response()->json([
@@ -124,11 +125,11 @@ class ManageUserController extends Controller
 
         // ✅ Siapkan data untuk update
         $updateData = [
-            'name' => $validated['name'],
-            'id_staff' => $validated['id_staff'],
-            'email' => $validated['email'],
+            'name'          => $validated['name'],
+            'id_staff'      => Str::lower($validated['id_staff']),
+            'email'         => $validated['email'],
             'department_id' => $validated['department_id'],
-            'location_id' => $validated['location_id'],
+            'location_id'   => $validated['location_id'],
         ];
 
         // ✅ Hanya update password jika diisi

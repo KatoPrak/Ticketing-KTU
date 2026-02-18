@@ -12,23 +12,24 @@ $(document).ready(function () {
     // ========================
     function getStatusBadgeClass(status) {
         if (!status) return "bg-secondary";
-        const statusLower = status.toLowerCase();
-        if (statusLower === 'waiting') return "bg-secondary";
-        if (statusLower === 'in_progress' || statusLower === 'progress') return "bg-warning text-dark";
-        if (statusLower === 'pending') return "bg-info text-dark";
-        if (statusLower === 'resolved') return "bg-success";
-        if (statusLower === 'closed') return "bg-danger";
+        const s = status.toLowerCase();
+        if (s === 'open') return "bg-success";
+        if (s === 'waiting') return "bg-info";
+        if (s === 'in_progress' || s === 'in progress') return "bg-warning text-dark";
+        if (s === 'pending') return "bg-warning text-dark";
+        if (s === 'resolved') return "bg-primary";
+        if (s === 'closed') return "bg-secondary";
         return "bg-secondary";
     }
 
     function getPriorityBadgeClass(priority) {
         if (!priority) return "bg-secondary";
-        const priorityLower = priority.toLowerCase();
-        if (priorityLower === 'low') return "bg-success";
-        if (priorityLower === 'medium') return "bg-info";
-        if (priorityLower === 'high') return "bg-warning";
-        if (priorityLower === 'urgent') return "bg-danger";
-        if (priorityLower === 'critical') return "bg-dark";
+        const p = priority.toLowerCase();
+        if (p === 'low') return "bg-success";
+        if (p === 'medium') return "bg-warning text-dark";
+        if (p === 'high') return "bg-danger";
+        if (p === 'urgent') return "bg-danger";
+        if (p === 'critical') return "bg-dark";
         return "bg-secondary";
     }
 
@@ -121,6 +122,19 @@ $(document).ready(function () {
         $('#d_department').text(formatEmptyData(ticket.department?.name, 'Not Specified'));
         $('#d_category').text(formatEmptyData(ticket.category?.name, 'Not Specified'));
         $('#d_description').text(formatEmptyData(ticket.description, 'No description provided'));
+
+        // ✅ UPDATE STATUS BADGE
+        const statusEl = $('#d_status');
+        const statusVal = ticket.status || 'Unknown';
+        statusEl.removeClass().addClass(`badge rounded-pill px-3 py-2 ${getStatusBadgeClass(statusVal)}`);
+        statusEl.text(statusVal.replace(/_/g, ' '));
+
+        // ✅ UPDATE PRIORITY BADGE
+        const priorityEl = $('#d_priority');
+        const priorityVal = ticket.priority || 'Unknown';
+        priorityEl.removeClass().addClass(`badge rounded-pill px-3 py-2 ${getPriorityBadgeClass(priorityVal)}`);
+        priorityEl.text(priorityVal);
+
 
         // ✅ UPDATE TRANSFERRED BADGE (Region based)
         const transferredBadge = $('#d_transferred_badge');

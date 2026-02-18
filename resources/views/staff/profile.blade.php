@@ -2,6 +2,7 @@
 
 @section('title', 'My Profile')
 
+
 @section('content')
 <div class="container-fluid mt-4">
     {{-- Header --}}
@@ -42,7 +43,7 @@
                         <div class="info-item mb-3">
                             <i class="fas fa-envelope text-primary me-2"></i>
                             <small class="text-muted">Email</small>
-                            <p class="mb-0 fw-semibold">{{ $user->email }}</p>
+                            <p class="mb-0 fw-semibold">{{ $user->email ?? '-' }}</p>
                         </div>
                         <div class="info-item mb-3">
                             <i class="fas fa-building text-primary me-2"></i>
@@ -108,14 +109,14 @@
 
                             <div class="col-md-6">
                                 <label for="email" class="form-label fw-semibold">
-                                    Email <span class="text-danger">*</span>
+                                    Email <span class="text-muted small">(opsional)</span>
                                 </label>
                                 <input type="email" 
                                        class="form-control @error('email') is-invalid @enderror" 
                                        id="email" 
                                        name="email" 
-                                       value="{{ old('email', $user->email) }}" 
-                                       required>
+                                       value="{{ old('email', $user->email) }}"
+                                       autocomplete="email">
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

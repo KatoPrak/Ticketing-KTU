@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard')
+@section('title', 'Admin Dashboard')
+
 
 {{-- ❌ HAPUS INI - Sudah di-load di layout --}}
 {{-- <script src="{{ asset('build/assets/admin-DDuIwRwy.js') }}"></script> --}}

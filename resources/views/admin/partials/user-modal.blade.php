@@ -38,7 +38,7 @@
             {{-- Staff ID --}}
             <div class="col-md-5">
               <div class="form-floating">
-                <input type="text" class="form-control" id="id_staff" name="id_staff" placeholder="Staff ID" required>
+                <input type="text" class="form-control" id="id_staff" name="id_staff" placeholder="Staff ID" autocomplete="username" required>
                 <label for="id_staff"><i class="fas fa-id-badge me-2 text-muted"></i>Staff ID / NIK <span class="text-danger">*</span></label>
               </div>
             </div>
@@ -46,8 +46,13 @@
             {{-- Email --}}
             <div class="col-12">
               <div class="form-floating">
-                <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
-                <label for="email"><i class="fas fa-envelope me-2 text-muted"></i>Email Address <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" autocomplete="email">
+                <label for="email"><i class="fas fa-envelope me-2 text-muted"></i>Email Address <span class="text-muted small">(opsional)</span></label>
+              </div>
+              {{-- Info khusus untuk Tim IT --}}
+              <div id="emailItNote" class="alert alert-warning py-2 px-3 mt-2 small mb-0" style="display:none;">
+                <i class="fas fa-exclamation-triangle me-1"></i>
+                <strong>Wajib diisi untuk Tim IT</strong> — email ini digunakan untuk menerima notifikasi tiket masuk dari regional yang sama.
               </div>
             </div>
           </div>
@@ -113,15 +118,63 @@
             </div>
           </div>
 
-          {{-- PASSWORD INFO --}}
-          <div class="alert alert-light border d-flex align-items-center mt-4 mb-0" role="alert">
-            <div class="display-6 text-warning me-3"><i class="fas fa-shield-alt"></i></div>
-            <div>
-              <small class="text-muted d-block text-uppercase fw-bold">Login Security</small>
-              <span class="text-dark small">Default password is set to <strong>STAFFKTU123</strong>. The user can change this after logging in.</span>
-              <input type="hidden" name="password" value="STAFFKTU123">
+          {{-- PASSWORD SECTION --}}
+          <div class="mt-4 pt-3 border-top">
+            <h6 class="fw-bold text-secondary text-uppercase small ls-1 mb-3">
+              <i class="fas fa-lock me-2"></i>Password
+            </h6>
+
+            {{-- ADD MODE: checkbox to choose default or manual --}}
+            <div id="passwordAddSection">
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="useDefaultPassword" checked>
+                <label class="form-check-label fw-semibold" for="useDefaultPassword">
+                  Use default password &nbsp;<code class="text-primary">STAFFKTU123</code>
+                </label>
+              </div>
+
+              {{-- Manual password input (no name — value is copied to hidden input by JS) --}}
+              <div id="manualPasswordField" style="display:none;">
+                <div class="form-floating">
+                  <input type="password" class="form-control" id="password"
+                         placeholder="Enter password" autocomplete="new-password">
+                  <label for="password"><i class="fas fa-key me-2 text-muted"></i>Password</label>
+                </div>
+                <div class="form-check mt-2">
+                  <input class="form-check-input" type="checkbox" id="togglePasswordVisibility">
+                  <label class="form-check-label small text-muted" for="togglePasswordVisibility">Show password</label>
+                </div>
+              </div>
+
+              {{-- Single hidden input — always submitted with the final password value --}}
+              <input type="hidden" id="defaultPasswordInput" name="password" value="STAFFKTU123">
+            </div>
+
+            {{-- EDIT MODE: checkbox to optionally change password --}}
+            <div id="passwordEditSection" style="display:none;">
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="changePassword">
+                <label class="form-check-label fw-semibold" for="changePassword">
+                  Change password
+                </label>
+                <small class="d-block text-muted mt-1">Leave unchecked to keep the current password.</small>
+              </div>
+
+              <div id="editPasswordField" style="display:none;">
+                <div class="form-floating">
+                  {{-- No name here — JS copies value into hidden input on submit --}}
+                  <input type="password" class="form-control" id="editPassword"
+                         placeholder="New password" autocomplete="new-password">
+                  <label for="editPassword"><i class="fas fa-key me-2 text-muted"></i>New Password</label>
+                </div>
+                <div class="form-check mt-2">
+                  <input class="form-check-input" type="checkbox" id="toggleEditPasswordVisibility">
+                  <label class="form-check-label small text-muted" for="toggleEditPasswordVisibility">Show password</label>
+                </div>
+              </div>
             </div>
           </div>
+
 
         </div>
 

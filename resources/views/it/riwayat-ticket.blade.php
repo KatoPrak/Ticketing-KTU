@@ -1,6 +1,7 @@
 @extends('layouts.it')
 
-@section('title', 'IT Ticket History')
+@section('title', 'Ticket History')
+
 
 @section('content')
 @push('styles')

@@ -136,6 +136,9 @@ Route::middleware(['auth', 'roleredirect:admin'])->prefix('admin')->name('admin.
     
     // ✅ LOCATION ROUTES
     Route::resource('locations', \App\Http\Controllers\Admin\LocationController::class);
+
+    // ✅ REGION ROUTES
+    Route::resource('regions', \App\Http\Controllers\Admin\RegionController::class);
 });
 
 // -----------------------------

@@ -2,6 +2,7 @@
 
 @section('title', 'News Management')
 
+
 @section('content')
 <div class="container py-4">
     {{-- Header Section --}}

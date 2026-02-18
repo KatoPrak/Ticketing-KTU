@@ -51,7 +51,11 @@ class LoginController extends Controller
             ]);
         }
 
-        $credentials = $request->only('id_staff', 'password');
+        $credentials = [
+            'id_staff' => Str::lower($request->id_staff),
+            'password' => $request->password,
+        ];
+
         $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {

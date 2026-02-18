@@ -34,16 +34,17 @@ class ProfileController extends Controller
         $user = auth()->user();
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'region_id' => 'nullable|exists:regions,id',
+            'name'             => 'required|string|max:255',
+            'email'            => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
+            'region_id'        => 'nullable|exists:regions,id',
             'current_password' => 'nullable|required_with:new_password',
-            'new_password' => 'nullable|min:6|confirmed',
+            'new_password'     => 'nullable|min:6|confirmed',
         ]);
 
         // Update basic info
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
+        $user->name  = $validated['name'];
+        $user->email = $validated['email'] ?? null;
+
         
         if ($request->filled('region_id')) {
             $user->region_id = $validated['region_id'];

@@ -2,6 +2,7 @@
 
 @section('title', 'My Profile')
 
+
 @section('content')
 <div class="container-fluid mt-4">
     {{-- Header --}}
@@ -18,6 +19,16 @@
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
+
+    {{-- Email Warning for IT --}}
+    @if(empty(auth()->user()->email))
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Email belum diisi!</strong> Anda tidak akan menerima notifikasi tiket masuk maupun tiket selesai.
+        Silakan isi email Anda di form di bawah.
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     @endif
@@ -42,7 +53,7 @@
                         <div class="info-item mb-3">
                             <i class="fas fa-envelope text-info me-2"></i>
                             <small class="text-muted">Email</small>
-                            <p class="mb-0 fw-semibold">{{ $user->email }}</p>
+                            <p class="mb-0 fw-semibold">{{ $user->email ?? '-' }}</p>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-map-marked-alt text-info me-2"></i>
@@ -103,14 +114,21 @@
 
                             <div class="col-md-6">
                                 <label for="email" class="form-label fw-semibold">
-                                    Email <span class="text-danger">*</span>
+                                    Email
+                                    @if(empty($user->email))
+                                        <span class="badge bg-warning text-dark ms-1">Belum diisi</span>
+                                    @endif
                                 </label>
                                 <input type="email" 
                                        class="form-control @error('email') is-invalid @enderror" 
                                        id="email" 
                                        name="email" 
-                                       value="{{ old('email', $user->email) }}" 
-                                       required>
+                                       value="{{ old('email', $user->email) }}"
+                                       autocomplete="email">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Wajib diisi agar menerima notifikasi tiket masuk dan tiket selesai.
+                                </small>
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

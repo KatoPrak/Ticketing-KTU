@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Locations')
+@section('title', 'Location Management')
+
 
 @section('content')
 <div class="card">

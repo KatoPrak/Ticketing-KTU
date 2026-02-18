@@ -346,37 +346,35 @@ class TicketController extends Controller
             $ticket->load(['category', 'user.department', 'department']);
             $ticket->refresh();
 
-            // 4️⃣ EMAIL NOTIFICATION (Based on Ticket Region)
+            // 4️⃣ EMAIL NOTIFICATION — kirim ke akun Tim IT di regional yang sama
             try {
-                $recipients = [];
-                $targetRegionId = $ticket->region_id; // Use ticket's region
+                $targetRegionId = $ticket->region_id;
 
-                if ($targetRegionId) {
-                    // a) Regional Email (rmail)
-                    $region = \App\Models\Region::find($targetRegionId);
-                    if ($region && $region->rmail) {
-                        $recipients[] = $region->rmail;
-                    }
-
-                    // b) IT Staff in that Region
+                if (!$targetRegionId) {
+                    Log::warning("Ticket {$ticket->ticket_id}: Tidak ada region_id — notifikasi email dilewati. " .
+                        "User location_id=" . ($user->location_id ?? 'null'));
+                } else {
+                    // Ambil semua email Tim IT yang berada di regional yang sama
                     $itEmails = User::whereIn('role', ['tim it', 'it'])
                         ->where('region_id', $targetRegionId)
                         ->whereNotNull('email')
+                        ->where('email', '!=', '')
                         ->pluck('email')
                         ->toArray();
-                    
-                    $recipients = array_unique(array_merge($recipients, $itEmails));
-                }
 
-                if (!empty($recipients)) {
-                    // Optimized: Send single email with multiple recipients (reduces SMTP connection overhead)
-                    Mail::to($recipients)->send(new TicketCreatedMail($ticket));
-                    Log::info("Ticket {$ticket->ticket_id} notification sent to " . count($recipients) . " recipients.");
+                    if (empty($itEmails)) {
+                        Log::warning("Ticket {$ticket->ticket_id}: Tidak ada Tim IT dengan email di region_id={$targetRegionId}. " .
+                            "Pastikan akun Tim IT memiliki email yang terisi.");
+                    } else {
+                        Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
+                        Log::info("Ticket {$ticket->ticket_id} notifikasi terkirim ke " . count($itEmails) . " Tim IT: " . implode(', ', $itEmails));
+                    }
                 }
 
             } catch (\Exception $e) {
                 Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
             }
+
 
             // ✅ RESPONSE menggunakan accessor dari Model
             return response()->json([

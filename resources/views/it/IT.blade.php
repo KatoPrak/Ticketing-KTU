@@ -1,6 +1,7 @@
 @extends('layouts.it')
 
-@section('title', 'Dashboard - IT Team')
+@section('title', 'IT Dashboard')
+
 
 @section('content')
 

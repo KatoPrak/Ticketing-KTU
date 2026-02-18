@@ -2,6 +2,7 @@
 
 @section('title', 'User Management')
 
+
 @section('content')
 @includeWhen(session('success') || session('error') || $errors->any(), 'admin.partials.alerts')
 <link rel="stylesheet" href="{{ asset('build/assets/admin-BJfupJ7l.css') }}">
