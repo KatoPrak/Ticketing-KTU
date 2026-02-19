@@ -30,15 +30,15 @@
                                     </tr>
                                     <tr>
                                         <th class="text-muted align-top">Problem</th>
-                                        <td id="d_description" class="text-secondary" style="white-space: pre-wrap;">No description provided</td>
+                                        <td id="d_description" class="text-secondary text-break" style="word-wrap: break-word; word-break: break-all; white-space: pre-wrap; max-width: 200px;">No description provided</td>
                                     </tr>
                                     <tr>
                                         <th class="text-muted">Category</th>
-                                        <td id="d_category" class="text-secondary">Not Specified</td>
+                                        <td id="d_category" class="text-secondary text-break">Not Specified</td>
                                     </tr>
                                     <tr>
                                         <th class="text-muted">Department</th>
-                                        <td id="d_department" class="text-secondary">Not Specified</td>
+                                        <td id="d_department" class="text-secondary text-break">Not Specified</td>
                                     </tr>
                                     <tr>
                                         <th class="text-muted">Status</th>
@@ -55,13 +55,13 @@
                                     <tr id="d_row_transfers" class="d-none">
                                         <th class="text-muted align-top">Transfer History</th>
                                         <td>
-                                            <div id="d_transfers" class="text-muted small"></div>
+                                            <div id="d_transfers" class="text-muted small text-break"></div>
                                         </td>
                                     </tr>
                                     <tr id="d_row_notes" class="d-none">
                                         <th class="text-muted align-top">Resolution Notes</th>
                                         <td>
-                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border">No notes available</div>
+                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border text-break" style="white-space: pre-wrap; word-wrap: break-word;">No notes available</div>
                                         </td>
                                     </tr>
                                     <tr>
@@ -218,6 +218,11 @@
 /* ========================================
    TICKET DETAIL TABLE
 ======================================== */
+.ticket-detail-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
 .ticket-detail-table tr {
     border-bottom: 1px solid #f0f0f0;
 }
@@ -230,11 +235,17 @@
     padding: 12px 8px 12px 0;
     font-weight: 500;
     font-size: 14px;
+    width: 30%; /* Force width */
+    vertical-align: top;
 }
 
 .ticket-detail-table td {
     padding: 12px 0;
     font-size: 14px;
+    vertical-align: top;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* ========================================
