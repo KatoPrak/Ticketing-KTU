@@ -374,6 +374,7 @@
     background: #f8f9fa;
     border-radius: 10px;
 }
+
 </style>
 
 @endsection
