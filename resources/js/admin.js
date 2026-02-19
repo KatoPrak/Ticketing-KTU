@@ -1,11 +1,103 @@
 /* ================================
    🧱 ADMIN.JS - RESPONSIVE VERSION
-================================ */
+   ================================ */
 
 // ================================
 // GLOBAL VARIABLES
 // ================================
 let currentEditUserId = null;
+
+// ================================
+// HELPER FUNCTIONS (GLOBAL SCOPE)
+// ================================
+function updateFieldsVisibility() {
+    const roleSelect = document.getElementById('role');
+    const locationField = document.getElementById('locationField');
+    const regionField = document.getElementById('regionField');
+    const locationSelect = document.getElementById('location_id');
+    const regionSelect = document.getElementById('region_id');
+    const emailItNote = document.getElementById('emailItNote');
+
+    if (!roleSelect) return;
+
+    const role = roleSelect.value;
+    const isIT = (role === 'tim it' || role === 'it');
+
+    if (isIT) {
+        // IT Role: Region is Assignment (Required), Location is Hidden
+        if (regionField) regionField.style.display = 'block';
+        if (locationField) locationField.style.display = 'none';
+        if (emailItNote) emailItNote.style.display = 'block';
+
+        if (regionSelect) regionSelect.required = true;
+        if (locationSelect) {
+            locationSelect.required = false;
+            locationSelect.value = '';
+        }
+    } else {
+        // User Role: Region is Filter (Required to select Location), Location is Required
+        if (regionField) regionField.style.display = 'block';
+        if (emailItNote) emailItNote.style.display = 'none';
+
+        // Hide Location Initially until region selected
+        if (locationField) {
+            if (regionSelect && regionSelect.value) {
+                locationField.style.display = 'block';
+            } else {
+                locationField.style.display = 'none';
+            }
+        }
+
+        if (regionSelect) regionSelect.required = true;
+        if (locationSelect) locationSelect.required = true;
+    }
+}
+
+function filterLocationsByRegion() {
+    const regionSelect = document.getElementById('region_id');
+    const locationSelect = document.getElementById('location_id');
+    const locationField = document.getElementById('locationField');
+    const roleSelect = document.getElementById('role');
+
+    if (!regionSelect || !locationSelect) return;
+
+    const selectedRegionId = regionSelect.value;
+    const options = locationSelect.querySelectorAll('option');
+
+    // Update visibility logic based on selection change
+    if (locationField && roleSelect) {
+        const role = roleSelect.value;
+        const isIT = (role === 'tim it' || role === 'it');
+        if (!isIT) {
+            if (selectedRegionId) {
+                locationField.style.display = 'block';
+            } else {
+                locationField.style.display = 'none';
+            }
+        }
+    }
+
+    // Filter Options
+    const currentLocOption = locationSelect.options[locationSelect.selectedIndex];
+
+    options.forEach(opt => {
+        if (!opt.value) return; // Skip placeholder
+
+        const regionId = opt.getAttribute('data-region-id');
+        if (selectedRegionId && regionId === selectedRegionId) {
+            opt.style.display = ''; // Reset to default
+            opt.hidden = false;
+        } else {
+            opt.style.display = 'none';
+            opt.hidden = true;
+        }
+    });
+
+    // Reset value if currently selected is now hidden
+    if (currentLocOption && currentLocOption.value && currentLocOption.hidden) {
+        locationSelect.value = "";
+    }
+}
 
 // ================================
 // SIDEBAR FUNCTIONS - MOBILE RESPONSIVE
@@ -75,20 +167,15 @@ function openUserModal() {
     currentEditUserId = null;
 
     // Trigger visibility update and filter reset
-    if (typeof updateFieldsVisibility === 'function') {
-        updateFieldsVisibility();
-    }
+    updateFieldsVisibility();
 
     // Clear filters initially (since form.reset() clears region)
-    if (typeof filterLocationsByRegion === 'function') {
-        const regionSelect = document.getElementById('region_id');
-        const locationSelect = document.getElementById('location_id');
-        // Ensure reset actually happened or force it
-        if (regionSelect) regionSelect.value = "";
-        if (locationSelect) locationSelect.value = "";
+    const regionSelect = document.getElementById('region_id');
+    const locationSelect = document.getElementById('location_id');
+    if (regionSelect) regionSelect.value = "";
+    if (locationSelect) locationSelect.value = "";
 
-        filterLocationsByRegion();
-    }
+    filterLocationsByRegion();
 
     // ── PASSWORD: show ADD section, hide EDIT section ──
     document.getElementById('passwordAddSection').style.display = 'block';
@@ -188,8 +275,6 @@ function editUser(id) {
             const emailInput = form.querySelector('#email');
             const roleSelect = form.querySelector('#role');
             const departmentSelect = form.querySelector('#department_id');
-            const passwordInput = form.querySelector('#password');
-            const passwordHelp = form.querySelector('#passwordHelp');
 
             if (userIdInput) userIdInput.value = user.id || '';
             if (nameInput) nameInput.value = user.name || '';
@@ -198,19 +283,14 @@ function editUser(id) {
             if (roleSelect) roleSelect.value = user.role || '';
             if (departmentSelect) departmentSelect.value = user.department_id || '';
 
-            // Handle Location Field
             // Handle Location Field & Region Field logic
-            const locationField = document.getElementById('locationField');
             const locationSelect = document.getElementById('location_id');
             const regionSelect = document.getElementById('region_id');
 
             // 1. Set Role first to determine visibility mode
             if (roleSelect) {
                 roleSelect.value = user.role || '';
-                // Trigger visibility update
-                if (typeof updateFieldsVisibility === 'function') {
-                    updateFieldsVisibility();
-                }
+                updateFieldsVisibility();
             }
 
             // 2. Determine Region to select
@@ -228,11 +308,8 @@ function editUser(id) {
             // 3. Set Region Value
             if (regionSelect) {
                 regionSelect.value = regionToSelect || '';
-
                 // 4. Trigger Filter based on the set region
-                if (typeof filterLocationsByRegion === 'function') {
-                    filterLocationsByRegion();
-                }
+                filterLocationsByRegion();
             }
 
             // 5. Set Location Value (after filter, so options are valid)
@@ -376,7 +453,6 @@ function initializeSearch() {
 // ALERT FUNCTION
 // ================================
 function showAlert(type, message) {
-    // Create alert element
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
     alertDiv.role = 'alert';
@@ -386,20 +462,15 @@ function showAlert(type, message) {
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
 
-    // Insert at top of content
     const content = document.querySelector('.content');
     if (content) {
         content.insertBefore(alertDiv, content.firstChild);
-
-        // Auto dismiss after 5 seconds
         setTimeout(() => {
             alertDiv.classList.remove('show');
             setTimeout(() => alertDiv.remove(), 150);
         }, 5000);
     }
 }
-
-
 
 // ================================
 // NAVBAR HAMBURGER TOGGLE
@@ -409,7 +480,6 @@ function initializeNavbarToggle() {
 
     if (navbar && window.innerWidth <= 768) {
         navbar.addEventListener('click', function (e) {
-            // Check if clicked on the ::before pseudo element area
             const rect = this.getBoundingClientRect();
             if (e.clientX - rect.left < 40 && e.clientY - rect.top < 50) {
                 toggleSidebar();
@@ -427,8 +497,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize search functionality
     initializeSearch();
 
-
-
     // Initialize navbar toggle for mobile
     initializeNavbarToggle();
 
@@ -441,18 +509,12 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.menu-item').forEach(item => {
         item.addEventListener('click', function (e) {
             const section = this.getAttribute('data-section');
-
-            // If menu item has href, let it navigate normally
             if (this.hasAttribute('href') && this.getAttribute('href') !== '#') {
-                // Just close sidebar on mobile, let the link work
                 if (window.innerWidth <= 768) {
                     closeSidebar();
                 }
-                // Don't prevent default, let the link navigate
                 return;
             }
-
-            // Only use showSection for data-section based navigation
             if (section) {
                 e.preventDefault();
                 showSection(section, this);
@@ -485,7 +547,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 editUser(id);
             }
         }
-
         // Delete user
         const deleteBtn = e.target.closest('.delete-user');
         if (deleteBtn) {
@@ -497,7 +558,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Auto-dismiss alerts after 5 seconds
+    // Auto-dismiss alerts
     document.querySelectorAll('.alert').forEach(alert => {
         setTimeout(() => {
             const bsAlert = new bootstrap.Alert(alert);
@@ -512,127 +573,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Role change event to toggle location/region fields
+    // Role change event
     const roleSelect = document.getElementById('role');
-    const locationField = document.getElementById('locationField');
-    const regionField = document.getElementById('regionField');
-    const locationSelect = document.getElementById('location_id');
     const regionSelect = document.getElementById('region_id');
-
-    function updateFieldsVisibility() {
-        if (!roleSelect) return;
-
-        const role = roleSelect.value;
-        const isIT = (role === 'tim it' || role === 'it');
-        // User/Staff defaults are handled here too
-        const emailItNote = document.getElementById('emailItNote');
-
-        if (isIT) {
-            // IT Role: Region is Assignment (Required), Location is Hidden
-            if (regionField) regionField.style.display = 'block';
-            if (locationField) locationField.style.display = 'none';
-            if (emailItNote) emailItNote.style.display = 'block';
-
-            if (regionSelect) regionSelect.required = true;
-            if (locationSelect) {
-                locationSelect.required = false;
-                locationSelect.value = '';
-            }
-
-            // Show all regions (IT can be assigned to any)
-            if (regionSelect) {
-                // Should we filter regions? No.
-            }
-
-        } else {
-            // User Role: Region is Filter (Required to select Location), Location is Required
-            if (regionField) regionField.style.display = 'block'; // Now visible for User too
-            if (emailItNote) emailItNote.style.display = 'none';
-
-            // Hide Location Initially until region selected
-            if (locationField) {
-                if (regionSelect && regionSelect.value) {
-                    locationField.style.display = 'block';
-                } else {
-                    locationField.style.display = 'none';
-                }
-            }
-
-            if (regionSelect) regionSelect.required = true;
-            if (locationSelect) locationSelect.required = true;
-
-            // Trigger filter initially if needed
-            // filterLocationsByRegion(); (Called by event listener)
-        }
-    }
-
-    function filterLocationsByRegion() {
-        if (!regionSelect || !locationSelect) return;
-
-        const selectedRegionId = regionSelect.value;
-        const options = locationSelect.querySelectorAll('option');
-
-        // Show/Hide Location Field based on selection
-        if (locationField) {
-            // If IT, always hidden (handled in updateFieldsVisibility) or special logic?
-            // But for User role, we want it hidden if no region.
-            // Let's rely on role too?
-            const role = roleSelect ? roleSelect.value : '';
-            const isIT = (role === 'tim it' || role === 'it');
-
-            if (!isIT) {
-                if (selectedRegionId) {
-                    locationField.style.display = 'block';
-                } else {
-                    locationField.style.display = 'none';
-                }
-            }
-        }
-
-        // Reset location if the currently selected location does not belong to the new region
-        // But be careful not to reset if we are just initializing
-        const currentLocOption = locationSelect.options[locationSelect.selectedIndex];
-
-        let hasVisibleOptions = false;
-
-        options.forEach(opt => {
-            if (!opt.value) return; // Skip placeholder
-
-            const regionId = opt.getAttribute('data-region-id');
-            if (selectedRegionId && regionId === selectedRegionId) {
-                opt.style.display = 'block'; // Show
-                opt.hidden = false;
-                hasVisibleOptions = true;
-            } else {
-                opt.style.display = 'none'; // Hide
-                opt.hidden = true;
-            }
-        });
-
-        // If current selection is now hidden, reset to empty
-        if (currentLocOption && currentLocOption.value && currentLocOption.hidden) {
-            locationSelect.value = "";
-        }
-
-        // If no region selected, maybe hide all locations or show all? 
-        // User asked: "pilih regional dlu baru lokasi" -> implied hide if no region.
-        if (!selectedRegionId) {
-            options.forEach(opt => {
-                if (opt.value) {
-                    opt.style.display = 'none';
-                    opt.hidden = true;
-                }
-            });
-        }
-    }
 
     if (roleSelect) {
         roleSelect.addEventListener('change', () => {
             updateFieldsVisibility();
-            // Reset filters if role changes?
-            // If switching to User, maybe clear selection
         });
-        // Initial check
         updateFieldsVisibility();
     }
 
@@ -641,34 +589,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ── PASSWORD CHECKBOX LOGIC ──
-
-    // References
     const useDefaultCb = document.getElementById('useDefaultPassword');
     const manualPasswordField = document.getElementById('manualPasswordField');
-    const defaultPasswordInput = document.getElementById('defaultPasswordInput'); // the ONE hidden input with name="password"
-    const manualPasswordInput = document.getElementById('password');             // no name, just for typing
+    const defaultPasswordInput = document.getElementById('defaultPasswordInput');
+    const manualPasswordInput = document.getElementById('password');
 
     const changePasswordCb = document.getElementById('changePassword');
     const editPasswordField = document.getElementById('editPasswordField');
-    const editPasswordInput = document.getElementById('editPassword');            // no name, just for typing
+    const editPasswordInput = document.getElementById('editPassword');
 
-    // ADD mode: toggle between default and manual password
     if (useDefaultCb) {
         useDefaultCb.addEventListener('change', function () {
             if (this.checked) {
-                // Revert to default
                 manualPasswordField.style.display = 'none';
                 manualPasswordInput.value = '';
                 defaultPasswordInput.value = 'STAFFKTU123';
             } else {
-                // Show manual input
                 manualPasswordField.style.display = 'block';
-                defaultPasswordInput.value = ''; // clear so manual value takes over on submit
+                defaultPasswordInput.value = '';
                 manualPasswordInput.focus();
             }
         });
-
-        // Sync manual input → hidden input in real-time
         if (manualPasswordInput) {
             manualPasswordInput.addEventListener('input', function () {
                 if (!useDefaultCb.checked) {
@@ -678,7 +619,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ADD mode: show/hide password visibility
     const toggleVisibilityCb = document.getElementById('togglePasswordVisibility');
     if (toggleVisibilityCb && manualPasswordInput) {
         toggleVisibilityCb.addEventListener('change', function () {
@@ -686,7 +626,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // EDIT mode: toggle change password
     if (changePasswordCb) {
         changePasswordCb.addEventListener('change', function () {
             if (this.checked) {
@@ -695,12 +634,9 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 editPasswordField.style.display = 'none';
                 editPasswordInput.value = '';
-                // Clear the hidden input so no password is sent
                 defaultPasswordInput.value = '';
             }
         });
-
-        // Sync edit password input → hidden input in real-time
         if (editPasswordInput) {
             editPasswordInput.addEventListener('input', function () {
                 if (changePasswordCb.checked) {
@@ -710,7 +646,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // EDIT mode: show/hide password visibility
     const toggleEditVisibilityCb = document.getElementById('toggleEditPasswordVisibility');
     if (toggleEditVisibilityCb && editPasswordInput) {
         toggleEditVisibilityCb.addEventListener('change', function () {
@@ -726,10 +661,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (form) form.reset();
             currentEditUserId = null;
 
-            // Reset visibility
             updateFieldsVisibility();
 
-            // Reset password sections to ADD mode defaults
             document.getElementById('passwordAddSection').style.display = 'block';
             document.getElementById('passwordEditSection').style.display = 'none';
             if (useDefaultCb) useDefaultCb.checked = true;
@@ -740,7 +673,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (editPasswordField) editPasswordField.style.display = 'none';
             if (editPasswordInput) editPasswordInput.value = '';
 
-            // Remove any stuck backdrops
             document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
             document.body.classList.remove('modal-open');
             document.body.style.overflow = '';
@@ -748,11 +680,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-
     console.log('✅ Admin.js loaded successfully');
 });
 
-// Make functions globally accessible
+// Make functions globally accessible (just in case)
 window.openUserModal = openUserModal;
 window.closeUserModal = closeUserModal;
 window.editUser = editUser;
