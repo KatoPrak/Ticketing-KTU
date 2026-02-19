@@ -27,7 +27,7 @@ class TicketCreatedMail extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        $subject = sprintf('🎫 Tiket Baru Diterima: %s', $this->ticket->ticket_id);
+        $subject = sprintf('🎫 New Ticket Received: %s', $this->ticket->ticket_id);
 
         return $this->subject($subject)
                     ->view('emails.new-ticket-notification')

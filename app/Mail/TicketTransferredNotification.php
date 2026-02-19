@@ -37,7 +37,7 @@ class TicketTransferredNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Ticket #' . ($this->ticket->ticket_id ?? $this->ticket->id) . ' Masuk ke Regional Anda',
+            subject: 'Incoming Ticket #' . ($this->ticket->ticket_id ?? $this->ticket->id),
         );
     }
 

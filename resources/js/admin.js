@@ -74,6 +74,22 @@ function openUserModal() {
 
     currentEditUserId = null;
 
+    // Trigger visibility update and filter reset
+    if (typeof updateFieldsVisibility === 'function') {
+        updateFieldsVisibility();
+    }
+
+    // Clear filters initially (since form.reset() clears region)
+    if (typeof filterLocationsByRegion === 'function') {
+        const regionSelect = document.getElementById('region_id');
+        const locationSelect = document.getElementById('location_id');
+        // Ensure reset actually happened or force it
+        if (regionSelect) regionSelect.value = "";
+        if (locationSelect) locationSelect.value = "";
+
+        filterLocationsByRegion();
+    }
+
     // ── PASSWORD: show ADD section, hide EDIT section ──
     document.getElementById('passwordAddSection').style.display = 'block';
     document.getElementById('passwordEditSection').style.display = 'none';
@@ -183,21 +199,45 @@ function editUser(id) {
             if (departmentSelect) departmentSelect.value = user.department_id || '';
 
             // Handle Location Field
+            // Handle Location Field & Region Field logic
             const locationField = document.getElementById('locationField');
             const locationSelect = document.getElementById('location_id');
             const regionSelect = document.getElementById('region_id');
 
-            // Set values
-            if (locationSelect) locationSelect.value = user.location_id || '';
-            if (regionSelect) regionSelect.value = user.region_id || '';
+            // 1. Set Role first to determine visibility mode
+            if (roleSelect) {
+                roleSelect.value = user.role || '';
+                // Trigger visibility update
+                if (typeof updateFieldsVisibility === 'function') {
+                    updateFieldsVisibility();
+                }
+            }
 
-            // Update visibility based on loaded role
-            if (typeof updateFieldsVisibility === 'function') {
-                updateFieldsVisibility();
-            } else {
-                // Fallback if function not yet defined (rare)
-                const roleSelect = form.querySelector('#role');
-                if (roleSelect) roleSelect.dispatchEvent(new Event('change'));
+            // 2. Determine Region to select
+            let regionToSelect = user.region_id;
+
+            // If no explicit region (e.g. Regular User), derive it from Location
+            if (!regionToSelect && user.location_id && locationSelect) {
+                // Find the option for this location
+                const locOption = locationSelect.querySelector(`option[value="${user.location_id}"]`);
+                if (locOption) {
+                    regionToSelect = locOption.getAttribute('data-region-id');
+                }
+            }
+
+            // 3. Set Region Value
+            if (regionSelect) {
+                regionSelect.value = regionToSelect || '';
+
+                // 4. Trigger Filter based on the set region
+                if (typeof filterLocationsByRegion === 'function') {
+                    filterLocationsByRegion();
+                }
+            }
+
+            // 5. Set Location Value (after filter, so options are valid)
+            if (locationSelect) {
+                locationSelect.value = user.location_id || '';
             }
 
             // ── PASSWORD: switch to EDIT section ──
@@ -484,10 +524,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const role = roleSelect.value;
         const isIT = (role === 'tim it' || role === 'it');
-        const isUser = (role === 'user' || role === 'staff');
+        // User/Staff defaults are handled here too
         const emailItNote = document.getElementById('emailItNote');
 
         if (isIT) {
+            // IT Role: Region is Assignment (Required), Location is Hidden
             if (regionField) regionField.style.display = 'block';
             if (locationField) locationField.style.display = 'none';
             if (emailItNote) emailItNote.style.display = 'block';
@@ -495,26 +536,108 @@ document.addEventListener('DOMContentLoaded', function () {
             if (regionSelect) regionSelect.required = true;
             if (locationSelect) {
                 locationSelect.required = false;
-                locationSelect.value = ''; // Clear location for IT
+                locationSelect.value = '';
             }
+
+            // Show all regions (IT can be assigned to any)
+            if (regionSelect) {
+                // Should we filter regions? No.
+            }
+
         } else {
-            // Default (User/Staff)
-            if (regionField) regionField.style.display = 'none';
-            if (locationField) locationField.style.display = 'block';
+            // User Role: Region is Filter (Required to select Location), Location is Required
+            if (regionField) regionField.style.display = 'block'; // Now visible for User too
             if (emailItNote) emailItNote.style.display = 'none';
 
-            if (regionSelect) {
-                regionSelect.required = false;
-                regionSelect.value = ''; // Clear region for User
+            // Hide Location Initially until region selected
+            if (locationField) {
+                if (regionSelect && regionSelect.value) {
+                    locationField.style.display = 'block';
+                } else {
+                    locationField.style.display = 'none';
+                }
             }
+
+            if (regionSelect) regionSelect.required = true;
             if (locationSelect) locationSelect.required = true;
+
+            // Trigger filter initially if needed
+            // filterLocationsByRegion(); (Called by event listener)
+        }
+    }
+
+    function filterLocationsByRegion() {
+        if (!regionSelect || !locationSelect) return;
+
+        const selectedRegionId = regionSelect.value;
+        const options = locationSelect.querySelectorAll('option');
+
+        // Show/Hide Location Field based on selection
+        if (locationField) {
+            // If IT, always hidden (handled in updateFieldsVisibility) or special logic?
+            // But for User role, we want it hidden if no region.
+            // Let's rely on role too?
+            const role = roleSelect ? roleSelect.value : '';
+            const isIT = (role === 'tim it' || role === 'it');
+
+            if (!isIT) {
+                if (selectedRegionId) {
+                    locationField.style.display = 'block';
+                } else {
+                    locationField.style.display = 'none';
+                }
+            }
+        }
+
+        // Reset location if the currently selected location does not belong to the new region
+        // But be careful not to reset if we are just initializing
+        const currentLocOption = locationSelect.options[locationSelect.selectedIndex];
+
+        let hasVisibleOptions = false;
+
+        options.forEach(opt => {
+            if (!opt.value) return; // Skip placeholder
+
+            const regionId = opt.getAttribute('data-region-id');
+            if (selectedRegionId && regionId === selectedRegionId) {
+                opt.style.display = 'block'; // Show
+                opt.hidden = false;
+                hasVisibleOptions = true;
+            } else {
+                opt.style.display = 'none'; // Hide
+                opt.hidden = true;
+            }
+        });
+
+        // If current selection is now hidden, reset to empty
+        if (currentLocOption && currentLocOption.value && currentLocOption.hidden) {
+            locationSelect.value = "";
+        }
+
+        // If no region selected, maybe hide all locations or show all? 
+        // User asked: "pilih regional dlu baru lokasi" -> implied hide if no region.
+        if (!selectedRegionId) {
+            options.forEach(opt => {
+                if (opt.value) {
+                    opt.style.display = 'none';
+                    opt.hidden = true;
+                }
+            });
         }
     }
 
     if (roleSelect) {
-        roleSelect.addEventListener('change', updateFieldsVisibility);
+        roleSelect.addEventListener('change', () => {
+            updateFieldsVisibility();
+            // Reset filters if role changes?
+            // If switching to User, maybe clear selection
+        });
         // Initial check
         updateFieldsVisibility();
+    }
+
+    if (regionSelect) {
+        regionSelect.addEventListener('change', filterLocationsByRegion);
     }
 
     // ── PASSWORD CHECKBOX LOGIC ──

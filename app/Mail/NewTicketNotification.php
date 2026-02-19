@@ -33,7 +33,7 @@ class NewTicketNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Notifikasi Tiket Baru: #' . $this->ticket->ticket_id,
+            subject: 'New Ticket Notification: #' . $this->ticket->ticket_id,
         );
     }
 

@@ -47,12 +47,12 @@
             <div class="col-12">
               <div class="form-floating">
                 <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" autocomplete="email">
-                <label for="email"><i class="fas fa-envelope me-2 text-muted"></i>Email Address <span class="text-muted small">(opsional)</span></label>
+                <label for="email"><i class="fas fa-envelope me-2 text-muted"></i>Email Address <span class="text-muted small">(Optional)</span></label>
               </div>
-              {{-- Info khusus untuk Tim IT --}}
+              {{-- Info specifically for IT Team --}}
               <div id="emailItNote" class="alert alert-warning py-2 px-3 mt-2 small mb-0" style="display:none;">
                 <i class="fas fa-exclamation-triangle me-1"></i>
-                <strong>Wajib diisi untuk Tim IT</strong> — email ini digunakan untuk menerima notifikasi tiket masuk dari regional yang sama.
+                <strong>Required for IT Team</strong> — this email is used to receive ticket notifications from the same region.
               </div>
             </div>
           </div>
@@ -87,6 +87,21 @@
               </div>
             </div>
 
+            {{-- Region --}}
+            <div class="col-12" id="regionField">
+              <div class="form-floating">
+                <select class="form-select" id="region_id" name="region_id">
+                    <option value="" selected disabled>Select Region</option>
+                    @isset($regions)
+                        @foreach($regions as $region)
+                            <option value="{{ $region->id }}">{{ $region->name }}</option>
+                        @endforeach
+                    @endisset
+                </select>
+                <label for="region_id"><i class="fas fa-globe me-2 text-muted"></i>Region <span class="text-danger">*</span></label>
+              </div>
+            </div>
+
             {{-- Location --}}
             <div class="col-12" id="locationField">
               <div class="form-floating">
@@ -94,26 +109,11 @@
                   <option value="" selected disabled>Select Location</option>
                   @isset($locations)
                     @foreach($locations as $loc)
-                      <option value="{{ $loc->id }}">{{ $loc->name }}</option>
+                      <option value="{{ $loc->id }}" data-region-id="{{ $loc->region_id }}">{{ $loc->name }}</option>
                     @endforeach
                   @endisset
                 </select>
                 <label for="location_id"><i class="fas fa-map-marker-alt me-2 text-muted"></i>Location <span class="text-danger">*</span></label>
-              </div>
-            </div>
-
-            {{-- Region (For IT Staff) --}}
-            <div class="col-12" id="regionField" style="display: none;">
-              <div class="form-floating">
-                <select class="form-select" id="region_id" name="region_id">
-                    <option value="" selected disabled>Select Region Assignment</option>
-                    @isset($regions)
-                        @foreach($regions as $region)
-                            <option value="{{ $region->id }}">{{ $region->name }}</option>
-                        @endforeach
-                    @endisset
-                </select>
-                <label for="region_id"><i class="fas fa-globe me-2 text-muted"></i>Region Coverage <span class="text-danger">*</span></label>
               </div>
             </div>
           </div>

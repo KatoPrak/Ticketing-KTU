@@ -289,12 +289,12 @@ class TicketController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Tiket berhasil diperbarui.',
+                'message' => 'Ticket updated successfully.',
                 'ticket'  => $ticket
             ]);
         }
 
-        return back()->with('success', 'Tiket berhasil diperbarui.');
+        return back()->with('success', 'Ticket updated successfully.');
     }
 
     // ============================================================

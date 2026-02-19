@@ -83,7 +83,7 @@ document.addEventListener('keydown', function(e) {
 function handleLogout(event) {
     event.preventDefault();
     
-    if (confirm('Apakah Anda yakin ingin logout?')) {
+    if (confirm('Are you sure you want to log out?')) {
         document.getElementById('logout-form').submit();
     }
 }

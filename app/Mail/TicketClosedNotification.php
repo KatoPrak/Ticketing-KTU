@@ -33,7 +33,7 @@ class TicketClosedNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Ticket #' . ($this->ticket->ticket_id ?? $this->ticket->id) . ' Telah Diselesaikan',
+            subject: 'Ticket #' . ($this->ticket->ticket_id ?? $this->ticket->id) . ' Closed',
         );
     }
 
