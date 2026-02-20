@@ -122,16 +122,6 @@ class TicketController extends Controller
                 $location = \App\Models\Location::find($targetUser->location_id);
                 if ($location && $location->region_id) {
                     $regionId = $location->region_id;
-                    
-                    // Auto-assign to IT in this region
-                    $assignedIt = User::whereIn('role', ['tim it', 'it'])
-                        ->where('region_id', $regionId)
-                        ->inRandomOrder() 
-                        ->first();
-                        
-                    if ($assignedIt) {
-                        $assignedItId = $assignedIt->id;
-                    }
                 }
             }
 
@@ -146,7 +136,7 @@ class TicketController extends Controller
                 'attachments'   => json_encode($filePaths),
                 'status'        => 'waiting',
                 'region_id'     => $regionId,
-                'assigned_to'   => $assignedItId,
+                'assigned_to'   => null,
             ]);
 
             // Generate unique ticket_id using helper
@@ -170,13 +160,7 @@ class TicketController extends Controller
                     $recipients = array_merge($recipients, $itEmails);
                 }
 
-                // 2. Add Assigned IT (Safety net)
-                if ($assignedItId) {
-                    $assignedIt = User::find($assignedItId);
-                    if ($assignedIt && $assignedIt->email) {
-                       $recipients[] = $assignedIt->email;
-                    }
-                }
+                // 2. Recipients are already all IT in Region
                 
                 $recipients = array_unique($recipients);
 
@@ -337,6 +321,12 @@ class TicketController extends Controller
                 $ticket->resolved_at = now();
             }
 
+            // ✅ AUTO-ASSIGN: Jika tiket belum ada yang menangani (unassigned),
+            // maka otomatis ditugaskan ke staff IT yang melakukan update status ini.
+            if (!$ticket->assigned_to) {
+                $ticket->assigned_to = Auth::id();
+            }
+
             $ticket->save();
 
             // Send Email to User ONLY if Closed
@@ -439,20 +429,8 @@ class TicketController extends Controller
             $ticket->region_id = $region->id; // ✅ Update Region
         }
 
-        // 2. Auto-assign to IT Staff in that Region
-        // Similar to Ticket Creation logic
-        $assignedIt = User::whereIn('role', ['tim it', 'it'])
-            ->where('region_id', $regionId)
-            ->inRandomOrder() 
-            ->first();
-
-        if ($assignedIt) {
-            $assignedItId = $assignedIt->id;
-            $ticket->assigned_to = $assignedItId; // ✅ Re-assign User
-        } else {
-            // Case: No IT in that region. Leave unassigned but in the correct region.
-            $ticket->assigned_to = null;
-        }
+        // 2. Clear assigned_to (so IT staff in new region can claim it)
+        $ticket->assigned_to = null;
 
         $ticket->save();
 
@@ -468,10 +446,7 @@ class TicketController extends Controller
                 ->toArray();
             $recipients = array_merge($recipients, $newRegionITs);
 
-            // 2. Add Assigned IT (Safety net)
-            if ($assignedIt && $assignedIt->email) {
-                $recipients[] = $assignedIt->email;
-            }
+            // 2. Recipients are already all IT in Region
 
             $recipients = array_unique($recipients);
 

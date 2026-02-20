@@ -1,0 +1,11 @@
+TICKETS:
+ID: 546, CID: 260220-001, UserID: 453, RegionID: 2, AssignedTo: 452, Status: waiting
+
+IT USERS:
+ID: 446, Name: John Winata, Role: tim it, RegionID: 1
+ID: 447, Name: Budi Hartono, Role: tim it, RegionID: 1
+ID: 448, Name: Surya Tjandra, Role: tim it, RegionID: 1
+ID: 449, Name: Esther Ratuning, Role: tim it, RegionID: 1
+ID: 450, Name: Ferdinal Sukman Nur, Role: tim it, RegionID: 2
+ID: 451, Name: Boha Nainggolan, Role: tim it, RegionID: 3
+ID: 452, Name: Kato, Role: tim it, RegionID: 2

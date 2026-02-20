@@ -289,22 +289,11 @@ class TicketController extends Controller
 
             // 3️⃣ REGIONAL LOGIC
             $regionId = null;
-            $assignedItId = null;
 
             if ($user->location_id) {
                 $location = \App\Models\Location::find($user->location_id);
                 if ($location && $location->region_id) {
                     $regionId = $location->region_id;
-                    
-                    // Auto-assign to IT in this region (Optional)
-                    $assignedIt = User::whereIn('role', ['tim it', 'it'])
-                        ->where('region_id', $regionId)
-                        ->inRandomOrder()
-                        ->first();
-                        
-                    if ($assignedIt) {
-                        $assignedItId = $assignedIt->id;
-                    }
                 }
             }
 
@@ -333,7 +322,7 @@ class TicketController extends Controller
                 'attachments'   => json_encode($filePaths),
                 'status'        => 'waiting',
                 'region_id'     => $regionId, // 📌 SAVED TO TICKET
-                'assigned_to'   => $assignedItId,
+                'assigned_to'   => null,
             ]);
 
             // Generate unique ticket_id using helper
