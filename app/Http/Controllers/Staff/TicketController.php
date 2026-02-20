@@ -363,11 +363,18 @@ class TicketController extends Controller
                         ->toArray();
 
                     if (empty($itEmails)) {
-                        Log::warning("Ticket {$ticket->ticket_id}: Tidak ada Tim IT dengan email di region_id={$targetRegionId}. " .
-                            "Pastikan akun Tim IT memiliki email yang terisi.");
-                    } else {
+                        Log::warning("Ticket {$ticket->ticket_id}: Tidak ada Tim IT dengan email di region_id={$targetRegionId}. Mencoba env IT_TEAM_EMAILS.");
+                        
+                        // FALLBACK: Ambil dari .env
+                        $envEmails = array_map('trim', explode(',', env('IT_TEAM_EMAILS', '')));
+                        $itEmails = array_filter($envEmails);
+                    }
+
+                    if (!empty($itEmails)) {
                         Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
-                        Log::info("Ticket {$ticket->ticket_id} notifikasi terkirim ke " . count($itEmails) . " Tim IT: " . implode(', ', $itEmails));
+                        Log::info("Ticket {$ticket->ticket_id} notifikasi terkirim ke: " . implode(', ', $itEmails));
+                    } else {
+                        Log::warning("Ticket {$ticket->ticket_id}: Gagal mengirim notifikasi. Tidak ada penerima (Regional IT kosong & ENV kosong).");
                     }
                 }
 
