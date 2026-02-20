@@ -306,11 +306,9 @@ class TicketController extends Controller
         $value = $validated['value'];
 
         if ($field === 'status') {
-            $resolutionNotes = $validated['resolution_notes'] ?? null;
-            
-            // Update status
             $ticket->status = $value;
-            
+            $resolutionNotes = $request->resolution_notes;
+
             // Simpan resolution_notes untuk pending, resolved, dan closed
             if (in_array($value, ['pending', 'resolved', 'closed']) && $resolutionNotes) {
                 $ticket->resolution_notes = $resolutionNotes;
@@ -320,17 +318,21 @@ class TicketController extends Controller
             if ($value === 'resolved' && !$ticket->resolved_at) {
                 $ticket->resolved_at = now();
             }
+        } else {
+            // For priority updates
+            $ticket->{$field} = $value;
+        }
 
-            // ✅ AUTO-ASSIGN: Jika tiket belum ada yang menangani (unassigned),
-            // maka otomatis ditugaskan ke staff IT yang melakukan update status ini.
-            if (!$ticket->assigned_to) {
-                $ticket->assigned_to = Auth::id();
-            }
+        // ✅ AUTO-ASSIGN CLAIM LOGIC:
+        // Jika tiket belum ada yang menangani (unassigned), 
+        // maka otomatis ditugaskan ke staff IT yang melakukan update ini.
+        if (!$ticket->assigned_to) {
+            $ticket->assigned_to = Auth::id();
+        }
 
-            $ticket->save();
+        $ticket->save();
 
-            // Send Email to User ONLY if Closed
-            if ($value === 'closed') {
+        if ($field === 'status' && $value === 'closed') {
                 Log::info('-------- TICKET CLOSED EMAIL DEBUG START --------');
                 Log::info('Ticket ID: ' . $ticket->id);
                 try {
@@ -360,11 +362,7 @@ class TicketController extends Controller
                 Log::info('Status update: ' . $value . ' (Not trigger closed email)');
             }
             
-        } else {
-            // For priority updates
-            $ticket->{$field} = $value;
-            $ticket->save();
-        }
+            // Handled above in auto-assign logic
 
         // Muat relasi terbaru dan refresh dari database
         $ticket->load('category', 'user', 'department');
@@ -409,25 +407,34 @@ class TicketController extends Controller
         ]);
         
         $regionId = $request->region_id;
-        $assignedItId = null;
         $regionName = 'Unknown Region';
 
         // 1. Find Region Name
         $region = \App\Models\Region::find($regionId);
-        if ($region) {
-            $regionName = $region->name;
-            
-            // ✅ Log Transfer History
-            \App\Models\TicketTransferLog::create([
-                'ticket_id' => $ticket->id,
-                'from_region_id' => $ticket->region_id, // Old Region
-                'to_region_id' => $region->id, // New Region
-                'transferred_by' => Auth::id(),
-                'note' => $request->note // Save Reason
-            ]);
-
-            $ticket->region_id = $region->id; // ✅ Update Region
+        if (!$region) {
+            return response()->json(['success' => false, 'message' => 'Target region not found.'], 404);
         }
+
+        // ✅ PREVENT SAME REGION TRANSFER
+        if ($ticket->region_id == $regionId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ticket is already in Region ' . $region->name . '. No transfer needed.'
+            ], 400);
+        }
+
+        $regionName = $region->name;
+        
+        // ✅ Log Transfer History
+        \App\Models\TicketTransferLog::create([
+            'ticket_id' => $ticket->id,
+            'from_region_id' => $ticket->region_id, // Old Region
+            'to_region_id' => $region->id, // New Region
+            'transferred_by' => Auth::id(),
+            'note' => $request->note // Save Reason
+        ]);
+
+        $ticket->region_id = $region->id; // ✅ Update Region
 
         // 2. Clear assigned_to (so IT staff in new region can claim it)
         $ticket->assigned_to = null;
@@ -470,12 +477,7 @@ class TicketController extends Controller
             Log::error('Failed to send transfer email: ' . $e->getMessage());
         }
 
-        $message = "Ticket transferred to Region: {$regionName}";
-        if ($assignedIt) {
-            $message .= " (Assigned to {$assignedIt->name})";
-        } else {
-            $message .= " (Pending Assignment)";
-        }
+        $message = "Ticket transferred to Region: {$regionName} (Pending Assignment)";
 
         return response()->json([
             'success' => true,
