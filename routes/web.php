@@ -145,8 +145,15 @@ Route::middleware(['auth', 'roleredirect:admin'])->prefix('admin')->name('admin.
 // DEBUG ROUTE (Temporary)
 // -----------------------------
 Route::get('/test-email-notification', function () {
-    // SECURITY: Disabled for production
-    abort(404);
+    try {
+        Illuminate\Support\Facades\Mail::raw('Tes Email Server Config Berhasil!', function ($message) {
+            $message->to('ticketingktu@gmail.com')
+                    ->subject('Koneksi Email Berhasil');
+        });
+        return 'Email berhasil dikirim ke ticketingktu@gmail.com!';
+    } catch (\Exception $e) {
+        return 'Gagal kirim email: ' . $e->getMessage();
+    }
 });
 
 // -----------------------------
@@ -156,8 +163,23 @@ Route::get('/test-email-notification', function () {
 // DEBUG IT TARGET (Who are these users?)
 // -----------------------------
 Route::get('/debug-it-target', function () {
-    // SECURITY: Disabled for production
-    abort(404);
+    $itUsers = \App\Models\User::whereIn('role', ['tim it', 'it'])
+        ->with('region')
+        ->get()
+        ->map(function($user) {
+            return [
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'region_id' => $user->region_id,
+                'region_name' => $user->region->name ?? 'NO REGION',
+            ];
+        });
+
+    return response()->json([
+        'total_it_staff' => $itUsers->count(),
+        'users' => $itUsers
+    ]);
 });
 
 // -----------------------------

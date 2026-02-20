@@ -354,16 +354,21 @@ class TicketController extends Controller
                     Log::warning("Ticket {$ticket->ticket_id}: Tidak ada region_id — notifikasi email dilewati. " .
                         "User location_id=" . ($user->location_id ?? 'null'));
                 } else {
-                    // Ambil semua email Tim IT yang berada di regional yang sama
-                    $itEmails = User::whereIn('role', ['tim it', 'it'])
+                    // Ambil User IT di region yang sama
+                    $queryIt = User::whereIn('role', ['tim it'])
                         ->where('region_id', $targetRegionId)
                         ->whereNotNull('email')
-                        ->where('email', '!=', '')
-                        ->pluck('email')
-                        ->toArray();
+                        ->where('email', '!=', '');
+
+                    // Log Detail (Siapa saja yg akan dikirim?)
+                    $recipients = $queryIt->get(['name', 'email', 'role']);
+                    $recipientListLog = $recipients->map(fn($u) => "{$u->name} ({$u->email}) [{$u->role}]")->implode(', ');
+                    Log::info("Target Notifikasi Ticket {$ticket->ticket_id} (Region {$targetRegionId}): {$recipientListLog}");
+
+                    $itEmails = $recipients->pluck('email')->toArray();
 
                     if (empty($itEmails)) {
-                        Log::warning("Ticket {$ticket->ticket_id}: Tidak ada Tim IT dengan email di region_id={$targetRegionId}. Mencoba env IT_TEAM_EMAILS.");
+                        Log::warning("Ticket {$ticket->ticket_id}: Tidak ada Tim IT/Admin dengan email di region_id={$targetRegionId}. Mencoba env IT_TEAM_EMAILS.");
                         
                         // FALLBACK: Ambil dari .env
                         $envEmails = array_map('trim', explode(',', env('IT_TEAM_EMAILS', '')));
@@ -372,7 +377,7 @@ class TicketController extends Controller
 
                     if (!empty($itEmails)) {
                         Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
-                        Log::info("Ticket {$ticket->ticket_id} notifikasi terkirim ke: " . implode(', ', $itEmails));
+                        Log::info("Ticket {$ticket->ticket_id} email sukses dikirim (Queued/Sent) ke: " . implode(', ', $itEmails));
                     } else {
                         Log::warning("Ticket {$ticket->ticket_id}: Gagal mengirim notifikasi. Tidak ada penerima (Regional IT kosong & ENV kosong).");
                     }
