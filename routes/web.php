@@ -10,7 +10,6 @@ use App\Http\Controllers\Staff\TicketController as StaffTicketController;
 use App\Http\Controllers\IT\TicketController as ItTicketController;
 use App\Http\Middleware\RememberMeMiddleware;
 use App\Http\Controllers\NewsController;
-use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\IT\ManageUserController;
 use App\Http\Controllers\IT\DepartmentController as ItDepartmentController;
