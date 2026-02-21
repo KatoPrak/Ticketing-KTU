@@ -86,6 +86,9 @@
                             @if($ticket->transferLogs->isNotEmpty())
                                 <div class="mt-1"><span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Transferred</span></div>
                             @endif
+                            @if(!$ticket->assigned_to)
+                                <div class="mt-1"><span class="badge bg-danger" style="font-size: 0.65rem;">UNASSIGNED</span></div>
+                            @endif
                         </td>
                         <td data-label="Requester">
                             <div>
@@ -567,7 +570,7 @@
                                 <option value="{{ $region->id }}">{{ $region->name }}</option>
                              @endforeach
                         </select>
-                        <div class="form-text small">Ticket will be auto-assigned to IT Staff in this region.</div>
+                        <div class="form-text small">Ticket will be sent to the unassigned queue of the target region.</div>
                     </div>
 
                      <div class="mb-3">

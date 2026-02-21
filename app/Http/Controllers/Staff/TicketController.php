@@ -344,7 +344,7 @@ class TicketController extends Controller
                         "User location_id=" . ($user->location_id ?? 'null'));
                 } else {
                     // Ambil User IT di region yang sama
-                    $queryIt = User::whereIn('role', ['tim it'])
+                    $queryIt = User::whereIn('role', ['tim it', 'it'])
                         ->where('region_id', $targetRegionId)
                         ->whereNotNull('email')
                         ->where('email', '!=', '');

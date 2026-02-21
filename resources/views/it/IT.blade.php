@@ -106,8 +106,11 @@
                             <tr>
                                 <td class="ps-3">
                                     <span class="fw-bold text-primary">{{ $ticket->ticket_id ?? ('#'.$ticket->id) }}</span>
-                                    @if($ticket->assigned_to == Auth::id())
+                                    @if($ticket->transferLogs->isNotEmpty())
                                         <i class="fas fa-exchange-alt text-warning ms-1" title="Transferred" style="font-size: 0.7rem;"></i>
+                                    @endif
+                                    @if(!$ticket->assigned_to)
+                                        <span class="badge bg-danger ms-1" style="font-size: 0.6rem; vertical-align: middle;">NEW</span>
                                     @endif
                                 </td>
                                 <td>

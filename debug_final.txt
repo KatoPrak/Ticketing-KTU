@@ -1,0 +1,11 @@
+TICKETS:
+ID: 547, TicketID: 260220-001, Region: 1, Assigned: NULL
+
+IT STAFF:
+ID: 446, Name: John Winata, Region: 1
+ID: 447, Name: Budi Hartono, Region: 1
+ID: 448, Name: Surya Tjandra, Region: 1
+ID: 449, Name: Esther Ratuning, Region: 1
+ID: 450, Name: Ferdinal Sukman Nur, Region: 2
+ID: 451, Name: Boha Nainggolan, Region: 3
+ID: 452, Name: Kato, Region: 2

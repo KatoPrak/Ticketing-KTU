@@ -46,16 +46,18 @@ class TicketController extends Controller
 
         $tickets = Ticket::with(['category', 'user', 'department', 'assignedTo', 'transferLogs']) // Load assignedTo & logs
             ->whereNotIn('status', ['closed'])
-            // ✅ FILTER: Logika "Regional Assignment"
-            // 1. Show tickets explicitly assigned to this IT staff.
-            // 2. Fallback: Show tickets in the IT staff's REGION if assigned_to is null (safety net).
             ->where(function ($query) use ($currentUser) {
+                // 1. Admins see all unassigned tickets or explicitly assigned to them
+                if ($currentUser->isAdmin()) {
+                    $query->where('assigned_to', $currentUser->id)
+                          ->orWhereNull('assigned_to');
+                    return;
+                }
+
+                // 2. IT Staff see tickets explicitly assigned to them
                 $query->where('assigned_to', $currentUser->id);
                 
-                // Optional: If you want IT to see ALL tickets in their region regardless of assignment:
-                // $query->orWhere('region_id', $currentUser->region_id);
-                
-                // OR: Only if unassigned:
+                // 3. AND unassigned tickets in their region
                 if ($currentUser->region_id) {
                      $query->orWhere(function ($subQuery) use ($currentUser) {
                         $subQuery->whereNull('assigned_to')
@@ -548,6 +550,12 @@ class TicketController extends Controller
 
         // ✅ Base Query with Correct Region Filter
         $baseQuery = Ticket::query()->where(function ($query) use ($currentUser) {
+            if ($currentUser->isAdmin()) {
+                $query->where('assigned_to', $currentUser->id)
+                      ->orWhereNull('assigned_to');
+                return;
+            }
+
             $query->where('assigned_to', $currentUser->id)
                   ->orWhere(function ($subQuery) use ($currentUser) {
                       $subQuery->whereNull('assigned_to')
@@ -563,7 +571,12 @@ class TicketController extends Controller
 
         $recentTickets = Ticket::with(['category', 'user.location', 'department', 'assignedTo'])
             ->where(function ($query) use ($currentUser) {
-                // Same logic for recent tickets
+                if ($currentUser->isAdmin()) {
+                    $query->where('assigned_to', $currentUser->id)
+                          ->orWhereNull('assigned_to');
+                    return;
+                }
+                
                 $query->where('assigned_to', $currentUser->id)
                       ->orWhere(function ($subQuery) use ($currentUser) {
                           $subQuery->whereNull('assigned_to')
