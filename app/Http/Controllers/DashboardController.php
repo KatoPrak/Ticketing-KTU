@@ -16,14 +16,18 @@ class DashboardController extends Controller
     {
         $currentUser = Auth::user();
 
-        // Base Query: Filter logic strictly for user's location or assignment
+        // Base Query: Filter logic strictly for regional assignment
         $baseQuery = \App\Models\Ticket::query()->where(function ($query) use ($currentUser) {
+            if ($currentUser->isAdmin()) {
+                $query->where('assigned_to', $currentUser->id)
+                      ->orWhereNull('assigned_to');
+                return;
+            }
+
             $query->where('assigned_to', $currentUser->id)
                   ->orWhere(function ($subQuery) use ($currentUser) {
                       $subQuery->whereNull('assigned_to')
-                               ->whereHas('user', function ($q) use ($currentUser) {
-                                   $q->where('location_id', $currentUser->location_id);
-                               });
+                               ->where('region_id', $currentUser->region_id);
                   });
         });
 
