@@ -25,10 +25,6 @@
                     <tr>
                         <th style="width: 50px;">No</th>
                         <th>Region Name</th>
-                        <th>
-                            <i class="fas fa-envelope me-1 text-muted"></i>
-                            Notification Email (rmail)
-                        </th>
                         <th>Locations</th>
                         <th class="text-center" style="width: 130px;">Action</th>
                     </tr>
@@ -38,17 +34,6 @@
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td class="fw-bold text-primary">{{ $region->name }}</td>
-                            <td>
-                                @if($region->rmail)
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check me-1"></i>{{ $region->rmail }}
-                                    </span>
-                                @else
-                                    <span class="badge bg-danger">
-                                        <i class="fas fa-times me-1"></i>Not set
-                                    </span>
-                                @endif
-                            </td>
                             <td>
                                 <span class="badge bg-secondary">{{ $region->locations_count ?? $region->locations->count() }} location(s)</span>
                             </td>
@@ -75,12 +60,6 @@
     </div>
 </div>
 
-{{-- Info Box --}}
-<div class="alert alert-info mt-3">
-    <i class="fas fa-info-circle me-2"></i>
-    <strong>Notification Email (rmail):</strong> Email ini akan menerima notifikasi setiap kali ada tiket baru dari lokasi yang berada di regional ini.
-    Pastikan setiap regional memiliki email yang valid.
-</div>
 
 {{-- Modal --}}
 <div class="modal fade" id="regionModal" tabindex="-1" aria-hidden="true">
@@ -96,14 +75,6 @@
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Region Name <span class="text-danger">*</span></label>
                     <input type="text" name="name" id="regionName" class="form-control" placeholder="e.g. Regional 1" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">
-                        <i class="fas fa-envelope me-1 text-muted"></i>
-                        Notification Email (rmail)
-                    </label>
-                    <input type="email" name="rmail" id="regionRmail" class="form-control" placeholder="e.g. it-regional1@ktushipyard.com">
-                    <small class="text-muted">Email yang akan menerima notifikasi tiket baru dari regional ini.</small>
                 </div>
             </div>
             <div class="modal-footer">
@@ -131,7 +102,6 @@
             .then(res => res.json())
             .then(data => {
                 document.getElementById('regionName').value = data.name;
-                document.getElementById('regionRmail').value = data.rmail ?? '';
                 document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
                 document.getElementById('regionForm').action = `/admin/regions/${id}`;
                 document.getElementById('modalTitle').innerText = 'Edit Region';

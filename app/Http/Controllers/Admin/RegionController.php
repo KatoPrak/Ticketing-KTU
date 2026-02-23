@@ -18,10 +18,9 @@ class RegionController extends Controller
     {
         $request->validate([
             'name'  => 'required|string|max:255|unique:regions,name',
-            'rmail' => 'nullable|email|max:255',
         ]);
 
-        Region::create($request->only('name', 'rmail'));
+        Region::create($request->only('name'));
 
         return redirect()->back()->with('success', 'Region created successfully!');
     }
@@ -37,10 +36,9 @@ class RegionController extends Controller
 
         $request->validate([
             'name'  => 'required|string|max:255|unique:regions,name,' . $region->id,
-            'rmail' => 'nullable|email|max:255',
         ]);
 
-        $region->update($request->only('name', 'rmail'));
+        $region->update($request->only('name'));
 
         return redirect()->back()->with('success', 'Region updated successfully!');
     }

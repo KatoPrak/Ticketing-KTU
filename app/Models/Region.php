@@ -9,7 +9,7 @@ class Region extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'rmail'];
+    protected $fillable = ['name', 'description'];
 
     // Relasi ke Locations
     public function locations()
