@@ -29,8 +29,12 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('user_id').value = '';
         errorContainer.classList.add('d-none');
 
-        // ✅ Reset password field ke default
         document.getElementById('password').value = 'STAFFKTU123';
+        document.getElementById('passwordAddSection').classList.remove('d-none');
+        document.getElementById('passwordEditSection').classList.add('d-none');
+        document.getElementById('changePasswordToggle').checked = false;
+        document.getElementById('editPasswordField').classList.add('d-none');
+        document.getElementById('editPassword').value = '';
     }
 
     function updateTableRow(data) {
@@ -78,7 +82,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (openAddBtn) {
         openAddBtn.addEventListener('click', () => {
             userForm.reset();
-            document.getElementById('password').value = 'STAFFKTU123'; // ✅ Set default value
+            document.getElementById('password').value = 'STAFFKTU123';
+            document.getElementById('passwordAddSection').classList.remove('d-none');
+            document.getElementById('passwordEditSection').classList.add('d-none');
             openUserModal('Add User');
         });
     }
@@ -101,9 +107,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (id) formData.append('_method', 'PUT');
 
-            // ✅ Untuk update, jangan kirim password (password field disabled)
+            // ✅ Untuk update, hanya kirim password jika toggle nyala
             if (id) {
-                formData.delete('password');
+                const changeToggle = document.getElementById('changePasswordToggle');
+                const editPass = document.getElementById('editPassword').value;
+                if (changeToggle && changeToggle.checked && editPass) {
+                    formData.append('password', editPass);
+                } else {
+                    formData.delete('password');
+                }
             }
 
             try {
@@ -160,8 +172,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('email').value = data.email;
                     document.getElementById('department_id').value = data.department_id;
                     document.getElementById('location_id').value = data.location_id || '';
-                    // ✅ Password tetap disabled saat edit
-                    document.getElementById('password').value = 'STAFFKTU123';
+
+                    // ✅ Password logic for edit
+                    document.getElementById('passwordAddSection').classList.add('d-none');
+                    document.getElementById('passwordEditSection').classList.remove('d-none');
+                    document.getElementById('changePasswordToggle').checked = false;
+                    document.getElementById('editPasswordField').classList.add('d-none');
+                    document.getElementById('editPassword').value = '';
 
                 } catch (err) {
                     alert('Error: ' + err.message);
@@ -276,6 +293,42 @@ document.addEventListener('DOMContentLoaded', function () {
                 deptErrorContainer.innerHTML = `<p class="mb-0">${err.message}</p>`;
                 deptErrorContainer.classList.remove('d-none');
             }
+        });
+    }
+
+    // --- Password Toggles & Logic ---
+    const changeToggle = document.getElementById('changePasswordToggle');
+    const editPasswordField = document.getElementById('editPasswordField');
+    const showEditPass = document.getElementById('showEditPassword');
+    const editPassInput = document.getElementById('editPassword');
+
+    if (changeToggle) {
+        changeToggle.addEventListener('change', function () {
+            if (this.checked) {
+                editPasswordField.classList.remove('d-none');
+                editPassInput.focus();
+            } else {
+                editPasswordField.classList.add('d-none');
+                editPassInput.value = '';
+            }
+        });
+    }
+
+    if (showEditPass && editPassInput) {
+        showEditPass.addEventListener('change', function () {
+            editPassInput.type = this.checked ? 'text' : 'password';
+        });
+    }
+
+    const genPassBtn = document.getElementById('generatePassword');
+    if (genPassBtn) {
+        genPassBtn.addEventListener('click', () => {
+            const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+            let pass = "";
+            for (let i = 0; i < 10; i++) {
+                pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('password').value = pass;
         });
     }
 

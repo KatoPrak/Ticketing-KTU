@@ -372,12 +372,14 @@
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
                     <input type="text" id="username" name="username" class="form-control" 
-                           value="{{ old('username') }}" placeholder="Enter your username" required autofocus>
+                           value="{{ old('username') }}" placeholder="Enter username" 
+                           autocomplete="username" required autofocus>
                 </div>
                 
                 <div class="mb-3 password-input-wrapper">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" required>
+                    <input type="password" id="password" name="password" class="form-control" 
+                           placeholder="Enter password" autocomplete="current-password" required>
                     <i class="fas fa-eye password-toggle" id="togglePassword"></i>
                 </div>
 

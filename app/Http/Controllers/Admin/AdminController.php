@@ -114,7 +114,7 @@ public function showUsers()
 
     $user = new User();
     $user->name          = $validated['name'];
-    $user->nik           = Str::lower($validated['nik']);
+    $user->nik           = $validated['nik'] ? Str::lower($validated['nik']) : null;
     $user->username      = isset($validated['username']) ? Str::lower($validated['username']) : null;
     $user->email         = $validated['email'] ?? null;
     $user->role          = $validated['role'];
@@ -146,7 +146,7 @@ public function showUsers()
 
     $updateData = [
         'name'          => $validated['name'],
-        'nik'           => Str::lower($validated['nik']),
+        'nik'           => $validated['nik'] ? Str::lower($validated['nik']) : null,
         'username'      => isset($validated['username']) ? Str::lower($validated['username']) : null,
         'email'         => $validated['email'] ?? null,
         'role'          => $validated['role'],

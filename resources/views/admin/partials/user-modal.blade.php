@@ -143,10 +143,15 @@
 
               {{-- Manual password input (no name — value is copied to hidden input by JS) --}}
               <div id="manualPasswordField" style="display:none;">
-                <div class="form-floating">
-                  <input type="password" class="form-control" id="password"
-                         placeholder="Enter password" autocomplete="new-password">
-                  <label for="password"><i class="fas fa-key me-2 text-muted"></i>Password</label>
+                <div class="input-group">
+                  <div class="form-floating flex-grow-1">
+                    <input type="password" class="form-control" id="password"
+                           placeholder="Enter password" autocomplete="new-password">
+                    <label for="password"><i class="fas fa-key me-2 text-muted"></i>Password</label>
+                  </div>
+                  <button class="btn btn-outline-secondary" type="button" id="generatePasswordAdminAdd" title="Generate Random Password">
+                    <i class="fas fa-magic"></i>
+                  </button>
                 </div>
                 <div class="form-check mt-2">
                   <input class="form-check-input" type="checkbox" id="togglePasswordVisibility">
@@ -169,11 +174,16 @@
               </div>
 
               <div id="editPasswordField" style="display:none;">
-                <div class="form-floating">
-                  {{-- No name here — JS copies value into hidden input on submit --}}
-                  <input type="password" class="form-control" id="editPassword"
-                         placeholder="New password" autocomplete="new-password">
-                  <label for="editPassword"><i class="fas fa-key me-2 text-muted"></i>New Password</label>
+                <div class="input-group">
+                  <div class="form-floating flex-grow-1">
+                    {{-- No name here — JS copies value into hidden input on submit --}}
+                    <input type="password" class="form-control" id="editPassword"
+                           placeholder="New password" autocomplete="new-password">
+                    <label for="editPassword"><i class="fas fa-key me-2 text-muted"></i>New Password</label>
+                  </div>
+                  <button class="btn btn-outline-secondary" type="button" id="generatePasswordAdminEdit" title="Generate Random Password">
+                    <i class="fas fa-magic"></i>
+                  </button>
                 </div>
                 <div class="form-check mt-2">
                   <input class="form-check-input" type="checkbox" id="toggleEditPasswordVisibility">

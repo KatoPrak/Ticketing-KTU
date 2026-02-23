@@ -116,16 +116,31 @@
                             <div class="invalid-feedback">Location is required</div>
                         </div>
 
-                        <!-- ✅ Password Field - Disabled dengan Info Label -->
+                        <!-- ✅ Password Section -->
                         <div class="col-12">
-                            <label for="password" class="form-label fw-semibold">Default Password</label>
-                            <input type="text" id="password" name="password" class="form-control bg-light" value="STAFFKTU123" disabled readonly>
-                            <div class="d-flex align-items-start mt-2">
-                                <i class="fas fa-info-circle text-info me-2 mt-1"></i>
-                                <small class="text-muted">
-                                    All new users will receive default password: <strong class="text-primary">STAFFKTU123</strong>
-                                    <br>Users can change their password after first login.
-                                </small>
+                            <div id="passwordAddSection">
+                                <label for="password" class="form-label fw-semibold">Password</label>
+                                <div class="input-group">
+                                    <input type="text" id="password" name="password" class="form-control" value="STAFFKTU123">
+                                    <button class="btn btn-outline-secondary" type="button" id="generatePassword">
+                                        <i class="fas fa-magic"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Default: <strong class="text-primary">STAFFKTU123</strong></small>
+                            </div>
+
+                            <div id="passwordEditSection" class="d-none">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="changePasswordToggle">
+                                    <label class="form-check-label fw-semibold" for="changePasswordToggle">Change Password</label>
+                                </div>
+                                <div id="editPasswordField" class="d-none">
+                                    <input type="password" id="editPassword" name="edit_password" class="form-control" placeholder="Enter new password">
+                                    <div class="form-check mt-1">
+                                        <input class="form-check-input" type="checkbox" id="showEditPassword">
+                                        <label class="form-check-label small text-muted" for="showEditPassword">Show password</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -329,7 +329,10 @@ function editUser(id) {
             const editPasswordInput = document.getElementById('editPassword');
             if (changePasswordCb) changePasswordCb.checked = false;
             if (editPasswordField) editPasswordField.style.display = 'none';
-            if (editPasswordInput) { editPasswordInput.disabled = true; editPasswordInput.value = ''; }
+            if (editPasswordInput) {
+                editPasswordInput.disabled = false;
+                editPasswordInput.value = '';
+            }
 
             // Remove loading state
             if (modalBody) {
@@ -635,10 +638,12 @@ document.addEventListener('DOMContentLoaded', function () {
         changePasswordCb.addEventListener('change', function () {
             if (this.checked) {
                 editPasswordField.style.display = 'block';
+                editPasswordInput.disabled = false;
                 editPasswordInput.focus();
             } else {
                 editPasswordField.style.display = 'none';
                 editPasswordInput.value = '';
+                editPasswordInput.disabled = true;
                 defaultPasswordInput.value = '';
             }
         });
@@ -657,6 +662,30 @@ document.addEventListener('DOMContentLoaded', function () {
             editPasswordInput.type = this.checked ? 'text' : 'password';
         });
     }
+
+    const generateBtnAdd = document.getElementById('generatePasswordAdminAdd');
+    const generateBtnEdit = document.getElementById('generatePasswordAdminEdit');
+    const manualPassInput = document.getElementById('password');
+    const editPassInput_gen = document.getElementById('editPassword');
+
+    const generateAndSet = (targetInput) => {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        let pass = "";
+        for (let i = 0; i < 10; i++) {
+            pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        targetInput.value = pass;
+        const defaultInput = document.getElementById('defaultPasswordInput');
+        if (defaultInput) defaultInput.value = pass;
+    };
+
+    if (generateBtnAdd && manualPassInput) {
+        generateBtnAdd.addEventListener('click', () => generateAndSet(manualPassInput));
+    }
+    if (generateBtnEdit && editPassInput_gen) {
+        generateBtnEdit.addEventListener('click', () => generateAndSet(editPassInput_gen));
+    }
+
 
     // ── MODAL CLOSE CLEANUP ──
     const userModalEl = document.getElementById('userModal');

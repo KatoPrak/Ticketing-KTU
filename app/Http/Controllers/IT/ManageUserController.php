@@ -75,7 +75,7 @@ class ManageUserController extends Controller
 
         $user = User::create([
             'name'          => $validated['name'],
-            'nik'           => Str::lower($validated['nik']),
+            'nik'           => $validated['nik'] ? Str::lower($validated['nik']) : null,
             'username'      => isset($validated['username']) ? Str::lower($validated['username']) : null,
             'email'         => $validated['email'],
             'department_id' => $validated['department_id'],
@@ -133,7 +133,7 @@ class ManageUserController extends Controller
         // ✅ Siapkan data untuk update
         $updateData = [
             'name'          => $validated['name'],
-            'nik'           => Str::lower($validated['nik']),
+            'nik'           => $validated['nik'] ? Str::lower($validated['nik']) : null,
             'username'      => isset($validated['username']) ? Str::lower($validated['username']) : null,
             'email'         => $validated['email'],
             'department_id' => $validated['department_id'],
