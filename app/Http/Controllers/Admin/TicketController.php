@@ -53,8 +53,16 @@ class TicketController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        // ✅ Tambahkan 'feedback' relation untuk export PDF juga
-        $query = Ticket::query()->with(['user.department', 'user.location', 'category', 'department', 'feedback']);
+        // ✅ Tambahkan 'feedback', 'assignedTo', dan 'region' relation
+        $query = Ticket::query()->with([
+            'user.department', 
+            'user.location', 
+            'category', 
+            'department', 
+            'feedback',
+            'assignedTo',
+            'region'
+        ]);
 
         if ($request->filled('year')) {
             $query->whereYear('created_at', $request->year);

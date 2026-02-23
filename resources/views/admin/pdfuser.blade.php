@@ -144,20 +144,20 @@
             background: #f8fafb; 
         }
 
-        /* ===== COLUMN WIDTHS - OPTIMIZED FOR READABILITY ===== */
+        /* ===== COLUMN WIDTHS - OPTIMIZED WITH IT STAFF & REGION ===== */
         th:nth-child(1), td:nth-child(1) { width: 4%; text-align: center; }    /* ID */
         th:nth-child(2), td:nth-child(2) { width: 7%; }                         /* User */
-        th:nth-child(3), td:nth-child(3) { width: 7%; }                         /* Location */
-        th:nth-child(4), td:nth-child(4) { width: 6%; }                         /* Category */
-        th:nth-child(5), td:nth-child(5) { width: 11%; }                        /* Description */
-        th:nth-child(6), td:nth-child(6) { width: 4%; text-align: center; }    /* Priority */
-        th:nth-child(7), td:nth-child(7) { width: 5%; text-align: center; }    /* Status */
-        th:nth-child(8), td:nth-child(8) { width: 7%; font-size: 6.5px; }      /* Report Date */
-        th:nth-child(9), td:nth-child(9) { width: 7%; font-size: 6.5px; }      /* Response Date */
-        th:nth-child(10), td:nth-child(10) { width: 7%; font-size: 6.5px; }    /* Resolved Date */
+        th:nth-child(3), td:nth-child(3) { width: 8%; }                         /* Loc/Region */
+        th:nth-child(4), td:nth-child(4) { width: 8%; }                         /* IT STAFF */
+        th:nth-child(5), td:nth-child(5) { width: 6%; }                         /* Category */
+        th:nth-child(6), td:nth-child(6) { width: 10%; }                        /* Description */
+        th:nth-child(7), td:nth-child(7) { width: 4%; text-align: center; }    /* Priority */
+        th:nth-child(8), td:nth-child(8) { width: 4%; text-align: center; }    /* Status */
+        th:nth-child(9), td:nth-child(9) { width: 7%; font-size: 6px; }        /* Report Date */
+        th:nth-child(10), td:nth-child(10) { width: 7%; font-size: 6px; }      /* Resolved Date */
         th:nth-child(11), td:nth-child(11) { width: 5%; text-align: center; }  /* Rating */
-        th:nth-child(12), td:nth-child(12) { width: 13%; }                      /* Comment */
-        th:nth-child(13), td:nth-child(13) { width: 11%; }                      /* Remark */
+        th:nth-child(12), td:nth-child(12) { width: 15%; }                     /* Feedback */
+        th:nth-child(13), td:nth-child(13) { width: 15%; }                     /* Remark */
 
         /* ===== BADGES ===== */
         .badge {
@@ -364,16 +364,16 @@
             <tr>
                 <th>ID</th>
                 <th>User</th>
-                <th>Location</th>
+                <th>Loc/Region</th>
+                <th>IT Support</th>
                 <th>Category</th>
                 <th>Description</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Report Date</th>
-                <th>Response Date</th>
-                <th>Resolved Date</th>
+                <th>Pri</th>
+                <th>St</th>
+                <th>Reported</th>
+                <th>Resolved</th>
                 <th>Rating</th>
-                <th>Comment</th>
+                <th>Feedback</th>
                 <th>Remark</th>
             </tr>
         </thead>
@@ -386,73 +386,69 @@
                     {{-- User --}}
                     <td>{{ $ticket->user->name ?? 'N/A' }}</td>
                     
-                    {{-- Location --}}
-                    <td>{{ $ticket->user->location->name ?? 'N/A' }}</td>
+                    {{-- Loc/Region --}}
+                    <td>
+                        {{ $ticket->user->location->name ?? 'N/A' }}<br>
+                        <small style="color: #666; font-size: 6px;">({{ $ticket->region->name ?? 'N/A' }})</small>
+                    </td>
+
+                    {{-- IT STAFF --}}
+                    <td style="color: #003366; font-weight: bold;">
+                        {{ $ticket->assignedTo->name ?? 'Unassigned' }}
+                    </td>
                     
                     {{-- Category --}}
                     <td>{{ $ticket->category->name ?? 'N/A' }}</td>
                     
-                    {{-- Description - WITH WORD WRAP --}}
+                    {{-- Description --}}
                     <td>
                         <span class="text-wrap">
                             {{ $ticket->description ?? 'No description' }}
                         </span>
                     </td>
                     
-                    {{-- Priority Badge --}}
+                    {{-- Priority --}}
                     <td>
                         <span class="badge priority-{{ strtolower($ticket->priority ?? 'low') }}">
                             {{ strtoupper(substr($ticket->priority ?? 'low', 0, 3)) }}
                         </span>
                     </td>
                     
-                    {{-- Status Badge --}}
+                    {{-- Status --}}
                     <td>
                         <span class="badge {{ strtolower(str_replace(' ', '_', $ticket->status)) }}">
                             {{ strtoupper(substr(str_replace('_', ' ', $ticket->status), 0, 3)) }}
                         </span>
                     </td>
                     
-                    {{-- ✅ REPORT DATE = created_at (WITH SECONDS) --}}
+                    {{-- REPORTED --}}
                     <td>
-                        <span class="date-only">{{ $ticket->created_at->format('d/m/Y') }}</span>
-                        <span class="time-only">{{ $ticket->created_at->format('H:i:s') }}</span>
+                        <span class="date-only">{{ \Carbon\Carbon::parse($ticket->created_at)->format('d/m/y') }}</span>
+                        <span class="time-only">{{ \Carbon\Carbon::parse($ticket->created_at)->format('H:i') }}</span>
                     </td>
 
-                    {{-- ✅ RESPONSE DATE = updated_at (WITH SECONDS) --}}
-                    <td>
-                        @if($ticket->updated_at)
-                            <span class="date-only">{{ $ticket->updated_at->format('d/m/Y') }}</span>
-                            <span class="time-only">{{ $ticket->updated_at->format('H:i:s') }}</span>
-                        @else
-                            <span class="no-date">Not yet</span>
-                        @endif
-                    </td>
-
-                    {{-- ✅ RESOLVED/CLOSED DATE = resolved_at (WITH SECONDS) --}}
+                    {{-- RESOLVED --}}
                     <td>
                         @if($ticket->resolved_at)
-                            <span class="date-only">{{ \Carbon\Carbon::parse($ticket->resolved_at)->format('d/m/Y') }}</span>
-                            <span class="time-only">{{ \Carbon\Carbon::parse($ticket->resolved_at)->format('H:i:s') }}</span>
+                            <span class="date-only text-success">{{ \Carbon\Carbon::parse($ticket->resolved_at)->format('d/m/y') }}</span>
+                            <span class="time-only">{{ \Carbon\Carbon::parse($ticket->resolved_at)->format('H:i') }}</span>
                         @else
-                            <span class="no-date">Pending</span>
+                            <span class="no-date">-</span>
                         @endif
                     </td>
                     
-                    {{-- ⭐ RATING --}}
+                    {{-- RATING --}}
                     <td>
                         @if($ticket->feedback)
-                            <div class="rating-stars">
-                                @for($i = 1; $i <= 5; $i++)
-                                    {{ $i <= $ticket->feedback->rating ? '★' : '☆' }}
-                                @endfor
+                            <div class="rating-stars" style="color: #f39c12;">
+                                {{ $ticket->feedback->rating }} / 5
                             </div>
                         @else
-                            <span class="no-rating">No rating</span>
+                            <span class="no-rating">-</span>
                         @endif
                     </td>
 
-                    {{-- 💬 COMMENT - WITH WORD WRAP --}}
+                    {{-- FEEDBACK --}}
                     <td>
                         @if($ticket->feedback && $ticket->feedback->comment)
                             <div class="comment-text">
@@ -463,7 +459,7 @@
                         @endif
                     </td>
 
-                    {{-- REMARK - WITH WORD WRAP --}}
+                    {{-- REMARK --}}
                     <td>
                         @if($ticket->resolution_notes)
                             <span class="text-wrap">

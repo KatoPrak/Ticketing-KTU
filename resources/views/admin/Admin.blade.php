@@ -176,6 +176,34 @@
                 <canvas id="ticketsChart" height="100"></canvas>
             </div>
         </div>
+
+        <!-- 🥧 Pie Charts Section -->
+        <div class="row mb-5">
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 shadow-sm border-0 rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-chart-pie text-primary me-2"></i>Status Distribution</h5>
+                    </div>
+                    <div class="card-body p-4 d-flex justify-content-center align-items-center">
+                        <div style="width: 100%; max-width: 300px;">
+                            <canvas id="statusPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 shadow-sm border-0 rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-tags text-success me-2"></i>Tickets by Category</h5>
+                    </div>
+                    <div class="card-body p-4 d-flex justify-content-center align-items-center">
+                        <div style="width: 100%; max-width: 300px;">
+                            <canvas id="categoryPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -238,6 +266,75 @@
                             display: true,
                             position: 'top'
                         }
+                    }
+                }
+            });
+        }
+
+        // 🥧 Status Pie Chart
+        const statusCtx = document.getElementById('statusPieChart');
+        if (statusCtx) {
+            const statusData = @json($statusStats);
+            const labels = Object.keys(statusData).map(s => s.replace('_', ' ').toUpperCase());
+            const data = Object.values(statusData);
+            
+            // Define colors based on status
+            const colors = Object.keys(statusData).map(status => {
+                switch(status) {
+                    case 'waiting': return '#3b82f6'; // blue
+                    case 'in_progress': return '#f59e0b'; // orange
+                    case 'pending': return '#ef4444'; // red
+                    case 'resolved': return '#10b981'; // green
+                    case 'closed': return '#6b7280'; // gray
+                    default: return '#8b5cf6'; // purple
+                }
+            });
+
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        hoverOffset: 10,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // 🥧 Category Pie Chart
+        const categoryCtx = document.getElementById('categoryPieChart');
+        if (categoryCtx) {
+            const categoryData = @json($categoryStats);
+            const labels = categoryData.map(c => c.name);
+            const data = categoryData.map(c => c.count);
+            const colors = categoryData.map(c => c.color);
+
+            new Chart(categoryCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
                     }
                 }
             });

@@ -38,6 +38,11 @@ class AdminController extends Controller
 
     $users = User::orderBy('created_at', 'desc')->paginate(10);
 
+    // Statistika Status untuk Pie Chart
+    $statusStats = Ticket::select('status', \DB::raw('count(*) as count'))
+        ->groupBy('status')
+        ->pluck('count', 'status');
+
     // Ambil data monthly (existing helper)
     $monthlyTickets = $this->getMonthlyTicketsData();
     // siapkan labels & data untuk Chart.js (aman jika helper berubah)
@@ -76,6 +81,7 @@ class AdminController extends Controller
         // tambahan untuk chart & filter agar Blade tidak undefined
         'labels',
         'ticketData',
+        'statusStats',
         'filter',
         'year'
     ));
@@ -423,17 +429,22 @@ public function showUsers()
 
     private function getCategoryStatsData($startDate = null, $endDate = null)
     {
+        $palette = [
+            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+            '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
+        ];
+
         $query = Category::withCount(['tickets' => function ($q) use ($startDate, $endDate) {
             if ($startDate && $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate]);
             }
         }]);
 
-        return $query->get()->map(function ($category) {
+        return $query->get()->map(function ($category, $index) use ($palette) {
             return [
                 'name' => $category->name,
                 'count' => $category->tickets_count,
-                'color' => $category->color ?? '#3b82f6'
+                'color' => $category->color ?: $palette[$index % count($palette)]
             ];
         });
     }
