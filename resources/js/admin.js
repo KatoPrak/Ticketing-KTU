@@ -271,14 +271,16 @@ function editUser(id) {
             // Populate form fields
             const userIdInput = form.querySelector('#user_id');
             const nameInput = form.querySelector('#name');
-            const idStaffInput = form.querySelector('#id_staff');
+            const nikInput = form.querySelector('#nik');
+            const usernameInput = form.querySelector('#username');
             const emailInput = form.querySelector('#email');
             const roleSelect = form.querySelector('#role');
             const departmentSelect = form.querySelector('#department_id');
 
             if (userIdInput) userIdInput.value = user.id || '';
             if (nameInput) nameInput.value = user.name || '';
-            if (idStaffInput) idStaffInput.value = user.id_staff || '';
+            if (nikInput) nikInput.value = user.nik || '';
+            if (usernameInput) usernameInput.value = user.username || '';
             if (emailInput) emailInput.value = user.email || '';
             if (roleSelect) roleSelect.value = user.role || '';
             if (departmentSelect) departmentSelect.value = user.department_id || '';
@@ -422,15 +424,18 @@ function initializeSearch() {
         let visibleCount = 0;
 
         rows.forEach(row => {
-            const staffIdCell = row.querySelector('.staff-id');
+            const nikCell = row.querySelector('.nik');
+            const usernameCell = row.querySelector('.username');
             const nameCell = row.querySelector('td:first-child');
             const emailCell = row.querySelector('td:nth-child(3)');
 
-            const staffId = staffIdCell ? staffIdCell.textContent.toLowerCase() : '';
+            const nik = nikCell ? nikCell.textContent.toLowerCase() : '';
+            const username = usernameCell ? usernameCell.textContent.toLowerCase() : '';
             const name = nameCell ? nameCell.textContent.toLowerCase() : '';
             const email = emailCell ? emailCell.textContent.toLowerCase() : '';
 
-            const matches = staffId.includes(searchTerm) ||
+            const matches = nik.includes(searchTerm) ||
+                username.includes(searchTerm) ||
                 name.includes(searchTerm) ||
                 email.includes(searchTerm);
 

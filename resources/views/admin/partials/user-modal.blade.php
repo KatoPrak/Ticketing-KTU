@@ -35,11 +35,19 @@
               </div>
             </div>
 
-            {{-- Staff ID --}}
+            {{-- NIK --}}
             <div class="col-md-5">
               <div class="form-floating">
-                <input type="text" class="form-control" id="id_staff" name="id_staff" placeholder="Staff ID" autocomplete="username" required>
-                <label for="id_staff"><i class="fas fa-id-badge me-2 text-muted"></i>Staff ID / NIK <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="nik" name="nik" placeholder="NIK" required>
+                <label for="nik"><i class="fas fa-id-badge me-2 text-muted"></i>NIK <span class="text-danger">*</span></label>
+              </div>
+            </div>
+
+            {{-- Username --}}
+            <div class="col-md-12">
+              <div class="form-floating">
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username" autocomplete="username" required>
+                <label for="username"><i class="fas fa-at me-2 text-muted"></i>Username <span class="text-danger">*</span></label>
               </div>
             </div>
 

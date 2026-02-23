@@ -21,7 +21,8 @@ class ManageUserController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('id_staff', 'like', "%{$search}%")
+                  ->orWhere('nik', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
@@ -34,7 +35,8 @@ class ManageUserController extends Controller
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'id_staff' => $user->id_staff,
+                    'nik' => $user->nik,
+                    'username' => $user->username,
                     'email' => $user->email,
                     'department_id' => $user->department_id,
                     'department_name' => $user->department->name ?? '-',
@@ -64,7 +66,8 @@ class ManageUserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'id_staff' => 'required|string|unique:users,id_staff|max:50',
+            'nik' => 'required|string|unique:users,nik|max:50',
+            'username' => 'required|string|unique:users,username|max:50',
             'email' => 'required|email|unique:users,email',
             'department_id' => 'required|exists:departments,id',
             'location_id' => 'required|exists:locations,id',
@@ -72,7 +75,8 @@ class ManageUserController extends Controller
 
         $user = User::create([
             'name'          => $validated['name'],
-            'id_staff'      => Str::lower($validated['id_staff']),
+            'nik'           => Str::lower($validated['nik']),
+            'username'      => isset($validated['username']) ? Str::lower($validated['username']) : null,
             'email'         => $validated['email'],
             'department_id' => $validated['department_id'],
             'location_id'   => $validated['location_id'],
@@ -83,7 +87,8 @@ class ManageUserController extends Controller
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
-            'id_staff' => $user->id_staff,
+            'nik' => $user->nik,
+            'username' => $user->username,
             'email' => $user->email,
             'department_id' => $user->department_id,
             'department_name' => $user->department->name ?? '-',
@@ -100,7 +105,8 @@ class ManageUserController extends Controller
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
-            'id_staff' => $user->id_staff,
+            'nik' => $user->nik,
+            'username' => $user->username,
             'email' => $user->email,
             'department_id' => $user->department_id,
             'department_name' => $user->department->name ?? '-',
@@ -116,7 +122,8 @@ class ManageUserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'id_staff' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
+            'nik' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
+            'username' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'department_id' => 'required|exists:departments,id',
             'location_id' => 'required|exists:locations,id',
@@ -126,7 +133,8 @@ class ManageUserController extends Controller
         // ✅ Siapkan data untuk update
         $updateData = [
             'name'          => $validated['name'],
-            'id_staff'      => Str::lower($validated['id_staff']),
+            'nik'           => Str::lower($validated['nik']),
+            'username'      => isset($validated['username']) ? Str::lower($validated['username']) : null,
             'email'         => $validated['email'],
             'department_id' => $validated['department_id'],
             'location_id'   => $validated['location_id'],
@@ -143,7 +151,8 @@ class ManageUserController extends Controller
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
-            'id_staff' => $user->id_staff,
+            'nik' => $user->nik,
+            'username' => $user->username,
             'email' => $user->email,
             'department_id' => $user->department_id,
             'department_name' => $user->department->name ?? '-',

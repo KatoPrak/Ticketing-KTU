@@ -26,7 +26,7 @@
                 <p class="mb-2 animated-fade-in">
                         <i class="fas fa-building me-2"></i>
                         {{ optional(Auth::user()->department)->name ?? '-' }} 
-                    <span class="badge bg-primary ms-2">{{ Auth::user()->id_staff }}</span>
+                    <span class="badge bg-primary ms-2">{{ Auth::user()->nik }}</span>
                 </p>
                 <div class="datetime-display animated-fade-in-delayed">
                     <i class="fas fa-calendar-day me-2 text-primary"></i>

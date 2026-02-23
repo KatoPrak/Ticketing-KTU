@@ -487,7 +487,7 @@
                                     <option value="{{ $u->id }}" 
                                             data-location="{{ optional($u->location)->name ?? '-' }}"
                                             data-department="{{ optional($u->department)->name ?? '-' }}">
-                                        {{ $u->name }} ({{ $u->id_staff }})
+                                        {{ $u->name }} ({{ $u->nik }})
                                     </option>
                                 @endforeach
                             </select>

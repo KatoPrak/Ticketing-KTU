@@ -370,9 +370,9 @@
             <form method="POST" action="{{ route('login') }}" id="loginForm">
                 @csrf
                 <div class="mb-3">
-                    <label for="id_staff" class="form-label">Username</label>
-                    <input type="text" id="id_staff" name="id_staff" class="form-control"
-                           value="{{ old('id_staff') }}" required autofocus>
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" 
+                           value="{{ old('username') }}" placeholder="Enter your username" required autofocus>
                 </div>
                 
                 <div class="mb-3 password-input-wrapper">

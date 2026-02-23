@@ -13,10 +13,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'username',
         'password',
         'department_id',
         'role',
-        'id_staff', 
+        'nik', 
         'location_id',
         'status',
         'phone',
@@ -160,9 +161,9 @@ public function user() {
     /**
      * Scopes
      */
-    public function scopeByStaffId($query, $staffId)
+    public function scopeByNik($query, $nik)
     {
-        return $query->where('id_staff', $staffId);
+        return $query->where('nik', $nik);
     }
 
     public function scopeActive($query)

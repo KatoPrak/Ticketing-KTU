@@ -13,7 +13,7 @@
         <h3 class="card-title mb-0">User Management</h3>
 
         <div class="d-flex gap-3">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search by Staff ID..." style="width: 250px;">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by NIK, Username, Name..." style="width: 250px;">
             <button class="btn btn-primary open-user-modal">
                 <i class="fas fa-plus me-1"></i> Add User
             </button>
@@ -25,7 +25,8 @@
             <thead class="table-light">
                 <tr>
                     <th>Name</th>
-                    <th>Staff ID</th>
+                    <th>NIK</th>
+                    <th>Username</th>
                     <th>Location / Region</th>
                     <th>Role</th>
                     <th>Department</th>
@@ -36,8 +37,9 @@
                 @forelse($users ?? [] as $user)
                     @if($user->role !== 'admin')
                         <tr>
-                            <td>{{ $user->name }}</td>
-                            <td class="staff-id">{{ $user->id_staff }}</td>
+                            <td class="name">{{ $user->name }}</td>
+                            <td class="nik">{{ $user->nik }}</td>
+                            <td class="username">{{ $user->username ?? '-' }}</td>
                             <td>
                                 @if(in_array($user->role, ['tim it', 'it']))
                                     <span class="badge bg-primary"><i class="fas fa-globe me-1"></i> {{ $user->region->name ?? 'Unassigned' }}</span>

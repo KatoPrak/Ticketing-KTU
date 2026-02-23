@@ -44,7 +44,8 @@
                         </div>
                     </div>
                     <h5 class="fw-bold mb-1">{{ $user->name }}</h5>
-                    <p class="text-muted mb-2">{{ $user->id_staff }}</p>
+                    <p class="text-muted mb-0">NIK: {{ $user->nik }}</p>
+                    <p class="text-muted mb-2">User: {{ $user->username ?? '-' }}</p>
                     <span class="badge bg-info">{{ ucfirst($user->role) }}</span>
                     
                     <hr class="my-3">
@@ -100,16 +101,29 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label for="id_staff" class="form-label fw-semibold">
-                                    Staff ID
+                                <label for="nik" class="form-label fw-semibold">
+                                    NIK
                                 </label>
                                 <input type="text" 
                                        class="form-control bg-light" 
-                                       id="id_staff" 
-                                       value="{{ $user->id_staff }}" 
+                                       id="nik" 
+                                       value="{{ $user->nik }}" 
                                        disabled 
                                        readonly>
-                                <small class="text-muted">Staff ID cannot be changed</small>
+                                <small class="text-muted">NIK cannot be changed</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="username" class="form-label fw-semibold">
+                                    Username
+                                </label>
+                                <input type="text" 
+                                       class="form-control bg-light" 
+                                       id="username" 
+                                       value="{{ $user->username ?? '-' }}" 
+                                       disabled 
+                                       readonly>
+                                <small class="text-muted">Username cannot be changed</small>
                             </div>
 
                             <div class="col-md-6">

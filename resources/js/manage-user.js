@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateTableRow(data) {
         const rowHtml = `
             <td>${data.name}</td>
-            <td>${data.id_staff}</td>
+            <td>${data.nik}</td>
+            <td>${data.username || '-'}</td>
             <td>${data.email}</td>
             <td>${data.department_name}</td>
             <td>
@@ -153,7 +154,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     openUserModal('Edit User');
                     document.getElementById('user_id').value = data.id;
                     document.getElementById('name').value = data.name;
-                    document.getElementById('id_staff').value = data.id_staff;
+                    document.getElementById('nik').value = data.nik;
+                    const usernameField = document.getElementById('username');
+                    if (usernameField) usernameField.value = data.username || '';
                     document.getElementById('email').value = data.email;
                     document.getElementById('department_id').value = data.department_id;
                     document.getElementById('location_id').value = data.location_id || '';
@@ -212,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     userTableBody.innerHTML = '';
 
                     if (data.length === 0) {
-                        userTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No users found.</td></tr>';
+                        userTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No users found.</td></tr>';
                     } else {
                         data.forEach(u => updateTableRow(u));
                     }

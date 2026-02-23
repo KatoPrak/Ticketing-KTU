@@ -102,7 +102,8 @@ public function showUsers()
 {
     $validated = $request->validate([
         'name'          => 'required|string|max:255',
-        'id_staff'      => 'required|string|max:50|unique:users,id_staff',
+        'nik'           => 'required|string|max:50|unique:users,nik',
+        'username'      => 'required|string|max:50|unique:users,username',
         'email'         => 'nullable|email|unique:users,email',
         'role'          => 'required|string',
         'department_id' => 'required|exists:departments,id',
@@ -113,7 +114,8 @@ public function showUsers()
 
     $user = new User();
     $user->name          = $validated['name'];
-    $user->id_staff      = Str::lower($validated['id_staff']);
+    $user->nik           = Str::lower($validated['nik']);
+    $user->username      = isset($validated['username']) ? Str::lower($validated['username']) : null;
     $user->email         = $validated['email'] ?? null;
     $user->role          = $validated['role'];
     $user->department_id = $validated['department_id'];
@@ -132,7 +134,8 @@ public function showUsers()
 
     $validated = $request->validate([
         'name'          => 'required|string|max:255',
-        'id_staff'      => 'required|string|max:50|unique:users,id_staff,' . $user->id,
+        'nik'           => 'required|string|max:50|unique:users,nik,' . $user->id,
+        'username'      => 'required|string|max:50|unique:users,username,' . $user->id,
         'email'         => 'nullable|email|unique:users,email,' . $user->id,
         'role'          => 'required|string',
         'department_id' => 'required|exists:departments,id',
@@ -143,7 +146,8 @@ public function showUsers()
 
     $updateData = [
         'name'          => $validated['name'],
-        'id_staff'      => Str::lower($validated['id_staff']),
+        'nik'           => Str::lower($validated['nik']),
+        'username'      => isset($validated['username']) ? Str::lower($validated['username']) : null,
         'email'         => $validated['email'] ?? null,
         'role'          => $validated['role'],
         'department_id' => $validated['department_id'],
@@ -188,7 +192,8 @@ public function showUsers()
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
-            'id_staff' => $user->id_staff,
+            'nik' => $user->nik,
+            'username' => $user->username,
             'email' => $user->email,
             'role' => $user->role,
             'department_id' => $user->department_id,

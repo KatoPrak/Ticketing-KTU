@@ -107,7 +107,8 @@ class TicketController extends Controller
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
-            'id_staff' => $user->id_staff,
+            'nik' => $user->nik,
+            'username' => $user->username,
             'email' => $user->email,
             'role' => $user->role,
             'department_id' => $user->department_id,

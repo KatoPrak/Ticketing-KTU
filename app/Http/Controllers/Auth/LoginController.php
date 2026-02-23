@@ -30,35 +30,34 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'id_staff' => 'required|string',
+            'username' => 'required|string',
             'password' => 'required|string',
         ], [
-            'id_staff.required' => 'Please enter your username.',
+            'username.required' => 'Please enter your username.',
             'password.required' => 'Please enter your password.',
         ]);
 
+        $username = Str::lower($request->username);
+
         // Rate limiting key generation
-        $key = Str::lower($request->id_staff) . '|' . $request->ip();
+        $key = $username . '|' . $request->ip();
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
             $minutes = ceil($seconds / 60);
             
             throw ValidationException::withMessages([
-                'id_staff' => $seconds > 60 
+                'username' => $seconds > 60 
                     ? "Too many failed login attempts. Please try again in {$minutes} minute(s) for security reasons."
                     : "Too many failed login attempts. Please try again in {$seconds} seconds for security reasons.",
             ]);
         }
 
-        $credentials = [
-            'id_staff' => Str::lower($request->id_staff),
-            'password' => $request->password,
-        ];
-
+        // Try login with Username only
         $remember = $request->boolean('remember');
-
-        if (Auth::attempt($credentials, $remember)) {
+        
+        if (Auth::attempt(['username' => $username, 'password' => $request->password], $remember)) {
+            
             RateLimiter::clear($key);
             $request->session()->regenerate();
 
@@ -85,9 +84,9 @@ class LoginController extends Controller
         $attemptsLeft = 5 - RateLimiter::attempts($key);
 
         return back()->withErrors([
-            'id_staff' => $attemptsLeft > 0 
-                ? "Invalid username or password. You have {$attemptsLeft} attempt(s) remaining."
-                : 'Invalid username or password.',
+            'username' => $attemptsLeft > 0 
+                ? "Invalid credentials. You have {$attemptsLeft} attempt(s) remaining."
+                : 'Invalid credentials.',
         ])->withInput($request->except('password'));
     }
 

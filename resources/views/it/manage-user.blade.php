@@ -23,7 +23,8 @@
                     <thead class="table-light">
                         <tr>
                             <th>Name</th>
-                            <th>ID Staff</th>
+                            <th>NIK</th>
+                            <th>Username</th>
                             <th>Email</th>
                             <th>Department</th>
                             <th>Action</th>
@@ -33,7 +34,8 @@
                         @foreach($users as $user)
                         <tr id="row-{{ $user->id }}">
                             <td>{{ $user->name }}</td>
-                            <td>{{ $user->id_staff }}</td>
+                            <td>{{ $user->nik }}</td>
+                            <td>{{ $user->username ?? '-' }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->department->name ?? '-' }}</td>
                             <td>
@@ -80,9 +82,14 @@
                             <div class="invalid-feedback">Name is required</div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label for="id_staff" class="form-label fw-semibold">ID Staff <span class="text-danger">*</span></label>
-                            <input type="text" id="id_staff" name="id_staff" class="form-control" required>
-                            <div class="invalid-feedback">ID Staff is required</div>
+                            <label for="nik" class="form-label fw-semibold">NIK <span class="text-danger">*</span></label>
+                            <input type="text" id="nik" name="nik" class="form-control" required>
+                            <div class="invalid-feedback">NIK is required</div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="username" class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                            <input type="text" id="username" name="username" class="form-control" required>
+                            <div class="invalid-feedback">Username is required</div>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>

@@ -465,7 +465,7 @@ DATA;
             // ID is first
             $id = array_shift($parts);
             // NIK is last
-            $id_staff = array_pop($parts);
+            $nik = array_pop($parts);
 
             // Middle is Name and Department
             $middle = implode(' ', $parts);
@@ -504,7 +504,8 @@ DATA;
                 'email' => null,
                 'department_id' => $departmentMap[$foundDept],
                 'role' => 'user',
-                'id_staff' => $id_staff,
+                'nik' => $nik,
+                'username' => Str::lower($nik),
                 'password' => $password,
                 'remember_token' => null,
                 'created_at' => $now,
@@ -517,7 +518,7 @@ DATA;
         // Use upsert to handle updates/duplicates
         if (count($users) > 0) {
             foreach (array_chunk($users, 200) as $chunk) {
-                DB::table('users')->upsert($chunk, ['id'], ['name', 'department_id', 'id_staff']);
+                DB::table('users')->upsert($chunk, ['id'], ['name', 'department_id', 'nik']);
             }
         }
     }

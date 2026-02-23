@@ -45,7 +45,7 @@ class RememberMeMiddleware
                     $user->updateLastLogin();
                     
                     // Log the auto login (optional)
-                    \Log::info("User {$user->id_staff} auto-logged in via remember token", [
+                    \Log::info("User {$user->nik} auto-logged in via remember token", [
                         'user_id' => $user->id,
                         'ip' => $request->ip()
                     ]);

@@ -13,27 +13,30 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Admin Sistem',
             'email' => 'admin@ktushipyard.com',
-            'department' => 'IT',
+            'department_id' => 9,
             'role' => 'admin',
-            'id_staff' => 'ADM001',
+            'nik' => 'ADM001',
+            'username' => 'admin',
             'password' => Hash::make('password'),
         ]);
 
         User::create([
             'name' => 'Staff User',
             'email' => 'staff@ktushipyard.com',
-            'department' => 'Engineering',
+            'department_id' => 7,
             'role' => 'user',
-            'id_staff' => 'STF001',
+            'nik' => 'STF001',
+            'username' => 'staff',
             'password' => Hash::make('password'),
         ]);
 
         User::create([
             'name' => 'Tim IT',
             'email' => 'it@ktushipyard.com',
-            'department' => 'IT',
+            'department_id' => 9,
             'role' => 'tim it',
-            'id_staff' => 'IT001',
+            'nik' => 'IT001',
+            'username' => 'it.team',
             'password' => Hash::make('password'),
         ]);
     }
