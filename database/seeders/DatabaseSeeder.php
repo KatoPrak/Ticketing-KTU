@@ -14,7 +14,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             CategorySeeder::class,
-            TicketSeeder::class, // Factory akan dijalankan di sini
+            Regional1UserSeeder::class,
+            Regional2UserSeeder::class,
+            Regional3UserSeeder::class,
+            TicketSeeder::class,
         ]);
 
         $this->command->info('Database seeded successfully!');
