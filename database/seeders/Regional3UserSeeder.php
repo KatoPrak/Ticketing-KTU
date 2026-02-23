@@ -138,7 +138,7 @@ class Regional3UserSeeder extends Seeder
             ['Sri Ayu Lestari', '104202348', '7', 'Sriayulestari', 'QA/QC'],
             ['Aswan Pasandi', '104223338', '7', 'Aswanpasandi', 'QA/QC'],
             ['Ivanna Bridga Ramadhan', '104223339', '7', 'Ivanna', 'QA/QC'],
-            ['Giban Aqyanalqu’Dah', '104254593', '7', 'Giban', 'QA/QC'],
+            ['Giban AqyanalquDah', '104254593', '7', 'Giban', 'QA/QC'],
 
             // SEKUPANG 1 (Regional 3 - Location 8)
             ['Julaman Manurung', '103123738', '8', 'Juluaman', 'Engineering'],
