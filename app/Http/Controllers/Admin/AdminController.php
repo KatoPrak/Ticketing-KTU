@@ -102,7 +102,7 @@ public function showUsers()
 {
     $validated = $request->validate([
         'name'          => 'required|string|max:255',
-        'nik'           => 'required|string|max:50|unique:users,nik',
+        'nik'           => 'nullable|string|max:50|unique:users,nik',
         'username'      => 'required|string|max:50|unique:users,username',
         'email'         => 'nullable|email|unique:users,email',
         'role'          => 'required|string',
@@ -134,7 +134,7 @@ public function showUsers()
 
     $validated = $request->validate([
         'name'          => 'required|string|max:255',
-        'nik'           => 'required|string|max:50|unique:users,nik,' . $user->id,
+        'nik'           => 'nullable|string|max:50|unique:users,nik,' . $user->id,
         'username'      => 'required|string|max:50|unique:users,username,' . $user->id,
         'email'         => 'nullable|email|unique:users,email,' . $user->id,
         'role'          => 'required|string',

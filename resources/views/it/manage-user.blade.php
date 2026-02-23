@@ -82,9 +82,8 @@
                             <div class="invalid-feedback">Name is required</div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label for="nik" class="form-label fw-semibold">NIK <span class="text-danger">*</span></label>
-                            <input type="text" id="nik" name="nik" class="form-control" required>
-                            <div class="invalid-feedback">NIK is required</div>
+                            <label for="nik" class="form-label fw-semibold">NIK <span class="text-muted small">(Optional)</span></label>
+                            <input type="text" id="nik" name="nik" class="form-control">
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="username" class="form-label fw-semibold">Username <span class="text-danger">*</span></label>

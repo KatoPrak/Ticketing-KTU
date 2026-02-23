@@ -38,8 +38,8 @@
             {{-- NIK --}}
             <div class="col-md-5">
               <div class="form-floating">
-                <input type="text" class="form-control" id="nik" name="nik" placeholder="NIK" required>
-                <label for="nik"><i class="fas fa-id-badge me-2 text-muted"></i>NIK <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="nik" name="nik" placeholder="NIK">
+                <label for="nik"><i class="fas fa-id-badge me-2 text-muted"></i>NIK <span class="text-muted small">(Optional)</span></label>
               </div>
             </div>
 

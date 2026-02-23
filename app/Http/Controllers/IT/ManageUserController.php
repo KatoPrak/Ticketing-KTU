@@ -66,7 +66,7 @@ class ManageUserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'nik' => 'required|string|unique:users,nik|max:50',
+            'nik' => 'nullable|string|unique:users,nik|max:50',
             'username' => 'required|string|unique:users,username|max:50',
             'email' => 'required|email|unique:users,email',
             'department_id' => 'required|exists:departments,id',
@@ -122,7 +122,7 @@ class ManageUserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'nik' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
+            'nik' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
             'username' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'department_id' => 'required|exists:departments,id',
