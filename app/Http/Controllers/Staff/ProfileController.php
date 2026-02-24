@@ -33,7 +33,7 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name'             => 'required|string|max:255',
-            'email'            => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
+            'email'            => ['nullable', 'email'],
             'department_id'    => 'required|exists:departments,id',
             'location_id'      => 'nullable|exists:locations,id',
             'current_password' => 'nullable|required_with:new_password',
