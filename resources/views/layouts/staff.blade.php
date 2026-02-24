@@ -11,6 +11,19 @@
 
     <link rel="icon" type="image/png" href="{{ asset('assets/image/logo-ktu.jpg') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    {{-- ✅ Image Compression for faster upload --}}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
+        }
+    </style>
 
     <!-- ✅ Load via Vite (Hot Reload Support) -->
     @vite([

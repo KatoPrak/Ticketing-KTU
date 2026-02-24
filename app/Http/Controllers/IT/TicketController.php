@@ -167,8 +167,8 @@ class TicketController extends Controller
                 $recipients = array_unique($recipients);
 
                 if (!empty($recipients)) {
-                    // Optimized: Send single email with multiple recipients
-                    Mail::to($recipients)->send(new TicketCreatedMail($ticket));
+                    // Optimized: Queue single email with multiple recipients
+                    Mail::to($recipients)->queue(new TicketCreatedMail($ticket));
                 }
             } catch (\Exception $e) {
                 Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
@@ -347,7 +347,7 @@ class TicketController extends Controller
                     } else {
                         Log::info('✅ User Found: ID=' . $ticket->user->id . ', Name=' . $ticket->user->name . ', Email=' . $ticket->user->email);
                         
-                        Mail::to($ticket->user->email)->send(new TicketClosedNotification(
+                        Mail::to($ticket->user->email)->queue(new TicketClosedNotification(
                             $ticket, 
                             Auth::user()->name,
                             $ticket->resolution_notes
@@ -467,7 +467,7 @@ class TicketController extends Controller
 
                 Log::info("Sending Transfer Email to: " . implode(',', $recipients));
                 
-                Mail::to($recipients)->send(new TicketTransferredNotification(
+                Mail::to($recipients)->queue(new TicketTransferredNotification(
                     $ticket,
                     Auth::user()->name,
                     $oldRegion, // From Region object

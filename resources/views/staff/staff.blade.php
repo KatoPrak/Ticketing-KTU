@@ -30,6 +30,14 @@
                 
                 <div class="info-section">
                     <div class="department-info">
+                        <i class="fas fa-id-card icon-pulse"></i>
+                        <span class="department-label">NIK:</span>
+                        <span class="badge bg-light text-primary department-badge">
+                            {{ Auth::user()->nik ?? '-' }}
+                        </span>
+                    </div>
+
+                    <div class="department-info">
                         <i class="fas fa-building icon-pulse"></i>
                         <span class="department-label">Department:</span>
                         <span class="badge bg-light text-primary department-badge">

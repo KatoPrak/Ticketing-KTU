@@ -365,8 +365,8 @@ class TicketController extends Controller
                     }
 
                     if (!empty($itEmails)) {
-                        Mail::to($itEmails)->send(new TicketCreatedMail($ticket));
-                        Log::info("Ticket {$ticket->ticket_id} email sukses dikirim (Queued/Sent) ke: " . implode(', ', $itEmails));
+                        Mail::to($itEmails)->queue(new TicketCreatedMail($ticket));
+                        Log::info("Ticket {$ticket->ticket_id} email sukses diantrekan (Queued) ke: " . implode(', ', $itEmails));
                     } else {
                         Log::warning("Ticket {$ticket->ticket_id}: Gagal mengirim notifikasi. Tidak ada penerima (Regional IT kosong & ENV kosong).");
                     }

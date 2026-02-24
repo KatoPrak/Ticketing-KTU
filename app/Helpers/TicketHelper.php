@@ -8,13 +8,13 @@ use Illuminate\Support\Facades\DB;
 class TicketHelper
 {
     /**
-     * Generate unique ticket ID with format: YYMMDD-XXX
-     * Example: 260206-001
+     * Generate unique ticket ID with format: YYMM-XXX
+     * Example: 2602-001
      */
     public static function generateTicketId(): string
     {
         return DB::transaction(function () {
-            $dateCode = now()->format('ymd'); // Format: YYMMDD
+            $dateCode = now()->format('ym'); // Format: YYMM
             
             // Lock the table to prevent race conditions
             $lastTicket = Ticket::where('ticket_id', 'like', $dateCode . '-%')
@@ -30,7 +30,7 @@ class TicketHelper
                 }
             }
             
-            // Format: YYMMDD-XXX (e.g., 260206-001)
+            // Format: YYMM-XXX (e.g., 2602-001)
             return $dateCode . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);
         });
     }

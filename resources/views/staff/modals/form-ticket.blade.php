@@ -58,7 +58,7 @@
                                 <i class="fas fa-paperclip me-1 text-secondary"></i> File Attachments
                                 <small class="text-muted">(optional, .jpg .png .jpeg .heif)</small>
                             </label>
-                            <input type="file" name="attachments[]" multiple accept=".jpg,.jpeg,.png,.heif" class="form-control">
+                            <input type="file" name="attachments[]" multiple accept="image/*" class="form-control">
                         </div>
                     </div>
                 </div>

@@ -24,61 +24,112 @@ window.submitCreateTicketForm = function (form) {
     const formData = new FormData(form);
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-    fetch('/staff/tickets', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        },
-        body: formData
-    })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => Promise.reject(err));
+    // --- ✅ IMAGE COMPRESSION LOGIC START ---
+    async function compressImages() {
+        const compressedFormData = new FormData();
+
+        // Copy all non-file fields
+        for (let [key, value] of formData.entries()) {
+            if (!(value instanceof File)) {
+                compressedFormData.append(key, value);
             }
-            return response.json();
+        }
+
+        // Compress all file fields
+        const files = formData.getAll('attachments[]');
+        const compressionOptions = {
+            maxSizeMB: 0.8,         // Compress to below 800KB
+            maxWidthOrHeight: 1600, // Reasonable resolution
+            useWebWorker: true,
+            initialQuality: 0.7
+        };
+
+        if (files.length > 0 && typeof imageCompression !== 'undefined') {
+            console.log(`📦 Compressing ${files.length} images...`);
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    try {
+                        const compressedFile = await imageCompression(file, compressionOptions);
+                        // Maintain the original name
+                        const finalFile = new File([compressedFile], file.name, { type: file.type });
+                        compressedFormData.append('attachments[]', finalFile);
+                        console.log(`✅ Compressed ${file.name}: ${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+                    } catch (error) {
+                        console.error('❌ Compression error:', error);
+                        compressedFormData.append('attachments[]', file); // Fallback to original
+                    }
+                } else {
+                    compressedFormData.append('attachments[]', file);
+                }
+            }
+        } else {
+            // No images or library not loaded
+            return formData;
+        }
+        return compressedFormData;
+    }
+    // --- ✅ IMAGE COMPRESSION LOGIC END ---
+
+    (async () => {
+        const finalFormData = await compressImages();
+
+        fetch('/staff/tickets', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            body: finalFormData
         })
-        .then(data => {
-            console.log('✅ Ticket created successfully:', data);
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('✅ Ticket created successfully:', data);
 
-            const createTicketModal = document.getElementById('createTicketModal');
-            const modal = createTicketModal ? bootstrap.Modal.getInstance(createTicketModal) : null;
-            if (modal) {
-                modal.hide();
-            }
+                const createTicketModal = document.getElementById('createTicketModal');
+                const modal = createTicketModal ? bootstrap.Modal.getInstance(createTicketModal) : null;
+                if (modal) {
+                    modal.hide();
+                }
 
-            if (typeof window.showSuccessAlert === 'function') {
-                window.showSuccessAlert(data.message || 'Ticket created successfully!', () => window.location.reload());
-            } else {
-                alert(data.message || 'Ticket created successfully!');
-                window.location.reload();
-            }
-        })
-        .catch(error => {
-            console.error('❌ Error creating ticket:', error);
+                if (typeof window.showSuccessAlert === 'function') {
+                    window.showSuccessAlert(data.message || 'Ticket created successfully!', () => window.location.reload());
+                } else {
+                    alert(data.message || 'Ticket created successfully!');
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error creating ticket:', error);
 
-            let errorMessage = 'Failed to create ticket. Please try again.';
+                let errorMessage = 'Failed to create ticket. Please try again.';
 
-            if (error.message) {
-                errorMessage = error.message;
-            } else if (error.errors) {
-                const firstError = Object.values(error.errors)[0];
-                errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
-            }
+                if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.errors) {
+                    const firstError = Object.values(error.errors)[0];
+                    errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+                }
 
-            if (typeof window.showErrorAlert === 'function') {
-                window.showErrorAlert(errorMessage);
-            } else {
-                alert(errorMessage);
-            }
+                if (typeof window.showErrorAlert === 'function') {
+                    window.showErrorAlert(errorMessage);
+                } else {
+                    alert(errorMessage);
+                }
 
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnText;
-            }
-            window.isSubmitting = false;
-        });
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
+                window.isSubmitting = false;
+            });
+    })();
 };
 
 document.addEventListener('DOMContentLoaded', function () {
