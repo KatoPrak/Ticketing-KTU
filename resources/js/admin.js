@@ -268,70 +268,59 @@ function editUser(id) {
         .then(user => {
             console.log('✅ User data loaded:', user);
 
+            // Helper for safe value setting
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val !== null && val !== undefined ? val : '';
+            };
+
             // Populate form fields
-            const userIdInput = form.querySelector('#user_id');
-            const nameInput = form.querySelector('#name');
-            const nikInput = form.querySelector('#nik');
-            const usernameInput = form.querySelector('#username');
-            const emailInput = form.querySelector('#email');
-            const roleSelect = form.querySelector('#role');
-            const departmentSelect = form.querySelector('#department_id');
+            setVal('user_id', user.id);
+            setVal('name', user.name);
+            setVal('nik', user.nik);
+            setVal('username', user.username);
+            setVal('email', user.email);
+            setVal('role', user.role);
+            setVal('department_id', user.department_id);
 
-            if (userIdInput) userIdInput.value = user.id || '';
-            if (nameInput) nameInput.value = user.name || '';
-            if (nikInput) nikInput.value = user.nik || '';
-            if (usernameInput) usernameInput.value = user.username || '';
-            if (emailInput) emailInput.value = user.email || '';
-            if (roleSelect) roleSelect.value = user.role || '';
-            if (departmentSelect) departmentSelect.value = user.department_id || '';
+            // Handle visibility and region/location
+            updateFieldsVisibility();
 
-            // Handle Location Field & Region Field logic
             const locationSelect = document.getElementById('location_id');
             const regionSelect = document.getElementById('region_id');
 
-            // 1. Set Role first to determine visibility mode
-            if (roleSelect) {
-                roleSelect.value = user.role || '';
-                updateFieldsVisibility();
-            }
-
-            // 2. Determine Region to select
             let regionToSelect = user.region_id;
-
-            // If no explicit region (e.g. Regular User), derive it from Location
             if (!regionToSelect && user.location_id && locationSelect) {
-                // Find the option for this location
                 const locOption = locationSelect.querySelector(`option[value="${user.location_id}"]`);
-                if (locOption) {
-                    regionToSelect = locOption.getAttribute('data-region-id');
-                }
+                if (locOption) regionToSelect = locOption.getAttribute('data-region-id');
             }
 
-            // 3. Set Region Value
             if (regionSelect) {
                 regionSelect.value = regionToSelect || '';
-                // 4. Trigger Filter based on the set region
                 filterLocationsByRegion();
             }
 
-            // 5. Set Location Value (after filter, so options are valid)
             if (locationSelect) {
                 locationSelect.value = user.location_id || '';
             }
 
             // ── PASSWORD: switch to EDIT section ──
-            document.getElementById('passwordAddSection').style.display = 'none';
-            document.getElementById('passwordEditSection').style.display = 'block';
+            const addSec = document.getElementById('passwordAddSection');
+            if (addSec) addSec.style.display = 'none';
 
-            // Reset change-password checkbox
+            const editSec = document.getElementById('passwordEditSection');
+            if (editSec) editSec.style.display = 'block';
+
             const changePasswordCb = document.getElementById('changePassword');
-            const editPasswordField = document.getElementById('editPasswordField');
-            const editPasswordInput = document.getElementById('editPassword');
             if (changePasswordCb) changePasswordCb.checked = false;
-            if (editPasswordField) editPasswordField.style.display = 'none';
-            if (editPasswordInput) {
-                editPasswordInput.disabled = false;
-                editPasswordInput.value = '';
+
+            const editField = document.getElementById('editPasswordField');
+            if (editField) editField.style.display = 'none';
+
+            const editInput = document.getElementById('editPassword');
+            if (editInput) {
+                editInput.disabled = false;
+                editInput.value = '';
             }
 
             // Remove loading state

@@ -23,18 +23,37 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function closeUserModal() {
-        userModal.hide();
-        userForm.reset();
-        userForm.classList.remove('was-validated');
-        document.getElementById('user_id').value = '';
-        errorContainer.classList.add('d-none');
+        if (userModal) userModal.hide();
+        if (userForm) {
+            userForm.reset();
+            userForm.classList.remove('was-validated');
+        }
 
-        document.getElementById('password').value = 'STAFFKTU123';
-        document.getElementById('passwordAddSection').classList.remove('d-none');
-        document.getElementById('passwordEditSection').classList.add('d-none');
-        document.getElementById('changePasswordToggle').checked = false;
-        document.getElementById('editPasswordField').classList.add('d-none');
-        document.getElementById('editPassword').value = '';
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        };
+
+        const toggleClass = (id, className, add = true) => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (add) el.classList.add(className);
+                else el.classList.remove(className);
+            }
+        };
+
+        setVal('user_id', '');
+        if (errorContainer) errorContainer.classList.add('d-none');
+
+        setVal('password', 'STAFFKTU123');
+        toggleClass('passwordAddSection', 'd-none', false);
+        toggleClass('passwordEditSection', 'd-none', true);
+
+        const cb = document.getElementById('changePasswordToggle');
+        if (cb) cb.checked = false;
+
+        toggleClass('editPasswordField', 'd-none', true);
+        setVal('editPassword', '');
     }
 
     function updateTableRow(data) {
@@ -81,10 +100,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const openAddBtn = document.getElementById('openAddModal');
     if (openAddBtn) {
         openAddBtn.addEventListener('click', () => {
-            userForm.reset();
-            document.getElementById('password').value = 'STAFFKTU123';
-            document.getElementById('passwordAddSection').classList.remove('d-none');
-            document.getElementById('passwordEditSection').classList.add('d-none');
+            if (userForm) userForm.reset();
+
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            };
+
+            const toggleClass = (id, className, add = true) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (add) el.classList.add(className);
+                    else el.classList.remove(className);
+                }
+            };
+
+            setVal('password', 'STAFFKTU123');
+            toggleClass('passwordAddSection', 'd-none', false);
+            toggleClass('passwordEditSection', 'd-none', true);
             openUserModal('Add User');
         });
     }
@@ -100,7 +133,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            const id = document.getElementById('user_id').value;
+            const userIdEl = document.getElementById('user_id');
+            const id = userIdEl ? userIdEl.value : '';
             const formData = new FormData(userForm);
             // Use dataset for route
             const url = id ? `/it/staff/${id}` : userForm.dataset.storeRoute;
@@ -164,23 +198,42 @@ document.addEventListener('DOMContentLoaded', function () {
                     const data = await res.json();
 
                     openUserModal('Edit User');
-                    document.getElementById('user_id').value = data.id;
-                    document.getElementById('name').value = data.name;
-                    document.getElementById('nik').value = data.nik;
-                    const usernameField = document.getElementById('username');
-                    if (usernameField) usernameField.value = data.username || '';
-                    document.getElementById('email').value = data.email;
-                    document.getElementById('department_id').value = data.department_id;
-                    document.getElementById('location_id').value = data.location_id || '';
+
+                    // Safe value setter helper
+                    const setVal = (id, val) => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = val !== null && val !== undefined ? val : '';
+                    };
+
+                    // Safe class/display toggle helper
+                    const toggleClass = (id, className, add = true) => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            if (add) el.classList.add(className);
+                            else el.classList.remove(className);
+                        }
+                    };
+
+                    setVal('user_id', data.id);
+                    setVal('name', data.name);
+                    setVal('nik', data.nik);
+                    setVal('username', data.username);
+                    setVal('email', data.email);
+                    setVal('department_id', data.department_id);
+                    setVal('location_id', data.location_id);
 
                     // ✅ Password logic for edit
-                    document.getElementById('passwordAddSection').classList.add('d-none');
-                    document.getElementById('passwordEditSection').classList.remove('d-none');
-                    document.getElementById('changePasswordToggle').checked = false;
-                    document.getElementById('editPasswordField').classList.add('d-none');
-                    document.getElementById('editPassword').value = '';
+                    toggleClass('passwordAddSection', 'd-none', true);
+                    toggleClass('passwordEditSection', 'd-none', false);
+
+                    const cb = document.getElementById('changePasswordToggle');
+                    if (cb) cb.checked = false;
+
+                    toggleClass('editPasswordField', 'd-none', true);
+                    setVal('editPassword', '');
 
                 } catch (err) {
+                    console.error('Edit fetch error:', err);
                     alert('Error: ' + err.message);
                 }
             }
