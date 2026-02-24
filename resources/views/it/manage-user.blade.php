@@ -121,7 +121,7 @@
                             <div id="passwordAddSection">
                                 <label for="password" class="form-label fw-semibold">Password</label>
                                 <div class="input-group">
-                                    <input type="text" id="password" name="password" class="form-control" value="STAFFKTU123">
+                                    <input type="text" id="password" name="password" class="form-control" value="STAFFKTU123" autocomplete="new-password">
                                     <button class="btn btn-outline-secondary" type="button" id="generatePassword">
                                         <i class="fas fa-magic"></i>
                                     </button>
@@ -135,7 +135,7 @@
                                     <label class="form-check-label fw-semibold" for="changePasswordToggle">Change Password</label>
                                 </div>
                                 <div id="editPasswordField" class="d-none">
-                                    <input type="password" id="editPassword" name="edit_password" class="form-control" placeholder="Enter new password">
+                                    <input type="password" id="editPassword" name="edit_password" class="form-control" placeholder="Enter new password" autocomplete="new-password">
                                     <div class="form-check mt-1">
                                         <input class="form-check-input" type="checkbox" id="showEditPassword">
                                         <label class="form-check-label small text-muted" for="showEditPassword">Show password</label>
