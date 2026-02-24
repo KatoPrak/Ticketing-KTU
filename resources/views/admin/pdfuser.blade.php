@@ -165,7 +165,7 @@
         th:nth-child(9), td:nth-child(9) { width: 7%; text-align: center; }    /* Report Date */
         th:nth-child(10), td:nth-child(10) { width: 7%; text-align: center; }  /* Response Date */
         th:nth-child(11), td:nth-child(11) { width: 7%; text-align: center; }  /* Resolved/Closed */
-        th:nth-child(12), td:nth-child(12) { width: 22%; }                     /* Marking */
+        th:nth-child(12), td:nth-child(12) { width: 22%; }                     /* solution */
 
 
 
@@ -342,8 +342,8 @@
             text-transform: uppercase;
         }
 
-        /* ===== MARKING CELL ===== */
-        .marking-cell {
+        /* ===== solution CELL ===== */
+        .solution-cell {
             word-wrap: break-word;
             overflow-wrap: break-word;
             white-space: normal;
@@ -399,7 +399,7 @@
         This document provides a comprehensive summary of all IT support tickets recorded 
         @if(isset($selectedRegion)) for <strong>{{ $selectedRegion->name }}</strong> @endif 
         during the specified period. 
-        It includes detailed information about issue categories, assigned users, departments, priority levels, current statuses, and resolution markings.
+        It includes detailed information about issue categories, assigned users, departments, priority levels, current statuses, and resolution solutions.
         <strong>Total Tickets: {{ count($tickets) }}</strong>
     </div>
 
@@ -420,7 +420,7 @@
                 <th>Report Date</th>
                 <th>Response Date</th>
                 <th>Resolved/Closed</th>
-                <th>Marking</th>
+                <th>Solution</th>
             </tr>
         </thead>
         <tbody>
@@ -493,7 +493,7 @@
                     </td>
                     <td>
                         @if($ticket->resolution_notes)
-                            <div class="marking-cell">
+                            <div class="solution-cell">
                                 {{ $ticket->resolution_notes }}
                             </div>
                         @else

@@ -870,7 +870,7 @@
                         <th>Report Date</th>
                         <th>Response Date</th>
                         <th>Resolved/Closed</th>
-                        <th>Marking</th>
+                        <th>Solution</th>
                     </tr>
                 </thead>
                 <tbody>
