@@ -127,8 +127,7 @@ class TicketController extends Controller
         $tickets = Ticket::with(['category', 'department'])
             ->where('user_id', auth()->id())
             ->orderByRaw('GREATEST(created_at, IFNULL(updated_at, created_at)) DESC')
-            ->take(5)
-            ->get();
+            ->paginate(5);
 
         return response()->json($tickets);
     }

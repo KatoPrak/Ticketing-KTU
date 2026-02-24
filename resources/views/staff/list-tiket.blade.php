@@ -128,9 +128,16 @@
             </table>
         </div>
         {{-- Pagination untuk Active Tickets --}}
-        <div class="d-flex justify-content-end mt-3 pagination-wrapper">
-            {{ $tickets->appends(request()->query())->links('pagination::bootstrap-5') }}
+        @if($tickets->hasPages())
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3 pagination-wrapper">
+            <div class="text-muted small mb-2 mb-md-0">
+                Showing <span class="fw-bold text-dark">{{ $tickets->firstItem() }}</span> to <span class="fw-bold text-dark">{{ $tickets->lastItem() }}</span> of <span class="fw-bold text-dark">{{ $tickets->total() }}</span> tickets
+            </div>
+            <div>
+                {{ $tickets->appends(request()->query())->links('pagination::bootstrap-5') }}
+            </div>
         </div>
+        @endif
     </div>
 </div>
 
@@ -232,9 +239,16 @@
             </table>
         </div>
         {{-- Pagination untuk History Tickets --}}
-        <div class="d-flex justify-content-end mt-3 pagination-wrapper">
-            {{ $historyTickets->appends(request()->query())->links('pagination::bootstrap-5') }}
+        @if($historyTickets->hasPages())
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3 pagination-wrapper">
+            <div class="text-muted small mb-2 mb-md-0">
+                Showing <span class="fw-bold text-dark">{{ $historyTickets->firstItem() }}</span> to <span class="fw-bold text-dark">{{ $historyTickets->lastItem() }}</span> of <span class="fw-bold text-dark">{{ $historyTickets->total() }}</span> tickets
+            </div>
+            <div>
+                {{ $historyTickets->appends(request()->query())->links('pagination::bootstrap-5') }}
+            </div>
         </div>
+        @endif
     </div>
 </div>
 

@@ -1451,6 +1451,8 @@ if (window.orientation !== undefined) {
                                         </tbody>
                                     </table>
                                 </div>
+                                {{-- Dashboard Pagination --}}
+                                <div id="dashboard-pagination" class="d-flex justify-content-center mt-3"></div>
 
                                 {{-- Empty State --}}
                                 <div id="no-tickets-message" class="text-center py-5 d-none">
@@ -1893,12 +1895,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     // FETCH DASHBOARD TICKETS
     // ========================================
-    function fetchDashboardTickets() {
+    function fetchDashboardTickets(url = "{{ route('staff.tickets.fetchDashboard') }}") {
         const ticketListBody = document.getElementById('ticket-list-body');
         const loadingRow = document.getElementById('tickets-loading');
         const emptyMessage = document.getElementById('no-tickets-message');
+        const paginationContainer = document.getElementById('dashboard-pagination');
 
-        fetch("{{ route('staff.tickets.fetchDashboard') }}", {
+        if (loadingRow) loadingRow.classList.remove('d-none');
+        if (ticketListBody) ticketListBody.innerHTML = ''; 
+
+        fetch(url, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -1908,17 +1914,20 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (loadingRow) loadingRow.classList.add('d-none');
             
-            if (!data || data.length === 0) {
+            const tickets = data.data || [];
+            if (!tickets || tickets.length === 0) {
                 if (emptyMessage) emptyMessage.classList.remove('d-none');
+                if (paginationContainer) paginationContainer.innerHTML = '';
                 return;
             }
 
+            if (emptyMessage) emptyMessage.classList.add('d-none');
+
             if (ticketListBody) {
-                ticketListBody.innerHTML = ''; // Clear loading spinner
-                data.forEach(ticket => {
+                tickets.forEach(ticket => {
                     const row = document.createElement('tr');
                     
-                    // Priority Badge
+                    // Priority Badge styling...
                     const p = (ticket.priority || '').toLowerCase();
                     let priorityBadgeClass = 'bg-secondary';
                     if (p === 'low')      priorityBadgeClass = 'bg-success';
@@ -1927,7 +1936,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (p === 'urgent')   priorityBadgeClass = 'bg-danger';
                     if (p === 'critical') priorityBadgeClass = 'bg-dark';
 
-                    // Status Badge
+                    // Status Badge styling...
                     const s = (ticket.status || '').toLowerCase();
                     let statusBadgeClass = 'bg-secondary';
                     if (s === 'open')        statusBadgeClass = 'bg-success';
@@ -1982,7 +1991,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     ticketListBody.appendChild(row);
                 });
             }
+
+            // Render Pagination
+            if (paginationContainer && data.links) {
+                let paginationHtml = '<nav aria-label="Page navigation"><ul class="pagination pagination-sm mb-0">';
+                data.links.forEach(link => {
+                    const activeClass = link.active ? 'active' : '';
+                    const disabledClass = !link.url ? 'disabled' : '';
+                    paginationHtml += `
+                        <li class="page-item ${activeClass} ${disabledClass}">
+                            <a class="page-link" href="#" data-url="${link.url || ''}">${link.label}</a>
+                        </li>
+                    `;
+                });
+                paginationHtml += '</ul></nav>';
+                paginationContainer.innerHTML = paginationHtml;
+
+                // Add event listeners to pagination links
+                paginationContainer.querySelectorAll('.page-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const nextUrl = this.dataset.url;
+                        if (nextUrl && !this.parentElement.classList.contains('active')) {
+                            fetchDashboardTickets(nextUrl);
+                        }
+                    });
+                });
+            }
         })
+
         .catch(error => {
             console.error('Error fetching tickets:', error);
             if (loadingRow) {
