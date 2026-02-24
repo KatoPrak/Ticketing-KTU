@@ -19,21 +19,21 @@ class Regional3UserSeeder extends Seeder
         $departments = [
             'Commercial' => Department::firstOrCreate(['name' => 'Commercial'])->id,
             'Dimensional' => Department::firstOrCreate(['name' => 'Dimensional'])->id,
-            'Engineering' => 7,
-            'Facility' => 14,
-            'HR' => 3,
-            'HSE' => 1,
-            'ISO' => 21,
-            'IT' => 9,
+            'Engineering' => Department::firstOrCreate(['name' => 'Engineering'])->id,
+            'Facility' => Department::firstOrCreate(['name' => 'Facility'])->id,
+            'HR' => Department::firstOrCreate(['name' => 'HR'])->id,
+            'HSE' => Department::firstOrCreate(['name' => 'HSE'])->id,
+            'ISO' => Department::firstOrCreate(['name' => 'ISO'])->id,
+            'IT' => Department::firstOrCreate(['name' => 'IT'])->id,
             'M&L' => Department::firstOrCreate(['name' => 'Material & Logistic'])->id,
             'Planner' => Department::firstOrCreate(['name' => 'Planner'])->id,
-            'PPC' => 11, // Mapping PPC to PPIC
-            'Purchasing' => 6,
-            'QA/QC' => 19, // Mapping QA/QC to Quality Control
-            'Production PMT' => 18,
-            'Project Management' => 15,
-            'Quality Control' => 19,
-            'Warehouse' => 16,
+            'PPC' => Department::firstOrCreate(['name' => 'PPIC'])->id,
+            'Purchasing' => Department::firstOrCreate(['name' => 'Purchasing'])->id,
+            'QA/QC' => Department::firstOrCreate(['name' => 'Quality Control'])->id,
+            'Production PMT' => Department::firstOrCreate(['name' => 'Production PMT'])->id,
+            'Project Management' => Department::firstOrCreate(['name' => 'Project Management'])->id,
+            'Quality Control' => Department::firstOrCreate(['name' => 'Quality Control'])->id,
+            'Warehouse' => Department::firstOrCreate(['name' => 'Warehouse'])->id,
         ];
 
         $users = [
@@ -167,24 +167,29 @@ class Regional3UserSeeder extends Seeder
             ['Elsa Irene Theresa', '103233705', '9', 'Elsa', 'Warehouse'],
         ];
 
-        $userData = [];
         foreach ($users as $u) {
-            $userData[] = [
-                'name' => $u[0],
-                'nik' => $u[1],
-                'location_id' => (int) $u[2],
-                'region_id' => 3,
-                'username' => strtolower($u[3]),
-                'password' => $password,
-                'department_id' => $departments[$u[4]],
-                'role' => 'user',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
+            $username = strtolower($u[3]);
+            
+            // Check if this username is already taken by a DIFFERENT NIK
+            $existing = DB::table('users')->where('username', $username)->first();
+            if ($existing && $existing->nik !== $u[1]) {
+                $username = $username . '.' . $u[1];
+            }
 
-        foreach (array_chunk($userData, 50) as $chunk) {
-            DB::table('users')->upsert($chunk, ['username'], ['name', 'nik', 'location_id', 'department_id', 'password', 'updated_at']);
+            DB::table('users')->updateOrInsert(
+                ['nik' => $u[1]],
+                [
+                    'name' => $u[0],
+                    'username' => $username,
+                    'location_id' => (int) $u[2],
+                    'region_id' => 3,
+                    'password' => $password,
+                    'department_id' => $departments[$u[4]],
+                    'role' => 'user',
+                    'updated_at' => $now,
+                    'created_at' => $now,
+                ]
+            );
         }
     }
 }

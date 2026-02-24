@@ -17,23 +17,23 @@ class Regional1UserSeeder extends Seeder
         $password = Hash::make('tiket-ktu1');
 
         $departments = [
-            'HR' => 3,
-            'FAT' => 8, // Accounting
+            'HR' => Department::firstOrCreate(['name' => 'HR'])->id,
+            'FAT' => Department::firstOrCreate(['name' => 'FAT'])->id,
             'ICMS' => Department::firstOrCreate(['name' => 'ICMS'])->id,
-            'IT' => 9,
-            'Sales & Marketing' => 22,
-            'Legal' => 13,
-            'Purchasing' => 6,
+            'IT' => Department::firstOrCreate(['name' => 'IT'])->id,
+            'Sales & Marketing' => Department::firstOrCreate(['name' => 'Sales & Marketing'])->id,
+            'Legal' => Department::firstOrCreate(['name' => 'Legal'])->id,
+            'Purchasing' => Department::firstOrCreate(['name' => 'Purchasing'])->id,
             'Treasury' => Department::firstOrCreate(['name' => 'Treasury'])->id,
             'BOD' => Department::firstOrCreate(['name' => 'BOD'])->id,
             'Head Office Eksternal' => Department::firstOrCreate(['name' => 'Head Office Eksternal'])->id,
             'RND' => Department::firstOrCreate(['name' => 'RND'])->id,
             'Operation Support' => Department::firstOrCreate(['name' => 'Operation Support'])->id,
-            'QC' => 19,
-            'Project Management' => 15,
+            'QC' => Department::firstOrCreate(['name' => 'QC'])->id,
+            'Project Management' => Department::firstOrCreate(['name' => 'Project Management'])->id,
             'Admin Shipyard' => Department::firstOrCreate(['name' => 'Admin Shipyard'])->id,
-            'Warehouse' => 16,
-            'PPIC' => 11,
+            'Warehouse' => Department::firstOrCreate(['name' => 'Warehouse'])->id,
+            'PPIC' => Department::firstOrCreate(['name' => 'PPIC'])->id,
             'Mechanical Facility' => Department::firstOrCreate(['name' => 'Mechanical Facility'])->id,
         ];
 
@@ -134,24 +134,29 @@ class Regional1UserSeeder extends Seeder
             ['Y. Christiyanto', '105130003', '2', 'Christiyanto', 'Warehouse'],
         ];
 
-        $userData = [];
         foreach ($users as $u) {
-            $userData[] = [
-                'name' => $u[0],
-                'nik' => $u[1],
-                'location_id' => (int) $u[2],
-                'region_id' => 1,
-                'username' => strtolower($u[3]),
-                'password' => $password,
-                'department_id' => $departments[$u[4]],
-                'role' => 'user',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
+            $username = strtolower($u[3]);
+            
+            // Check if this username is already taken by a DIFFERENT NIK
+            $existing = DB::table('users')->where('username', $username)->first();
+            if ($existing && $existing->nik !== $u[1]) {
+                $username = $username . '.' . $u[1];
+            }
 
-        foreach (array_chunk($userData, 50) as $chunk) {
-            DB::table('users')->upsert($chunk, ['username'], ['name', 'nik', 'location_id', 'department_id', 'password', 'updated_at']);
+            DB::table('users')->updateOrInsert(
+                ['nik' => $u[1]],
+                [
+                    'name' => $u[0],
+                    'username' => $username,
+                    'location_id' => (int) $u[2],
+                    'region_id' => 1,
+                    'password' => $password,
+                    'department_id' => $departments[$u[4]],
+                    'role' => 'user',
+                    'updated_at' => $now,
+                    'created_at' => $now,
+                ]
+            );
         }
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\Department;
+use App\Models\Region;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -17,8 +18,8 @@ class TicketController extends Controller
      */
     public function index(Request $request)
     {
-        // ✅ Tambahkan 'feedback' relation untuk load rating & comment
-        $query = Ticket::query()->with(['user.department', 'category', 'department', 'feedback']);
+        // ✅ Tambahkan 'feedback' & 'transferLogs' relation
+        $query = Ticket::query()->with(['user.department', 'category', 'department', 'feedback', 'transferLogs']);
 
         if ($request->filled('year')) {
             $query->whereYear('created_at', $request->year);
@@ -30,6 +31,10 @@ class TicketController extends Controller
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        if ($request->filled('region_id')) {
+            $query->where('region_id', $request->region_id);
         }
 
         // ✅ Gunakan paginate dengan opsi per_page dari request
@@ -45,7 +50,10 @@ class TicketController extends Controller
         // 🏢 Ambil semua departemen untuk dropdown di modal
         $departments = Department::orderBy('name')->get();
 
-        return view('admin.tickets', compact('tickets', 'years', 'departments'));
+        // 🗺️ Ambil semua region untuk filter
+        $regions = Region::orderBy('name')->get();
+
+        return view('admin.tickets', compact('tickets', 'years', 'departments', 'regions'));
     }
 
     /**
@@ -61,7 +69,8 @@ class TicketController extends Controller
             'department', 
             'feedback',
             'assignedTo',
-            'region'
+            'region',
+            'transferLogs'
         ]);
 
         if ($request->filled('year')) {
@@ -72,10 +81,20 @@ class TicketController extends Controller
             $query->whereMonth('created_at', $request->month);
         }
 
+        if ($request->filled('region_id')) {
+            $query->where('region_id', $request->region_id);
+        }
+
         $tickets = $query->latest()->get();
 
+        // Ambil info region jika difilter
+        $selectedRegion = null;
+        if ($request->filled('region_id')) {
+            $selectedRegion = Region::find($request->region_id);
+        }
+
         // Generate PDF
-        $pdf = Pdf::loadView('admin.pdfuser', compact('tickets'))
+        $pdf = Pdf::loadView('admin.pdfuser', compact('tickets', 'selectedRegion'))
             ->setPaper('a4', 'landscape'); // ✅ Landscape untuk kolom lebih banyak
 
         // ✅ Stream PDF untuk preview di browser (bukan langsung download)

@@ -24,7 +24,7 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h3>Admin Panel</h3>
-                <button class="toggle-btn" onclick="toggleSidebar()">
+                <button class="toggle-btn" id="sidebarToggleBtn">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -69,7 +69,7 @@
             <!-- NAVBAR with Mobile Toggle Button -->
             <div class="navbar">
                 <!-- ✅ Mobile Hamburger Button -->
-                <button class="btn toggle-btn d-md-none" onclick="toggleSidebar()" 
+                <button class="btn toggle-btn d-md-none" id="navbarToggleBtn"
                         style="background: none; border: none; padding: 5px 10px; margin-right: 10px;">
                     <i class="fas fa-bars" style="font-size: 20px; color: #2c3e50;"></i>
                 </button>
@@ -123,33 +123,7 @@
     <!-- ✅ HANYA LOAD 1 FILE JS ADMIN -->
     @vite('resources/js/admin.js')
 
-    <!-- ✅ CORE JAVASCRIPT FUNCTIONS -->
     <script>
-        // Toggle Sidebar (Mobile)
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
-
-        // Close Sidebar
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-        }
-
-        // Close sidebar on window resize to desktop
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
-                closeSidebar();
-            }
-        });
-
         // Logout Confirmation
         function confirmLogout(event) {
             event.preventDefault();

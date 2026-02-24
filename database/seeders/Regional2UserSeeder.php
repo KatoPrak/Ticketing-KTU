@@ -16,28 +16,28 @@ class Regional2UserSeeder extends Seeder
         $password = Hash::make('tiket-ktu2');
 
         $departments = [
-            'Shipyard' => 17,
-            'Administration' => 10,
-            'Office' => 12,
-            'Business Development' => 20,
-            'Sales & Marketing' => 22,
-            'Engineering' => 7,
-            'Facility' => 14,
-            'HR' => 3,
-            'HSE' => 1,
-            'IT' => 9,
-            'ISO' => 21,
-            'Legal' => 13,
-            'PPIC' => 11,
-            'Production' => 18, // Production PMT/Workshop
-            'Project Management' => 15,
-            'Purchasing' => 6,
-            'Quality Control' => 19,
-            'Warehouse' => 16,
-            'Production PMT' => 18,
-            'Production Workshop' => 5,
-            'Security' => 2,
-            'QC' => 19,
+            'Shipyard' => Department::firstOrCreate(['name' => 'Shipyard'])->id,
+            'Administration' => Department::firstOrCreate(['name' => 'Administration'])->id,
+            'Office' => Department::firstOrCreate(['name' => 'Office'])->id,
+            'Business Development' => Department::firstOrCreate(['name' => 'Business Development'])->id,
+            'Sales & Marketing' => Department::firstOrCreate(['name' => 'Sales & Marketing'])->id,
+            'Engineering' => Department::firstOrCreate(['name' => 'Engineering'])->id,
+            'Facility' => Department::firstOrCreate(['name' => 'Facility'])->id,
+            'HR' => Department::firstOrCreate(['name' => 'HR'])->id,
+            'HSE' => Department::firstOrCreate(['name' => 'HSE'])->id,
+            'IT' => Department::firstOrCreate(['name' => 'IT'])->id,
+            'ISO' => Department::firstOrCreate(['name' => 'ISO'])->id,
+            'Legal' => Department::firstOrCreate(['name' => 'Legal'])->id,
+            'PPIC' => Department::firstOrCreate(['name' => 'PPIC'])->id,
+            'Production' => Department::firstOrCreate(['name' => 'Production'])->id,
+            'Project Management' => Department::firstOrCreate(['name' => 'Project Management'])->id,
+            'Purchasing' => Department::firstOrCreate(['name' => 'Purchasing'])->id,
+            'Quality Control' => Department::firstOrCreate(['name' => 'Quality Control'])->id,
+            'Warehouse' => Department::firstOrCreate(['name' => 'Warehouse'])->id,
+            'Production PMT' => Department::firstOrCreate(['name' => 'Production PMT'])->id,
+            'Production Workshop' => Department::firstOrCreate(['name' => 'Production Workshop'])->id,
+            'Security' => Department::firstOrCreate(['name' => 'Security'])->id,
+            'QC' => Department::firstOrCreate(['name' => 'Quality Control'])->id,
         ];
 
         // Ensure missing departments exist
@@ -221,24 +221,29 @@ class Regional2UserSeeder extends Seeder
             ['Galah Arsyad Mustafa', '102223335', '4', 'Galah', 'Quality Control'],
         ];
 
-        $userData = [];
         foreach ($users as $u) {
-            $userData[] = [
-                'name' => $u[0],
-                'nik' => $u[1],
-                'location_id' => (int) $u[2],
-                'region_id' => 2,
-                'username' => strtolower($u[3]),
-                'password' => $password,
-                'department_id' => $departments[$u[4]],
-                'role' => 'user',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
+            $username = strtolower($u[3]);
+            
+            // Check if this username is already taken by a DIFFERENT NIK
+            $existing = DB::table('users')->where('username', $username)->first();
+            if ($existing && $existing->nik !== $u[1]) {
+                $username = $username . '.' . $u[1];
+            }
 
-        foreach (array_chunk($userData, 50) as $chunk) {
-            DB::table('users')->upsert($chunk, ['username'], ['name', 'nik', 'location_id', 'department_id', 'password', 'updated_at']);
+            DB::table('users')->updateOrInsert(
+                ['nik' => $u[1]],
+                [
+                    'name' => $u[0],
+                    'username' => $username,
+                    'location_id' => (int) $u[2],
+                    'region_id' => 2,
+                    'password' => $password,
+                    'department_id' => $departments[$u[4]],
+                    'role' => 'user',
+                    'updated_at' => $now,
+                    'created_at' => $now,
+                ]
+            );
         }
     }
 }

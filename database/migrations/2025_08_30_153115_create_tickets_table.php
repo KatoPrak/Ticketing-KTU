@@ -14,7 +14,6 @@ return new class extends Migration
             $table->text('description');
             $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('low');
             $table->enum('status', ['waiting', 'in_progress','pending', 'resolved', 'closed'])->default('waiting');
-            $table->timestamp('resolved_at')->nullable();
             $table->text('resolution_notes')->nullable();
             $table->json('attachments')->nullable();
             $table->timestamps();

@@ -12,8 +12,10 @@ class DatabaseSeeder extends Seeder
     {
         // Panggil seeder lain secara berurutan
         $this->call([
-            UserSeeder::class,
+            LocationSeeder::class,
+            RegionSeeder::class,
             CategorySeeder::class,
+            UserSeeder::class,
             Regional1UserSeeder::class,
             Regional2UserSeeder::class,
             Regional3UserSeeder::class,
@@ -21,7 +23,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->command->info('Database seeded successfully!');
-        $this->command->info('Admin credentials: admin@company.com / admin123');
-        $this->command->info('User credentials: Any user email / password123');
+        $this->command->info('Admin credentials: username: admin / password: password');
+        $this->command->info('IT Team credentials: username: it.team / password: password');
     }
 }

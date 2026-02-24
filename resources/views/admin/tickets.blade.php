@@ -302,6 +302,19 @@
         color: white;
     }
 
+    .badge-transfer {
+        background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+        color: white;
+        margin-top: 4px;
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 8px;
+        font-weight: 800;
+        text-transform: uppercase;
+        box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
+    }
+
     /* Rating Stars */
     .rating-stars {
         color: #fbbf24;
@@ -805,6 +818,20 @@
                 </div>
 
                 <div class="filter-group">
+                    <label for="region_id">
+                        <i class="fas fa-map-marked-alt"></i> Region
+                    </label>
+                    <select name="region_id" id="region_id">
+                        <option value="">All Regions</option>
+                        @foreach($regions as $region)
+                            <option value="{{ $region->id }}" {{ request('region_id') == $region->id ? 'selected' : '' }}>
+                                {{ $region->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="filter-group">
                     <label for="per_page">
                         <i class="fas fa-list"></i> Per Page
                     </label>
@@ -832,9 +859,10 @@
             <table class="table-custom" id="ticketsTable">
                 <thead>
                     <tr>
-                        <th>Ticket ID</th>
-                        <th>User</th>
+                        <th>Tiket ID</th>
                         <th>Location</th>
+                        <th>User</th>
+                        <th>PIC</th>
                         <th>Category</th>
                         <th>Description</th>
                         <th>Priority</th>
@@ -842,8 +870,6 @@
                         <th>Report Date</th>
                         <th>Response Date</th>
                         <th>Resolved/Closed</th>
-                        <th>Rating</th>
-                        <th>Comment</th>
                         <th>Marking</th>
                     </tr>
                 </thead>
@@ -852,14 +878,22 @@
                         <tr>
                             <td>
                                 <span class="ticket-id">{{ $ticket->ticket_id }}</span>
+                                @if($ticket->transferLogs->count() > 0)
+                                    <div class="badge-transfer">
+                                        <i class="fas fa-exchange-alt" style="font-size: 7px;"></i> Transfer
+                                    </div>
+                                @endif
                             </td>
-                            <td>{{ $ticket->user->name ?? 'N/A' }}</td>
                             <td>
                                 <span class="badge bg-light text-dark border" title="{{ $ticket->user->location->name ?? 'Unknown' }}">
                                     <i class="fas fa-map-marker-alt me-1 text-danger"></i>
                                     {{ Str::limit($ticket->user->location->name ?? 'Unknown', 15) }}
                                 </span>
                             </td>
+                            <td>{{ $ticket->user->name ?? 'N/A' }}</td>
+                    <td style="color: #003366; font-weight: bold;">
+                        {{ $ticket->assignedTo->name ?? 'Unassigned' }}
+                    </td>
                             <td>{{ $ticket->category->name ?? 'N/A' }}</td>
                             <td>
                                 <div class="ticket-desc" title="{{ $ticket->description }}">
@@ -912,30 +946,6 @@
                                     </div>
                                 @else
                                     <span class="no-date">Pending</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($ticket->feedback)
-                                    <div class="rating-stars">
-                                        @for($i = 1; $i <= 5; $i++)
-                                            @if($i <= $ticket->feedback->rating)
-                                                <i class="fas fa-star"></i>
-                                            @else
-                                                <i class="far fa-star text-muted"></i>
-                                            @endif
-                                        @endfor
-                                    </div>
-                                @else
-                                    <span class="no-feedback-badge">No Rating</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($ticket->feedback && $ticket->feedback->comment)
-                                    <div class="comment-cell" title="{{ $ticket->feedback->comment }}">
-                                        {{ $ticket->feedback->comment }}
-                                    </div>
-                                @else
-                                    <span class="text-muted-custom">-</span>
                                 @endif
                             </td>
                             <td>
