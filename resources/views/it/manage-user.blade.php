@@ -91,9 +91,8 @@
                             <div class="invalid-feedback">Username is required</div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label for="email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
-                            <input type="email" id="email" name="email" class="form-control" required>
-                            <div class="invalid-feedback">Valid email is required</div>
+                            <label for="email" class="form-label fw-semibold">Email <span class="text-muted small">(Optional)</span></label>
+                            <input type="email" id="email" name="email" class="form-control">
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="department_id" class="form-label fw-semibold">Department <span class="text-danger">*</span></label>

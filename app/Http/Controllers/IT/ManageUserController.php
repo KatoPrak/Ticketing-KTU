@@ -68,7 +68,7 @@ class ManageUserController extends Controller
             'name' => 'required|string|max:255',
             'nik' => 'nullable|string|unique:users,nik|max:50',
             'username' => 'required|string|unique:users,username|max:50',
-            'email' => 'required|email',
+            'email' => 'nullable|email',
             'department_id' => 'required|exists:departments,id',
             'location_id' => 'required|exists:locations,id',
         ]);
@@ -124,7 +124,7 @@ class ManageUserController extends Controller
             'name' => 'required|string|max:255',
             'nik' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
             'username' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
-            'email' => ['required', 'email'],
+            'email' => ['nullable', 'email'],
             'department_id' => 'required|exists:departments,id',
             'location_id' => 'required|exists:locations,id',
             'password' => 'nullable|string|min:6', // ✅ Password optional
