@@ -30,6 +30,7 @@ export default defineConfig({
                 'resources/js/it-ticket-history.js',
                 'resources/css/change-password.css',
                 'resources/js/change-password.js',
+                'resources/js/auto-logout.js',
             ],
             refresh: true,
         }),

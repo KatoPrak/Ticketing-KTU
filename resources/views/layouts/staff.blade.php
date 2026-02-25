@@ -30,7 +30,8 @@
         'resources/css/user.css', 
         'resources/js/ticket-detail-handler.js', 
         'resources/js/staff.js', 
-        'resources/js/user.js'
+        'resources/js/user.js',
+        'resources/js/auto-logout.js'
     ])
 
     @yield('styles')

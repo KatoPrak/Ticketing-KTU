@@ -121,7 +121,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- ✅ HANYA LOAD 1 FILE JS ADMIN -->
-    @vite('resources/js/admin.js')
+    @vite(['resources/js/admin.js', 'resources/js/auto-logout.js'])
 
     <script>
         // Logout Confirmation
