@@ -85,6 +85,9 @@ Route::middleware(['auth', 'roleredirect:tim it'])->prefix('it')->name('it.')->g
     Route::get('/tickets-history', [ItTicketController::class, 'riwayat'])->name('tickets.history');
     Route::post('/tickets/{ticket}/update-field', [ItTicketController::class, 'updateField'])->name('tickets.updateField');
     
+    // CATEGORY ROUTE (Store only)
+    Route::post('/categories', [\App\Http\Controllers\IT\CategoryController::class, 'store'])->name('categories.store');
+    
     // 🚚 TRANSFER ROUTES
     Route::get('/locations/{location}/staff', [ItTicketController::class, 'getStaffByLocation'])->name('locations.staff');
     Route::post('/tickets/{ticket}/transfer', [ItTicketController::class, 'transfer'])->name('tickets.transfer');
@@ -162,7 +165,7 @@ Route::get('/test-email-notification', function () {
 // DEBUG IT TARGET (Who are these users?)
 // -----------------------------
 Route::get('/debug-it-target', function () {
-    $itUsers = \App\Models\User::whereIn('role', ['tim it', 'it'])
+    $itUsers = \App\Models\User::whereIn('role', ['tim it'])
         ->with('region')
         ->get()
         ->map(function($user) {

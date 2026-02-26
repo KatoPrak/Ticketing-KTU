@@ -470,9 +470,14 @@
 <div class="modal fade" id="createTicketModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">Create Ticket for User</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold mb-0">Create Ticket for User</h5>
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn btn-sm btn-light text-primary fw-bold px-3 py-1 rounded-pill shadow-sm me-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal" style="font-size: 0.85rem;">
+                        <i class="fas fa-plus me-1"></i> Add Category
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
             </div>
             <form id="createTicketForm" enctype="multipart/form-data">
                 <div class="modal-body p-4">
@@ -583,6 +588,29 @@
                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                  <button type="button" id="submitTransferBtn" class="btn btn-warning fw-bold">Transfer Ticket</button>
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- ================= ADD CATEGORY MODAL ================= --}}
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-3 border-0">
+             <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Add Category</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('it.categories.store') }}" method="POST" class="p-3">
+                @csrf
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Category Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="d-flex justify-content-end">
+                     <button type="button" class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#createTicketModal">Cancel</button>
+                     <button type="submit" class="btn btn-primary">Save Category</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
