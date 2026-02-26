@@ -1451,8 +1451,6 @@ if (window.orientation !== undefined) {
                                         </tbody>
                                     </table>
                                 </div>
-                                {{-- Dashboard Pagination --}}
-                                <div id="dashboard-pagination" class="d-flex justify-content-center mt-3"></div>
 
                                 {{-- Empty State --}}
                                 <div id="no-tickets-message" class="text-center py-5 d-none">
@@ -1992,32 +1990,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
 
-            // Render Pagination
-            if (paginationContainer && data.links) {
-                let paginationHtml = '<nav aria-label="Page navigation"><ul class="pagination pagination-sm mb-0">';
-                data.links.forEach(link => {
-                    const activeClass = link.active ? 'active' : '';
-                    const disabledClass = !link.url ? 'disabled' : '';
-                    paginationHtml += `
-                        <li class="page-item ${activeClass} ${disabledClass}">
-                            <a class="page-link" href="#" data-url="${link.url || ''}">${link.label}</a>
-                        </li>
-                    `;
-                });
-                paginationHtml += '</ul></nav>';
-                paginationContainer.innerHTML = paginationHtml;
 
-                // Add event listeners to pagination links
-                paginationContainer.querySelectorAll('.page-link').forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const nextUrl = this.dataset.url;
-                        if (nextUrl && !this.parentElement.classList.contains('active')) {
-                            fetchDashboardTickets(nextUrl);
-                        }
-                    });
-                });
-            }
         })
 
         .catch(error => {

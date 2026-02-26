@@ -4,7 +4,7 @@
             <!-- Left: Copyright -->
             <div class="col-12 text-start">
                 <span class="text-muted">
-                    © 2025 <strong>Team IT Support KTU</strong>. All rights reserved.
+                    © 2026 <strong>Team IT KTU</strong>. All rights reserved.
                 </span>
             </div>
         </div>

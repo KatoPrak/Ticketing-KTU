@@ -70,7 +70,7 @@ class TicketController extends Controller
         }
 
         // Render Blade
-        $tickets = $query->paginate(10);
+        $tickets = $query->paginate(5);
 
         // HISTORY TICKETS dengan Feedback Relation
         $historyTickets = Ticket::with(['user.department', 'category', 'feedback'])
@@ -127,9 +127,10 @@ class TicketController extends Controller
         $tickets = Ticket::with(['category', 'department'])
             ->where('user_id', auth()->id())
             ->orderByRaw('GREATEST(created_at, IFNULL(updated_at, created_at)) DESC')
-            ->paginate(5);
+            ->limit(5)
+            ->get();
 
-        return response()->json($tickets);
+        return response()->json(['data' => $tickets]);
     }
 
     /**
