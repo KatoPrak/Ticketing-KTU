@@ -323,10 +323,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const createdEl = document.getElementById('d_created');
             const responseEl = document.getElementById('d_response');
             const resolvedEl = document.getElementById('d_resolved');
+            const pendingEl = document.getElementById('d_pending');
             const resolvedMarker = document.getElementById('d_resolved_marker');
             const resolvedTitle = document.getElementById('d_resolved_title');
             const responseMarker = document.getElementById('d_response_marker');
-
+            const pendingMarker = document.getElementById('d_pending_marker');
             // REPORTED DATE
             if (createdEl) {
                 const createdDate = ticket.created_at_formatted || ticket.created_at;
@@ -343,9 +344,26 @@ document.addEventListener("DOMContentLoaded", () => {
                     responseMarker.classList.remove('bg-muted');
                     responseMarker.classList.add('bg-warning');
                 } else {
-                    responseEl.innerHTML = `<i class="fas fa-hourglass-me-1"></i>Waiting for response`;
+                    responseEl.innerHTML = `<i class="fas fa-hourglass-half me-1"></i>Waiting for response`;
                     responseMarker.classList.remove('bg-warning');
                     responseMarker.classList.add('bg-muted');
+                }
+            }
+
+            // PENDING DATE
+            if (pendingEl && pendingMarker) {
+                const pendingDate = ticket.pending_at_formatted || ticket.pending_at;
+                const timelinePending = document.getElementById('d_timeline_pending');
+                if (pendingDate && pendingDate !== 'Not yet pending' && pendingDate !== 'N/A' && pendingDate !== '-') {
+                    if (timelinePending) timelinePending.classList.remove('d-none');
+                    pendingEl.innerHTML = `<i class="fas fa-clock me-1"></i>${pendingDate}`;
+                    pendingMarker.classList.remove('bg-muted');
+                    pendingMarker.classList.add('bg-warning');
+                } else {
+                    if (timelinePending) timelinePending.classList.add('d-none');
+                    pendingEl.innerHTML = `<i class="fas fa-hourglass me-1"></i>Waiting for pending`;
+                    pendingMarker.classList.remove('bg-warning');
+                    pendingMarker.classList.add('bg-muted');
                 }
             }
 
@@ -375,31 +393,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            // ✅ RESOLVED DATE - FULL IMPLEMENTATION
+            // RESOLVED DATE
             if (resolvedEl && resolvedMarker && resolvedTitle) {
                 if (ticket.resolved_at_formatted &&
                     ticket.resolved_at_formatted !== 'Pending' &&
                     ticket.resolved_at_formatted !== '-' &&
                     ticket.resolved_at_formatted !== null &&
                     ticket.resolved_at_formatted !== 'N/A') {
-                    // ✅ Ticket sudah resolved/closed
+                    // Ticket sudah resolved/closed
                     resolvedEl.innerHTML = `<i class="fas fa-check-double me-1"></i>${ticket.resolved_at_formatted}`;
                     resolvedMarker.classList.remove('bg-muted');
                     resolvedMarker.classList.add('bg-success');
 
-                    // ✅ Update title berdasarkan status dengan icon
-                    const statusText = ticket.status === 'closed' ? 'Closed' : 'Resolved';
+                    const statusText = ticket.status === 'closed' ? 'Closed' : 'Solved';
                     resolvedTitle.innerHTML = `<i class="me-1"></i>${statusText}`;
                     resolvedTitle.style.color = '#198754'; // Success color
-
                 } else {
-                    // ✅ Ticket masih pending
+                    // Ticket masih pending
                     resolvedEl.innerHTML = `<i class="fas fa-hourglass-half me-1"></i>Pending`;
                     resolvedMarker.classList.remove('bg-success');
                     resolvedMarker.classList.add('bg-muted');
 
-                    // ✅ Update title untuk pending dengan icon
-                    resolvedTitle.innerHTML = `<i class="me-1"></i>Not Yet Resolved`;
+                    resolvedTitle.innerHTML = `<i class="me-1"></i>Not Yet Solved`;
                     resolvedTitle.style.color = '#6c757d'; // Muted color
                 }
             }
@@ -413,6 +428,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     notesRow.classList.remove('d-none');
                 } else {
                     notesRow.classList.add('d-none');
+                }
+            }
+
+            // ✅ Handle pending notes (reason) dengan icon
+            const pendingNotesRow = document.getElementById('d_row_pending_notes');
+            const pendingNotesElement = document.getElementById('d_pending_notes');
+            if (pendingNotesRow && pendingNotesElement) {
+                if ((ticket.status && ticket.status.toLowerCase() === 'pending') && ticket.pending_reason) {
+                    pendingNotesElement.innerHTML = `<i class="fas fa-pause-circle me-1"></i>${ticket.pending_reason}`;
+                    pendingNotesRow.classList.remove('d-none');
+                } else {
+                    pendingNotesRow.classList.add('d-none');
                 }
             }
 
@@ -482,7 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const old = select.dataset.originalValue;
 
         // ✅ Jika status berubah ke pending/resolved/closed, tampilkan modal
-        if (field === 'status' && ['pending', 'resolved', 'closed'].includes(value)) {
+        if (field === 'status' && ['pending', 'resolved'].includes(value)) {
             pendingUpdate = {
                 select: select,
                 id: id,
@@ -503,13 +530,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
             notesTextarea.value = '';
 
-            const statusLabel = value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ');
+            const statusLabel = (value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ')).replace('Resolved', 'Solved');
             const modalTitle = modalEl.querySelector('.modal-title');
             if (modalTitle) {
                 modalTitle.textContent = `Add Remark - ${statusLabel} `;
             }
 
             modal.show();
+            return;
+        }
+
+        if (field === 'status' && value === 'closed') {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Ticket status will be changed to Closed!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await updateFieldWithNotes(select, id, field, value, old, null);
+                } else {
+                    select.value = old;
+                }
+            });
             return;
         }
 
@@ -634,6 +681,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (field === 'status') {
                 updateSelectColor(select, value);
+
+                if (value === 'closed') {
+                    const row = select.closest('tr');
+                    if (row) {
+                        row.style.transition = 'all 0.5s ease';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            row.remove();
+                            // Optional: If no tickets left, maybe refresh or handle empty state
+                            const tbody = document.querySelector('.ticket-row');
+                            if (!tbody) {
+                                window.location.reload();
+                            }
+                        }, 500);
+                    }
+                }
             }
 
             if (field === 'priority') {

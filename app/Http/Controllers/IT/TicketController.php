@@ -222,6 +222,7 @@ class TicketController extends Controller
             'assigned_to' => $ticket->assigned_to, 
             'attachments' => $attachments,
             'resolution_notes' => $ticket->resolution_notes ?? '',
+            'pending_reason' => $ticket->pending_reason ?? '',
             'transfer_logs' => $ticket->transferLogs->map(function($log) {
                 return [
                     'from' => $log->fromRegion ? $log->fromRegion->name : 'N/A',
@@ -245,6 +246,9 @@ class TicketController extends Controller
                 ? $ticket->resolved_at->format('d M Y H:i')
                 : null,
             'resolved_at_formatted' => $ticket->resolved_at_formatted,
+            
+            // ✅ Pending Date
+            'pending_at_formatted' => $ticket->pending_at_formatted,
             
             // Relations
             'user' => [
@@ -311,8 +315,13 @@ class TicketController extends Controller
             $ticket->status = $value;
             $resolutionNotes = $request->resolution_notes;
 
-            // Simpan resolution_notes untuk pending, resolved, dan closed
-            if (in_array($value, ['pending', 'resolved', 'closed']) && $resolutionNotes) {
+            // Simpan pending_reason jika status pending
+            if ($value === 'pending' && $resolutionNotes) {
+                $ticket->pending_reason = $resolutionNotes;
+            }
+
+            // Simpan resolution_notes untuk resolved dan closed
+            if (in_array($value, ['resolved', 'closed']) && $resolutionNotes) {
                 $ticket->resolution_notes = $resolutionNotes;
             }
             

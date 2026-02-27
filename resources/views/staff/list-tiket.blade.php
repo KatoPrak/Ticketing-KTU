@@ -43,7 +43,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Ticket ID</th>
-                        <th>Problem</th>
+                        <th>Description</th>
                         <th>Department</th>
                         <th>Category</th>
                         <th>Status</th>
@@ -73,7 +73,7 @@
                                 };
                             @endphp
                             <span class="badge {{ $statusClass }}">
-                                {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}
+                                {{ str_replace('Resolved', 'Solved', ucfirst(str_replace('_', ' ', $ticket->status))) }}
                             </span>
                         </td>
                         <td>
@@ -144,7 +144,7 @@
 {{-- ================== TICKET HISTORY ================== --}}
 <div class="tickets-container fade-in mb-5">
     <div class="tickets-header mb-3">
-        <i class="fas fa-archive"></i> Ticket History (Closed & Resolved)
+        <i class="fas fa-archive"></i> Ticket History (Closed & Solved)
     </div>
     <div id="historyTicketsContent">
         <div class="table-responsive" id="historyTicketsTableWrapper">
@@ -152,7 +152,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Ticket ID</th>
-                        <th>Problem</th>
+                        <th>Description</th>
                         <th>Department</th>
                         <th>Category</th>
                         <th>Status</th>
@@ -178,7 +178,7 @@
                                 };
                             @endphp
                             <span class="badge {{ $statusClass }}">
-                                {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}
+                                {{ str_replace('Resolved', 'Solved', ucfirst(str_replace('_', ' ', $ticket->status))) }}
                             </span>
                         </td>
                         <td>

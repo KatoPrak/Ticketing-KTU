@@ -21,7 +21,9 @@ class Ticket extends Model
         'resolution_notes',
         'resolved_at',
         'assigned_to',
-        'region_id' // ✅ Added region_id
+        'region_id', // ✅ Added region_id
+        'pending_at', // ✅ Added pending_at
+        'pending_reason' // ✅ Added pending_reason
     ];
 
     protected $casts = [
@@ -29,9 +31,10 @@ class Ticket extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'resolved_at' => 'datetime',
+        'pending_at' => 'datetime',
     ];
 
-    protected $appends = ['created_at_formatted', 'updated_at_formatted', 'resolved_at_formatted'];
+    protected $appends = ['created_at_formatted', 'updated_at_formatted', 'resolved_at_formatted', 'pending_at_formatted'];
 
     // ✅ ACCESSOR untuk format date dengan NULL-safe
     public function getCreatedAtFormattedAttribute()
@@ -39,6 +42,13 @@ class Ticket extends Model
         return $this->created_at 
             ? $this->created_at->timezone('Asia/Jakarta')->format('d M Y, H:i') 
             : '-';
+    }
+
+    public function getPendingAtFormattedAttribute()
+    {
+        return $this->pending_at 
+            ? $this->pending_at->timezone('Asia/Jakarta')->format('d M Y, H:i') 
+            : 'Not yet pending';
     }
 
     public function getUpdatedAtFormattedAttribute()
@@ -138,32 +148,49 @@ class Ticket extends Model
             $currentStatus = $ticket->status;
             $oldStatus = $ticket->getOriginal('status');
 
+            // ✅ RULE 0: Mencegah updated_at terus berubah
+            // Kita ingin updated_at MURNI bertindak sebagai "Waktu Respon Pertama"
+            if ($ticket->getOriginal('updated_at')) {
+                // Jika sudah ada updated_at, matikan auto-update waktu agar
+                // updated_at tidak ter-overwrite sehingga waktu "Response" dan "Pending" jadi sama.
+                $ticket->timestamps = false;
+            }
+
             // ✅ RULE 1: Status berubah ke in_progress ATAU pending
             // → Set updated_at HANYA jika masih NULL (response pertama kali)
             if ($isDirtyStatus && in_array($currentStatus, ['in_progress', 'pending'])) {
                 if (!$ticket->getOriginal('updated_at')) {
                     $ticket->updated_at = now();
+                    $ticket->timestamps = false; // Matikan auto-update untuk operasi kali ini
                 }
-                // Jika sudah ada updated_at, biarkan Laravel auto-update
             }
 
-            // ✅ RULE 2: Status berubah ke resolved/closed
-            // → Set resolved_at, FREEZE updated_at
+            // ✅ RULE 2: Status berubah ke pending
+            // -> Set pending_at
+            if ($isDirtyStatus && $currentStatus === 'pending') {
+                $ticket->pending_at = now();
+            }
+
+            // ✅ RULE 3: Status berubah ke resolved/closed
+            // → Set resolved_at
             if ($isDirtyStatus && in_array($currentStatus, ['resolved', 'closed'])) {
                 $ticket->resolved_at = now();
                 $ticket->timestamps = false; // Freeze updated_at
             }
             
-            // ✅ RULE 3: Status kembali dari resolved/closed ke status lain
+            // ✅ RULE 4: Status kembali dari resolved/closed ke status lain
             // → Hapus resolved_at
             if ($isDirtyStatus && 
                 in_array($oldStatus, ['resolved', 'closed']) && 
                 !in_array($currentStatus, ['resolved', 'closed'])) {
                 $ticket->resolved_at = null;
-                $ticket->timestamps = true;
             }
 
-            // ✅ RULE 4: Perubahan selain status (priority, description, dll)
+            // ✅ RULE 5: Status kembali dari pending
+            // ⚠️ pending_at dan pending_reason TIDAK di-reset agar data historis tetap tersimpan
+            // dan dapat ditampilkan di laporan PDF admin.
+
+            // ✅ RULE 6: Perubahan selain status (priority, description, dll)
             // → JANGAN update updated_at jika status masih waiting
             if (!$isDirtyStatus && $currentStatus === 'waiting') {
                 $ticket->timestamps = false;

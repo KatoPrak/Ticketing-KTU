@@ -141,7 +141,7 @@
                                 <tr>
                                     <th class="ps-4 border-0">IT Specialist</th>
                                     <th class="text-center border-0">Assigned</th>
-                                    <th class="text-center border-0">Resolved</th>
+                                    <th class="text-center border-0">Solved</th>
                                     <th class="pe-4 border-0">Efficiency</th>
                                 </tr>
                             </thead>

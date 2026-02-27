@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket Resolved</title>
+    <title>Ticket Solved</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f3f4f6; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -47,14 +47,14 @@
             </div>
         </div>
         <div class="header-title">
-            <h2>✅ Ticket Resolved</h2>
+            <h2>✅ Ticket Solved</h2>
             <p>Your issue has been successfully handled</p>
         </div>
 
         {{-- ── CONTENT ── --}}
         <div class="content">
             <p style="margin-top:0; font-size:16px;">Hello <strong>{{ $ticket->user->name }}</strong>,</p>
-            <p style="color:#4b5563;">Your IT support ticket has been marked as <strong>Resolved</strong>. Here is the summary:</p>
+            <p style="color:#4b5563;">Your IT support ticket has been marked as <strong>Solved</strong>. Here is the summary:</p>
 
             <div class="info-box">
                 <div class="row">

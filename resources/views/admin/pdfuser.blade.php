@@ -116,7 +116,7 @@
 
         th {
             padding: 5px 2px;
-            text-align: left;
+            text-align: center;
             vertical-align: middle;
             font-size: 6.5px;
             font-weight: bold;
@@ -136,7 +136,7 @@
         td {
             padding: 4px 2px;
             border-bottom: 1px solid #e1e7f0;
-            text-align: left;
+            text-align: center;
             vertical-align: top;
             font-size: 6.5px;
             line-height: 1.3;
@@ -153,19 +153,21 @@
             page-break-inside: avoid;
         }
 
-        /* ===== COLUMN WIDTHS - 12 COLUMNS ===== */
-        th:nth-child(1), td:nth-child(1) { width: 4%; text-align: center; }    /* ID */
-        th:nth-child(2), td:nth-child(2) { width: 8%; }                         /* Location */
-        th:nth-child(3), td:nth-child(3) { width: 7%; }                         /* User */
-        th:nth-child(4), td:nth-child(4) { width: 8%; }                         /* PIC */
+        /* ===== COLUMN WIDTHS - 14 COLUMNS ===== */
+        th:nth-child(1), td:nth-child(1) { width: 4%; }                         /* ID */
+        th:nth-child(2), td:nth-child(2) { width: 7%; }                         /* Location */
+        th:nth-child(3), td:nth-child(3) { width: 6%; }                         /* User */
+        th:nth-child(4), td:nth-child(4) { width: 6%; }                         /* PIC */
         th:nth-child(5), td:nth-child(5) { width: 6%; }                         /* Category */
-        th:nth-child(6), td:nth-child(6) { width: 10%; }                        /* Description */
-        th:nth-child(7), td:nth-child(7) { width: 4%; text-align: center; }    /* Priority */
-        th:nth-child(8), td:nth-child(8) { width: 4%; text-align: center; }    /* Status */
-        th:nth-child(9), td:nth-child(9) { width: 7%; text-align: center; }    /* Report Date */
-        th:nth-child(10), td:nth-child(10) { width: 7%; text-align: center; }  /* Response Date */
-        th:nth-child(11), td:nth-child(11) { width: 7%; text-align: center; }  /* Resolved/Closed */
-        th:nth-child(12), td:nth-child(12) { width: 22%; }                     /* solution */
+        th:nth-child(6), td:nth-child(6) { width: 9%; }                         /* Description */
+        th:nth-child(7), td:nth-child(7) { width: 4%; }                         /* Priority */
+        th:nth-child(8), td:nth-child(8) { width: 4%; }                         /* Status */
+        th:nth-child(9), td:nth-child(9) { width: 6%; }                         /* Report Date */
+        th:nth-child(10), td:nth-child(10) { width: 6%; }                       /* Response Date */
+        th:nth-child(11), td:nth-child(11) { width: 6%; }                       /* Pending Date */
+        th:nth-child(12), td:nth-child(12) { width: 14%; }                      /* Pending Reason */
+        th:nth-child(13), td:nth-child(13) { width: 6%; }                       /* Closed */
+        th:nth-child(14), td:nth-child(14) { width: 16%; }                      /* Solution */
 
 
 
@@ -419,7 +421,9 @@
                 <th>Status</th>
                 <th>Report Date</th>
                 <th>Response Date</th>
-                <th>Resolved/Closed</th>
+                <th>Pending Date</th>
+                <th>Pending Reason</th>
+                <th>Closed</th>
                 <th>Solution</th>
             </tr>
         </thead>
@@ -462,7 +466,7 @@
                             @elseif($ticket->status === 'waiting') badge-waiting
                             @elseif($ticket->status === 'closed') badge-closed
                             @else badge-open @endif">
-                            {{ str_replace('_', ' ', ucfirst($ticket->status)) }}
+                            {{ str_replace('Resolved', 'Solved', str_replace('_', ' ', ucfirst($ticket->status))) }}
                         </span>
                     </td>
                     <td>
@@ -471,6 +475,7 @@
                             <span class="time-part">{{ $ticket->created_at->format('H:i:s') }}</span>
                         </div>
                     </td>
+                    
                     <td>
                         @if($ticket->updated_at)
                             <div class="datetime-cell">
@@ -479,6 +484,25 @@
                             </div>
                         @else
                             <span class="no-date">Not yet</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($ticket->pending_at)
+                            <div class="datetime-cell">
+                                <span class="date-part">{{ \Carbon\Carbon::parse($ticket->pending_at)->format('d M Y') }}</span>
+                                <span class="time-part">{{ \Carbon\Carbon::parse($ticket->pending_at)->format('H:i:s') }}</span>
+                            </div>
+                        @else
+                            <span class="no-date">-</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($ticket->pending_reason)
+                            <div class="solution-cell">
+                                {{ Str::limit($ticket->pending_reason, 30) }}
+                            </div>
+                        @else
+                            <span class="text-muted-custom">-</span>
                         @endif
                     </td>
                     <td>
@@ -491,6 +515,7 @@
                             <span class="no-date">Pending</span>
                         @endif
                     </td>
+
                     <td>
                         @if($ticket->resolution_notes)
                             <div class="solution-cell">
@@ -503,7 +528,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="12">
+                    <td colspan="14">
                         <div class="no-data">
                             <p>No tickets found</p>
                         </div>
@@ -517,10 +542,7 @@
         No tickets found for the selected period.
     </div>
     @endif
-
-    <div class="meta-line">
-        Confidential Report — For Internal Use Only — Generated: {{ now()->format('d F Y, H:i:s') }}
-    </div>
+    
 </main>
 
 <footer>

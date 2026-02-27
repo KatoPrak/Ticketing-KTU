@@ -811,7 +811,7 @@
                         <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>Open</option>
                         <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                        <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Solved</option>
                         <option value="waiting" {{ request('status') == 'waiting' ? 'selected' : '' }}>Waiting</option>
                         <option value="closed" {{ request('status') == 'closed' ? 'selected' : '' }}>Closed</option>
                     </select>
@@ -869,7 +869,9 @@
                         <th>Status</th>
                         <th>Report Date</th>
                         <th>Response Date</th>
-                        <th>Resolved/Closed</th>
+                        <th>Pending Date</th>
+                        <th>Pending Reason</th>
+                        <th>Solved/Closed</th>
                         <th>Solution</th>
                     </tr>
                 </thead>
@@ -917,7 +919,7 @@
                                     @elseif($ticket->status === 'waiting') badge-waiting
                                     @elseif($ticket->status === 'closed') badge-closed
                                     @else badge-open @endif">
-                                    {{ str_replace('_', ' ', ucfirst($ticket->status)) }}
+                                    {{ str_replace('Resolved', 'Solved', str_replace('_', ' ', ucfirst($ticket->status))) }}
                                 </span>
                             </td>
                             <td>
@@ -935,6 +937,25 @@
                                     </div>
                                 @else
                                     <span class="no-date">Not yet</span>
+                                @endif
+                            </td>
+                                                        <td>
+                                @if($ticket->status === 'pending' && $ticket->pending_at)
+                                    <div class="datetime-cell">
+                                        <span class="date-part">{{ \Carbon\Carbon::parse($ticket->pending_at)->format('d M Y') }}</span>
+                                        <span class="time-part">{{ \Carbon\Carbon::parse($ticket->pending_at)->format('H:i:s') }}</span>
+                                    </div>
+                                @else
+                                    <span class="no-date">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($ticket->status === 'pending' && $ticket->pending_reason)
+                                    <div class="marking-cell" title="{{ $ticket->pending_reason }}">
+                                        {{ Str::limit($ticket->pending_reason, 30) }}
+                                    </div>
+                                @else
+                                    <span class="text-muted-custom">-</span>
                                 @endif
                             </td>
                             {{-- ✅ RESOLVED/CLOSED DATE = resolved_at --}}

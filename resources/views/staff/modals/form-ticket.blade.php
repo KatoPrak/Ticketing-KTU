@@ -40,7 +40,7 @@
                             <input type="email" class="form-control" value="{{ Auth::user()->email }}" disabled>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Problem <span class="text-danger">*</span></label>
+                            <label class="form-label">Description <span class="text-danger">*</span></label>
                             <textarea class="form-control" name="description" style="height: 120px"></textarea>
                             <div class="mt-2">
                                 <small class="text-muted">

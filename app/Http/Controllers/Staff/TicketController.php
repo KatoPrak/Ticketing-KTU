@@ -412,6 +412,7 @@ class TicketController extends Controller
                     'updated_at_formatted' => $ticket->updated_at_formatted,
                     'resolved_at' => $ticket->resolved_at ? $ticket->resolved_at->timezone('Asia/Jakarta')->format('d M Y, H:i') : null,
                     'resolved_at_formatted' => $ticket->resolved_at_formatted,
+                    'pending_at_formatted' => $ticket->pending_at_formatted,
                     'response_date' => $ticket->response_date,
                 ],
             ], 201);
@@ -479,6 +480,7 @@ class TicketController extends Controller
                     'attachments'=> $ticket->attachments,
                     
                     'resolution_notes' => $ticket->resolution_notes,
+                    'pending_reason' => $ticket->pending_reason,
                     
                     // ✅ Add Transfer Info
                     'assigned_to' => $ticket->assigned_to,
@@ -500,6 +502,7 @@ class TicketController extends Controller
                     'updated_at_formatted' => $ticket->updated_at_formatted,
                     'resolved_at' => $ticket->resolved_at ? $ticket->resolved_at->timezone('Asia/Jakarta')->format('d M Y H:i') : null,
                     'resolved_at_formatted' => $ticket->resolved_at_formatted,
+                    'pending_at_formatted' => $ticket->pending_at_formatted,
                     'response_date' => $ticket->response_date,
                     'response_at_formatted' => $ticket->updated_at_formatted,
                 ],

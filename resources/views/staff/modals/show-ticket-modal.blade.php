@@ -58,6 +58,12 @@
                                             <div id="d_transfers" class="text-muted small text-break"></div>
                                         </td>
                                     </tr>
+                                    <tr id="d_row_pending_notes" class="d-none">
+                                        <th class="text-muted align-top">Pending Reason</th>
+                                        <td>
+                                            <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning text-break" style="--bs-bg-opacity: .1; white-space: pre-wrap; word-wrap: break-word;">No reason provided</div>
+                                        </td>
+                                    </tr>
                                     <tr id="d_row_notes" class="d-none">
                                         <th class="text-muted align-top">Resolution Notes</th>
                                         <td>
@@ -111,13 +117,26 @@
                                             </div>
                                         </div>
 
+                                        {{-- PENDING --}}
+                                        <div class="timeline-item" id="d_timeline_pending">
+                                            <div class="timeline-marker bg-warning" id="d_pending_marker">
+                                                <i class="fas fa-pause"></i>
+                                            </div>
+                                            <div class="timeline-content">
+                                                <div class="timeline-title text-warning fw-bold">Pending</div>
+                                                <div class="timeline-date text-muted small" id="d_pending">
+                                                    <i class="fas fa-hourglass me-1"></i>Waiting for pending
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         {{-- RESOLVED/CLOSED --}}
                                         <div class="timeline-item">
                                             <div class="timeline-marker bg-muted" id="d_resolved_marker"><i class="fas fa-check-circle"></i>
                                             </div>
                                             <div class="timeline-content">
-                                                <div class="timeline-title fw-bold" id="d_resolved_title" style="color: #6c757d;">Resolved/Closed</div>
-                                                <div class="timeline-date text-muted small" id="d_resolved"><i class="fas fa-clock me-1"></i>Not yet resolved
+                                                <div class="timeline-title fw-bold" id="d_resolved_title" style="color: #6c757d;">Solved/Closed</div>
+                                                <div class="timeline-date text-muted small" id="d_resolved"><i class="fas fa-clock me-1"></i>Not yet solved
                                                 </div>
                                             </div>
                                         </div>

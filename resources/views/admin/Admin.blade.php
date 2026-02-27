@@ -114,7 +114,7 @@
                                             @elseif($ticket->status == 'resolved') bg-success
                                             @elseif($ticket->status == 'closed') bg-secondary
                                             @else bg-primary @endif">
-                                            {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}
+                                            {{ str_replace('Resolved', 'Solved', ucfirst(str_replace('_', ' ', $ticket->status))) }}
                                         </span>
                                     </td>
                                     <td class="small">{{ $ticket->created_at->diffForHumans() }}</td>

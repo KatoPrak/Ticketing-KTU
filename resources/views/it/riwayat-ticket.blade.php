@@ -155,7 +155,7 @@
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Department</th>
-                        <th>Resolved/Closed</th>
+                        <th>Solved/Closed</th>
                     </tr>
                 </thead>
                 <tbody id="riwayatTbody">
@@ -166,7 +166,7 @@
                         <td>{{ Str::limit($ticket->description, 50) }}</td>
                         <td>{{ $ticket->category->name ?? '-' }}</td>
                         <td>
-                            <span class="badge bg-secondary">{{ ucfirst($ticket->status) }}</span>
+                            <span class="badge bg-secondary">{{ str_replace('Resolved', 'Solved', ucfirst($ticket->status)) }}</span>
                         </td>
                         <td>
                             @php

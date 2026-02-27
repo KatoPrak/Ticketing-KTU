@@ -1424,7 +1424,7 @@ if (window.orientation !== undefined) {
                                                     <i class="fas fa-hashtag me-2"></i>Ticket ID
                                                 </th>
                                                 <th scope="col" class="border-0 text-uppercase text-muted small fw-semibold py-3">
-                                                    <i class="fas fa-file-alt me-2"></i>Problem
+                                                    <i class="fas fa-file-alt me-2"></i>Description
                                                 </th>
                                                 <th scope="col" class="border-0 text-uppercase text-muted small fw-semibold py-3">
                                                     <i class="fas fa-flag me-2"></i>Priority

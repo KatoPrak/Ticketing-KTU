@@ -148,9 +148,11 @@ $(document).ready(function () {
         const createdEl = $('#d_created');
         const responseEl = $('#d_response');
         const resolvedEl = $('#d_resolved');
+        const pendingEl = $('#d_pending');
         const resolvedMarker = $('#d_resolved_marker');
         const resolvedTitle = $('#d_resolved_title');
         const responseMarker = $('#d_response_marker');
+        const pendingMarker = $('#d_pending_marker');
 
         // REPORTED DATE
         const createdDate = ticket.created_at_formatted || ticket.created_at;
@@ -171,6 +173,23 @@ $(document).ready(function () {
             responseEl.html(`<i class="fas fa-hourglass-half me-1"></i>Waiting for response`);
             if (responseMarker.length) {
                 responseMarker.removeClass('bg-warning').addClass('bg-muted');
+            }
+        }
+
+        // PENDING DATE
+        const pendingDate = ticket.pending_at_formatted || ticket.pending_at;
+        const timelinePending = $('#d_timeline_pending');
+        if ((ticket.status && ticket.status.toLowerCase() === 'pending') && pendingDate && pendingDate !== 'Not yet pending' && pendingDate !== 'N/A' && pendingDate !== '-') {
+            if (timelinePending.length) timelinePending.removeClass('d-none');
+            pendingEl.html(`<i class="fas fa-clock me-1"></i>${pendingDate}`);
+            if (pendingMarker.length) {
+                pendingMarker.removeClass('bg-muted').addClass('bg-warning');
+            }
+        } else {
+            if (timelinePending.length) timelinePending.addClass('d-none');
+            pendingEl.html(`<i class="fas fa-hourglass me-1"></i>Waiting for pending`);
+            if (pendingMarker.length) {
+                pendingMarker.removeClass('bg-warning').addClass('bg-muted');
             }
         }
 
@@ -200,7 +219,7 @@ $(document).ready(function () {
             }
         }
 
-        // RESOLVED DATE - ✅ FIXED VERSION
+        // RESOLVED DATE
         if (ticket.resolved_at_formatted &&
             ticket.resolved_at_formatted !== 'Pending' &&
             ticket.resolved_at_formatted !== '-' &&
@@ -208,13 +227,13 @@ $(document).ready(function () {
             // Ticket sudah resolved/closed
             resolvedEl.html(`<i class="fas fa-check-double me-1"></i>${ticket.resolved_at_formatted}`);
             resolvedMarker.removeClass('bg-muted').addClass('bg-success');
-            resolvedTitle.text(ticket.status === 'closed' ? 'Closed' : 'Resolved/Closed');
+            resolvedTitle.text(ticket.status === 'closed' ? 'Closed' : 'Solved/Closed');
             resolvedTitle.removeClass('text-muted').addClass('text-success');
         } else {
             // Ticket masih pending - TAMPILKAN "Pending" dengan icon hourglass
             resolvedEl.html(`<i class="fas fa-hourglass-half me-1"></i>Pending`);
             resolvedMarker.removeClass('bg-success').addClass('bg-muted');
-            resolvedTitle.text('Not Yet Resolved/Closed');
+            resolvedTitle.text('Not Yet Solved/Closed');
             resolvedTitle.removeClass('text-success').addClass('text-muted');
         }
 
@@ -243,6 +262,14 @@ $(document).ready(function () {
             $('#d_row_notes').removeClass('d-none');
         } else {
             $('#d_row_notes').addClass('d-none');
+        }
+
+        // ✅ UPDATE PENDING REASON NOTES
+        if ((ticket.status && ticket.status.toLowerCase() === 'pending') && ticket.pending_reason) {
+            $('#d_pending_notes').text(ticket.pending_reason);
+            $('#d_row_pending_notes').removeClass('d-none');
+        } else {
+            $('#d_row_pending_notes').addClass('d-none');
         }
 
         // ✅ UPDATE ATTACHMENTS
@@ -281,7 +308,8 @@ $(document).ready(function () {
         // Reset timeline dengan teks informatif
         $('#d_created').html('<i class="fas fa-calendar-alt me-1"></i>Not recorded');
         $('#d_response').html('<i class="fas fa-hourglass-half me-1"></i>Waiting for response');
-        $('#d_resolved').html('<i class="fas fa-clock me-1"></i>Not yet resolved');
+        $('#d_pending').html('<i class="fas fa-hourglass me-1"></i>Waiting for pending');
+        $('#d_resolved').html('<i class="fas fa-clock me-1"></i>Not yet solved');
 
         // Reset badges
         $('#d_status').removeClass().addClass('badge rounded-pill px-3 py-2 bg-secondary').text('UNKNOWN');
@@ -289,15 +317,22 @@ $(document).ready(function () {
 
         // Reset timeline markers
         $('#d_resolved_marker').removeClass('bg-success').addClass('bg-muted');
-        $('#d_resolved_title').removeClass('text-success').addClass('text-muted').text('Not Yet Resolved/Closed');
+        $('#d_resolved_title').removeClass('text-success').addClass('text-muted').text('Not Yet Solved/Closed');
 
         if ($('#d_response_marker').length) {
             $('#d_response_marker').removeClass('bg-warning').addClass('bg-muted');
         }
 
+        if ($('#d_pending_marker').length) {
+            $('#d_pending_marker').removeClass('bg-warning').addClass('bg-muted');
+        }
+
         // Hide notes
         $('#d_row_notes').addClass('d-none');
         $('#d_notes').text('No notes available');
+
+        $('#d_row_pending_notes').addClass('d-none');
+        $('#d_pending_notes').text('No reason provided');
 
         // Reset attachments
         $('#d_attachments').html('<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>');

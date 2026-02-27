@@ -145,7 +145,7 @@
                                         };
                                     @endphp
                                     <span class="badge {{ $statusClass }} rounded-pill" style="font-size: 0.65rem; padding: 0.2rem 0.5rem;">
-                                        {{ ucfirst(str_replace('_',' ', $ticket->status)) }}
+                                        {{ str_replace('Resolved', 'Solved', ucfirst(str_replace('_',' ', $ticket->status))) }}
                                     </span>
                                 </td>
                                 <td>

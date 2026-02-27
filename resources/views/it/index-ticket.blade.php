@@ -35,7 +35,7 @@
                 <select name="status" class="form-select text-muted" onchange="this.form.submit()">
                     <option value="">All Statuses</option>
                     @foreach(['waiting','in_progress','pending','resolved'] as $status)
-                    <option value="{{ $status }}" @selected(request('status')==$status)>{{ ucfirst(str_replace('_',' ',$status)) }}</option>
+                    <option value="{{ $status }}" @selected(request('status')==$status)>{{ str_replace('Resolved', 'Solved', ucfirst(str_replace('_',' ',$status))) }}</option>
                     @endforeach
                 </select>
             </div>
@@ -119,7 +119,7 @@
                                     style="width: 100%; cursor: pointer; border-radius: 20px;" 
                                     data-id="{{ $ticket->id }}" data-field="status" data-original-value="{{ $ticket->status }}">
                                 @foreach(['waiting','in_progress','pending','resolved','closed'] as $s)
-                                <option value="{{ $s }}" @selected($ticket->status == $s)>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
+                                <option value="{{ $s }}" @selected($ticket->status == $s)>{{ str_replace('Resolved', 'Solved', ucfirst(str_replace('_',' ',$s))) }}</option>
                                 @endforeach
                             </select>
                         </td>
@@ -454,7 +454,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="text-muted small">Please provide notes for changing the status to Pending/Resolved/Closed.</p>
+                <p class="text-muted small">Please provide notes for changing the status to Pending/Solved.</p>
                 <textarea id="resolutionNotes" class="form-control" rows="4"
                     placeholder="Write ticket completion notes..."></textarea>
             </div>
