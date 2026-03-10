@@ -200,7 +200,7 @@
             </table>
         </div>
         <div class="card-footer">
-            {{ $tickets->links() }}
+            {{ $tickets->links('pagination::bootstrap-5') }}
         </div>
     </div>
 </div>
