@@ -123,7 +123,7 @@
 
                             <div class="col-md-6">
                                 <label for="email" class="form-label fw-semibold">
-                                    Email <span class="text-muted small">(opsional)</span>
+                                    Email
                                 </label>
                                 <input type="email" 
                                        class="form-control @error('email') is-invalid @enderror" 
