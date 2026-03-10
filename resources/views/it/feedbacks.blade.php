@@ -14,7 +14,7 @@
     {{-- Page Header --}}
     <div class="page-header">
         <h1 class="page-title">
-            <i class="fas fa-star text-warning me-2"></i>Feedbacks Dashboard
+            <i class="text-warning me-2"></i>Feedbacks Dashboard
         </h1>
         <p class="page-subtitle">Monitor and analyze user satisfaction and feedback</p>
     </div>
