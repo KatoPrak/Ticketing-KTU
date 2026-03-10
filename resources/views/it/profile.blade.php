@@ -141,7 +141,7 @@
                                        autocomplete="email">
                                 <small class="text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Wajib diisi agar menerima notifikasi tiket masuk dan tiket selesai.
+                                     Wajib diisi agar menerima notifikasi tiket masuk.
                                 </small>
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>

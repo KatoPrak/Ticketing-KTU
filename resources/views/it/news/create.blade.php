@@ -94,23 +94,6 @@
                                         <i class="fas fa-exclamation-circle me-1"></i>{{ $message }}
                                     </div>
                                 @enderror
-
-                                {{-- Preview Box --}}
-                                <div class="preview-box" id="previewBox">
-                                    <div class="preview-header">
-                                        <i class="fas fa-eye me-2"></i>Live Preview
-                                    </div>
-                                    <div class="preview-content">
-                                        <div class="preview-item">
-                                            <div class="preview-icon">
-                                                <i class="fas fa-info-circle"></i>
-                                            </div>
-                                            <div class="preview-text" id="previewText">
-                                                Your announcement will appear here...
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -801,33 +784,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitBtn');
     const newsForm = document.getElementById('newsForm');
 
-    // Character counter and live preview
-    if (messageInput) {
-        messageInput.addEventListener('input', function() {
-            const length = this.value.length;
-            charCount.textContent = length;
-            
-            // Update character count color
-            charCount.classList.remove('warning', 'danger');
-            if (length > 400) {
-                charCount.classList.add('danger');
-            } else if (length > 300) {
-                charCount.classList.add('warning');
-            }
-            
-            // Update preview
-            if (this.value.trim()) {
-                previewText.textContent = this.value;
-                previewText.classList.remove('empty');
-            } else {
-                previewText.textContent = 'Your announcement will appear here...';
-                previewText.classList.add('empty');
-            }
-        });
-        
-        // Trigger initial update
-        messageInput.dispatchEvent(new Event('input'));
-    }
 
     // Form submission animation
     if (newsForm) {
