@@ -11,9 +11,6 @@
             <div class="page-header-animated mb-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div class="header-title-group">
-                        <div class="icon-wrapper">
-                            <i class="fas fa-bullhorn"></i>
-                        </div>
                         <div>
                             <h2 class="page-title mb-1">Create New Announcement</h2>
                             <p class="page-subtitle mb-0">Share important updates with your team</p>
@@ -130,23 +127,6 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-}
-
-.icon-wrapper {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
-    animation: float 3s ease-in-out infinite;
-}
-
-.icon-wrapper i {
-    font-size: 1.75rem;
-    color: white;
 }
 
 .page-title {
@@ -492,15 +472,6 @@
         font-size: 1.5rem;
     }
     
-    .icon-wrapper {
-        width: 50px;
-        height: 50px;
-    }
-    
-    .icon-wrapper i {
-        font-size: 1.5rem;
-    }
-    
     .form-body {
         padding: 2rem;
     }
@@ -538,15 +509,6 @@
         font-size: 0.9rem;
     }
     
-    .icon-wrapper {
-        width: 45px;
-        height: 45px;
-    }
-    
-    .icon-wrapper i {
-        font-size: 1.35rem;
-    }
-    
     .form-header {
         padding: 1.5rem;
         flex-direction: column;
@@ -579,15 +541,6 @@
 ======================================== */
 @media (max-width: 576px) {
     .page-title {
-        font-size: 1.2rem;
-    }
-    
-    .icon-wrapper {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .icon-wrapper i {
         font-size: 1.2rem;
     }
     
