@@ -114,40 +114,6 @@
                     </form>
                 </div>
             </div>
-
-            {{-- Helper Cards --}}
-            <div class="row mt-4">
-                <div class="col-md-6 mb-3">
-                    <div class="helper-card">
-                        <div class="helper-icon">
-                            <i class="fas fa-lightbulb"></i>
-                        </div>
-                        <div class="helper-content">
-                            <h6 class="helper-title">Tips for Good Announcements</h6>
-                            <ul class="helper-list">
-                                <li>Keep it brief and to the point</li>
-                                <li>Use clear and simple language</li>
-                                <li>Include relevant dates or deadlines</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="helper-card">
-                        <div class="helper-icon bg-success">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="helper-content">
-                            <h6 class="helper-title">What Makes It Effective?</h6>
-                            <ul class="helper-list">
-                                <li>Clear call-to-action if needed</li>
-                                <li>Professional and friendly tone</li>
-                                <li>Important information highlighted</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -465,68 +431,6 @@
 }
 
 /* ========================================
-   HELPER CARDS
-======================================== */
-.helper-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.25rem;
-    border: 1px solid #e2e8f0;
-    display: flex;
-    gap: 1rem;
-    transition: all 0.3s ease;
-    animation: fadeIn 0.8s ease-out;
-}
-
-.helper-card:hover {
-    border-color: #cbd5e0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
-}
-
-.helper-icon {
-    width: 45px;
-    height: 45px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.helper-icon.bg-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
-
-.helper-icon i {
-    color: white;
-    font-size: 1.25rem;
-}
-
-.helper-content {
-    flex: 1;
-}
-
-.helper-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-}
-
-.helper-list {
-    margin: 0;
-    padding-left: 1.25rem;
-    font-size: 0.85rem;
-    color: #718096;
-}
-
-.helper-list li {
-    margin-bottom: 0.25rem;
-}
-
-/* ========================================
    ANIMATIONS
 ======================================== */
 @keyframes fadeInDown {
@@ -667,15 +571,6 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
-    }
-    
-    .helper-card {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .helper-icon {
-        margin: 0 auto;
     }
 }
 
