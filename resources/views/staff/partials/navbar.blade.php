@@ -10,7 +10,9 @@
             <i class="fas fa-bars" id="desktopToggleIcon"></i>
         </button>
         <a class="navbar-brand" href="{{ route('staff.dashboard') }}">
-            <img src="{{ asset('assets/image/logo-ktu.jpg') }}" alt="KTU Logo" class="me-2 navbar-logo">
+            <div class="navbar-logo-wrapper">
+                <img src="{{ asset('assets/image/logo-ktu.jpg') }}" alt="KTU Logo" class="navbar-logo">
+            </div>
             <span class="navbar-title">IT Support Ticketing System</span>
         </a>
 
@@ -224,12 +226,30 @@ For urgent issues, please call our hotline.
         transition: font-size 0.3s ease;
     }
 
-    .navbar-logo {
-        height: 45px;
-        width: auto;
-        object-fit: contain;
+    .navbar-logo-wrapper {
+        width: 40px;
+        height: 40px;
+        border-radius: 2px;
+        overflow: hidden;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         margin-right: 0.75rem;
-        transition: height 0.3s ease;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-logo-wrapper:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .navbar-logo {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
     }
 
     .navbar-title {
@@ -283,29 +303,32 @@ For urgent issues, please call our hotline.
             font-size: 1rem; /* DIKECILKAN dari 1.3rem */
         }
         
-        .navbar-logo {
-            height: 40px;
+        .navbar-logo-wrapper {
+            width: 36px;
+            height: 36px;
         }
     }
 
     /* Tablets (768px - 992px) */
     @media (max-width: 992px) {
         .navbar-custom .navbar-brand {
-            font-size: 0.9rem; /* DIKECILKAN dari 1.1rem */
+            font-size: 0.9rem;
         }
         
-        .navbar-logo {
-            height: 35px;
+        .navbar-logo-wrapper {
+            width: 34px;
+            height: 34px;
         }
     }
 
     /* Large phones and small tablets (576px - 768px) */
     @media (max-width: 768px) {
         .navbar-custom .navbar-brand {
-            font-size: 0.8rem; /* DIKECILKAN dari 0.95rem */
+            font-size: 0.8rem;
         }
         
-        .navbar-logo {
+        .navbar-logo-wrapper {
+            width: 32px;
             height: 32px;
             margin-right: 0.5rem;
         }
@@ -321,28 +344,31 @@ For urgent issues, please call our hotline.
     /* Small phones (up to 576px) */
     @media (max-width: 576px) {
         .navbar-custom .navbar-brand {
-            font-size: 0.7rem; /* DIKECILKAN dari 0.85rem */
+            font-size: 0.7rem;
         }
         
-        .navbar-logo {
+        .navbar-logo-wrapper {
+            width: 28px;
             height: 28px;
             margin-right: 0.4rem;
+            border-radius: 7px;
         }
     }
 
     /* Extra small phones (up to 400px) */
     @media (max-width: 400px) {
         .navbar-custom .navbar-brand {
-            font-size: 0.65rem; /* DIKECILKAN dari 0.75rem */
+            font-size: 0.65rem;
         }
         
-        .navbar-logo {
+        .navbar-logo-wrapper {
+            width: 25px;
             height: 25px;
             margin-right: 0.3rem;
+            border-radius: 6px;
         }
         
         .navbar-title {
-            /* Optionally truncate very long text */
             max-width: 150px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -352,12 +378,14 @@ For urgent issues, please call our hotline.
     /* iPhone SE and similar (320px - 375px) */
     @media (max-width: 375px) {
         .navbar-custom .navbar-brand {
-            font-size: 0.6rem; /* DIKECILKAN dari 0.7rem */
+            font-size: 0.6rem;
         }
         
-        .navbar-logo {
+        .navbar-logo-wrapper {
+            width: 22px;
             height: 22px;
             margin-right: 0.25rem;
+            border-radius: 5px;
         }
         
         .navbar-title {
@@ -372,10 +400,11 @@ For urgent issues, please call our hotline.
         }
         
         .navbar-custom .navbar-brand {
-            font-size: 0.75rem; /* DIKECILKAN dari 0.85rem */
+            font-size: 0.75rem;
         }
         
-        .navbar-logo {
+        .navbar-logo-wrapper {
+            width: 28px;
             height: 28px;
         }
     }
