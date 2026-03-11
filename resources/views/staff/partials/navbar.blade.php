@@ -5,6 +5,10 @@
         <button class="btn navbar-toggler d-lg-none me-3" type="button" id="sidebarToggler">
             <i class="fas fa-bars"></i>
         </button>
+        {{-- Desktop Sidebar Toggle --}}
+        <button class="btn text-white d-none d-lg-inline-flex align-items-center me-2" type="button" id="desktopSidebarToggler" title="Toggle Sidebar">
+            <i class="fas fa-bars" id="desktopToggleIcon"></i>
+        </button>
         <a class="navbar-brand" href="{{ route('staff.dashboard') }}">
             <img src="{{ asset('assets/image/logo-ktu.jpg') }}" alt="KTU Logo" class="me-2 navbar-logo">
             <span class="navbar-title">IT Support Ticketing System</span>
@@ -58,10 +62,15 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Sidebar Toggle for Mobile
-        const sidebarToggler = document.getElementById('sidebarToggler');
         const sidebar = document.querySelector('.sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.querySelector('.main-content');
+        const footer = document.querySelector('footer.footer');
+
+        // ============================================
+        // MOBILE Sidebar Toggle (< 992px)
+        // ============================================
+        const sidebarToggler = document.getElementById('sidebarToggler');
 
         if (sidebarToggler) {
             sidebarToggler.addEventListener('click', function() {
@@ -70,7 +79,6 @@
             });
         }
 
-        // Close sidebar when overlay is clicked
         if (sidebarOverlay) {
             sidebarOverlay.addEventListener('click', function() {
                 sidebar.classList.remove('show');
@@ -78,7 +86,36 @@
             });
         }
 
+        // ============================================
+        // DESKTOP Sidebar Toggle (>= 992px)
+        // ============================================
+        const desktopToggler = document.getElementById('desktopSidebarToggler');
+        const STORAGE_KEY = 'staff_sidebar_hidden';
+
+        function applySidebarState(hidden) {
+            if (hidden) {
+                document.body.classList.add('sidebar-hidden');
+            } else {
+                document.body.classList.remove('sidebar-hidden');
+            }
+        }
+
+        // Restore saved preference on page load
+        const savedState = localStorage.getItem(STORAGE_KEY);
+        if (savedState === 'true') {
+            applySidebarState(true);
+        }
+
+        if (desktopToggler) {
+            desktopToggler.addEventListener('click', function() {
+                const isHidden = document.body.classList.toggle('sidebar-hidden');
+                localStorage.setItem(STORAGE_KEY, isHidden);
+            });
+        }
+
+        // ============================================
         // Help Function
+        // ============================================
         window.showHelp = function() {
             const helpMessage = `
 IT Support Contact Information
@@ -101,7 +138,6 @@ For urgent issues, please call our hotline.
 
         navLinks.forEach(link => {
             const href = link.getAttribute('href');
-            // Ensure href is valid and matches path
             if (href && href.length > 2 && href !== '#' && currentPath.includes(href)) {
                 link.classList.add('active');
             }
@@ -121,6 +157,19 @@ For urgent issues, please call our hotline.
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         height: var(--navbar-height);
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Desktop sidebar toggle button */
+    #desktopSidebarToggler {
+        font-size: 1.15rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        opacity: 0.85;
+    }
+    #desktopSidebarToggler:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        opacity: 1;
     }
 
     /* Fix dropdown z-index */
