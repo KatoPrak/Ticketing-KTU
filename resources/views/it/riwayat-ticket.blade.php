@@ -156,6 +156,7 @@
                         <th>Priority</th>
                         <th>Department</th>
                         <th>Solved/Closed</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody id="riwayatTbody">
@@ -183,10 +184,15 @@
                         </td>
                         <td>{{ $ticket->department->name ?? '-' }}</td>
 <td>{{ $ticket->resolved_at ? $ticket->resolved_at->format('d M Y H:i') : ($ticket->updated_at ? $ticket->updated_at->format('d M Y H:i') : '-') }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary btn-detail-ticket" data-id="{{ $ticket->id }}" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
+                        <td colspan="9" class="text-center text-muted py-4">
                             <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
                             @if(request()->hasAny(['search', 'start_date', 'end_date', 'category', 'priority']))
                                 No tickets found matching your criteria
@@ -217,5 +223,266 @@ if (!function_exists('remove_filter_url')) {
     }
 }
 @endphp
+
+@include('it.partials.ticket-detail-modal')
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ============================================
+    // TICKET DETAIL MODAL HANDLER FOR HISTORY PAGE
+    // ============================================
+
+    function formatEmptyData(value, defaultText = 'Not Available') {
+        if (!value || value === '-' || value === 'N/A' || value === '' || value === null) {
+            return defaultText;
+        }
+        return value;
+    }
+
+    function renderAttachments(attachments) {
+        try {
+            if (!attachments || !Array.isArray(attachments) || attachments.length === 0) {
+                return '<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>';
+            }
+            return attachments.map(file => {
+                const fileUrl = `/storage/${file}`;
+                const fileName = file.split('/').pop();
+                const isImage = /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(fileName);
+                return isImage
+                    ? `<a href="${fileUrl}" target="_blank"><img src="${fileUrl}" alt="Attachment" class="img-thumbnail" style="max-height:100px;"></a>`
+                    : `<a href="${fileUrl}" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fas fa-paperclip me-1"></i> ${fileName}</a>`;
+            }).join('');
+        } catch (err) {
+            console.error('Attachment parse error:', err);
+            return '<span class="text-danger">Error loading attachments</span>';
+        }
+    }
+
+    document.addEventListener('click', async (e) => {
+        if (e.target.closest('.btn-detail-ticket')) {
+            const button = e.target.closest('.btn-detail-ticket');
+            const ticketId = button.dataset.id;
+            if (ticketId) {
+                await showTicketDetail(ticketId);
+            }
+        }
+    });
+
+    async function showTicketDetail(ticketId) {
+        const modalEl = document.getElementById('detailTicketModal');
+        if (!modalEl) return;
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        const loader = document.getElementById('d_loader');
+        const content = document.getElementById('d_content');
+
+        if (!loader || !content) return;
+
+        loader.classList.remove('d-none');
+        content.classList.add('d-none');
+        modal.show();
+
+        try {
+            const response = await fetch(`/it/tickets/${ticketId}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+            const ticket = await response.json();
+
+            // Populate basic info
+            const updates = {
+                'd_ticket_id': formatEmptyData(ticket.ticket_id),
+                'd_user': formatEmptyData(ticket.user?.name, 'Unknown User'),
+                'd_location': formatEmptyData(ticket.user?.location, 'Unknown Location'),
+                'd_department': formatEmptyData(ticket.department?.name, 'Not Specified'),
+                'd_category': formatEmptyData(ticket.category?.name, 'Not Specified'),
+                'd_description': formatEmptyData(ticket.description, 'No description provided')
+            };
+            Object.entries(updates).forEach(([id, val]) => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = val;
+            });
+
+            // Transferred badge
+            const transferredBadge = document.getElementById('d_transferred_badge');
+            if (transferredBadge) {
+                transferredBadge.innerHTML = (ticket.transfer_logs && ticket.transfer_logs.length > 0)
+                    ? '<span class="badge bg-warning text-dark">Transferred</span>'
+                    : '';
+            }
+
+            // Timeline: Created
+            const createdEl = document.getElementById('d_created');
+            if (createdEl) {
+                const created = ticket.created_at_formatted || ticket.created_at;
+                createdEl.innerHTML = (created && created !== 'N/A')
+                    ? `<i class="fas fa-calendar-check me-1"></i>${created}`
+                    : '<i class="fas fa-calendar-times me-1"></i>Not recorded';
+            }
+
+            // Timeline: Response
+            const responseEl = document.getElementById('d_response');
+            const responseMarker = document.getElementById('d_response_marker');
+            if (responseEl && responseMarker) {
+                const resp = ticket.response_at_formatted || ticket.updated_at;
+                if (resp && resp !== 'Not yet' && resp !== 'N/A' && resp !== 'Not yet responded') {
+                    responseEl.innerHTML = `<i class="fas fa-clock me-1"></i>${resp}`;
+                    responseMarker.classList.remove('bg-muted');
+                    responseMarker.classList.add('bg-warning');
+                } else {
+                    responseEl.innerHTML = '<i class="fas fa-hourglass-half me-1"></i>Waiting for response';
+                    responseMarker.classList.remove('bg-warning');
+                    responseMarker.classList.add('bg-muted');
+                }
+            }
+
+            // Timeline: Pending
+            const pendingEl = document.getElementById('d_pending');
+            const pendingMarker = document.getElementById('d_pending_marker');
+            const timelinePending = document.getElementById('d_timeline_pending');
+            if (pendingEl && pendingMarker) {
+                const pend = ticket.pending_at_formatted;
+                if (pend && pend !== 'Not yet pending' && pend !== 'N/A' && pend !== '-') {
+                    if (timelinePending) timelinePending.classList.remove('d-none');
+                    pendingEl.innerHTML = `<i class="fas fa-clock me-1"></i>${pend}`;
+                    pendingMarker.classList.remove('bg-muted');
+                    pendingMarker.classList.add('bg-warning');
+                } else {
+                    if (timelinePending) timelinePending.classList.add('d-none');
+                }
+            }
+
+            // Timeline: Transfers
+            const timelineTransfers = document.getElementById('d_timeline_transfers');
+            if (timelineTransfers) {
+                timelineTransfers.innerHTML = '';
+                if (ticket.transfer_logs && ticket.transfer_logs.length > 0) {
+                    ticket.transfer_logs.forEach(log => {
+                        timelineTransfers.insertAdjacentHTML('beforeend', `
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"><i class="fas fa-exchange-alt"></i></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title text-info fw-bold">Transferred</div>
+                                    <div class="text-dark small mb-1">
+                                        <strong>${log.from}</strong> <i class="fas fa-arrow-right mx-1 text-muted"></i> <strong>${log.to}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                    });
+                }
+            }
+
+            // Timeline: Resolved
+            const resolvedEl = document.getElementById('d_resolved');
+            const resolvedMarker = document.getElementById('d_resolved_marker');
+            const resolvedTitle = document.getElementById('d_resolved_title');
+            if (resolvedEl && resolvedMarker && resolvedTitle) {
+                if (ticket.resolved_at_formatted && ticket.resolved_at_formatted !== 'Pending' && ticket.resolved_at_formatted !== '-' && ticket.resolved_at_formatted !== 'Not yet resolved') {
+                    resolvedEl.innerHTML = `<i class="fas fa-check-double me-1"></i>${ticket.resolved_at_formatted}`;
+                    resolvedMarker.classList.remove('bg-muted');
+                    resolvedMarker.classList.add('bg-success');
+                    resolvedTitle.textContent = ticket.status === 'closed' ? 'Closed' : 'Solved';
+                    resolvedTitle.style.color = '#198754';
+                } else {
+                    resolvedEl.innerHTML = '<i class="fas fa-hourglass-half me-1"></i>Pending';
+                    resolvedMarker.classList.remove('bg-success');
+                    resolvedMarker.classList.add('bg-muted');
+                    resolvedTitle.textContent = 'Not Yet Solved/Closed';
+                    resolvedTitle.style.color = '#6c757d';
+                }
+            }
+
+            // Resolution notes
+            const notesRow = document.getElementById('d_row_notes');
+            const notesElement = document.getElementById('d_notes');
+            if (notesRow && notesElement) {
+                if (ticket.resolution_notes) {
+                    notesElement.textContent = ticket.resolution_notes;
+                    notesRow.classList.remove('d-none');
+                } else {
+                    notesRow.classList.add('d-none');
+                }
+            }
+
+            // Pending reason
+            const pendingNotesRow = document.getElementById('d_row_pending_notes');
+            const pendingNotesElement = document.getElementById('d_pending_notes');
+            if (pendingNotesRow && pendingNotesElement) {
+                if (ticket.pending_reason) {
+                    pendingNotesElement.textContent = ticket.pending_reason;
+                    pendingNotesRow.classList.remove('d-none');
+                } else {
+                    pendingNotesRow.classList.add('d-none');
+                }
+            }
+
+            // Transfer history info
+            const transfersRow = document.getElementById('d_row_transfers');
+            const transfersElement = document.getElementById('d_transfers');
+            if (transfersRow && transfersElement) {
+                if (ticket.transfer_logs && ticket.transfer_logs.length > 0) {
+                    transfersElement.innerHTML = ticket.transfer_logs.map(log =>
+                        `<div class="mb-2 p-2 bg-light border rounded">
+                            <div class="fw-bold"><i class="fas fa-exchange-alt me-1 text-primary"></i> ${log.from} &rarr; ${log.to}</div>
+                            ${log.note ? `<div class="text-muted small fst-italic mb-1"><i class="fas fa-quote-left me-1" style="font-size: 0.8em;"></i>${log.note}</div>` : ''}
+                            <div class="text-muted" style="font-size: 0.85em;">
+                                <i class="fas fa-user-clock me-1"></i> by ${log.by} on ${log.date}
+                            </div>
+                         </div>`
+                    ).join('');
+                    transfersRow.classList.remove('d-none');
+                } else {
+                    transfersRow.classList.add('d-none');
+                }
+            }
+
+            // Attachments
+            const attachmentsContainer = document.getElementById('d_attachments');
+            if (attachmentsContainer) {
+                attachmentsContainer.innerHTML = renderAttachments(ticket.attachments || []);
+            }
+
+            loader.classList.add('d-none');
+            content.classList.remove('d-none');
+
+        } catch (error) {
+            console.error('Error loading ticket details:', error);
+            loader.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Failed to load ticket details: ${error.message}
+                </div>
+            `;
+        }
+    }
+
+    // Reset modal on hide
+    const detailModal = document.getElementById('detailTicketModal');
+    if (detailModal) {
+        detailModal.addEventListener('hidden.bs.modal', function () {
+            const loader = document.getElementById('d_loader');
+            const content = document.getElementById('d_content');
+            if (loader) {
+                loader.classList.remove('d-none');
+                loader.innerHTML = '<div class="spinner-border text-info"></div><p class="text-muted mt-2"><i class="fas fa-sync-alt fa-spin me-1"></i>Loading ticket without sync...</p>';
+            }
+            if (content) content.classList.add('d-none');
+
+            // Force cleanup stuck backdrops
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+        });
+    }
+});
+</script>
+@endpush
 
 @endsection
