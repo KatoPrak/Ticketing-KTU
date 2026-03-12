@@ -29,7 +29,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-muted align-top">Problem</th>
+                                        <th class="text-muted align-top">Description</th>
                                         <td id="d_description" class="text-secondary text-break" style="word-wrap: break-word; word-break: break-all; white-space: pre-wrap; max-width: 200px;">No description provided</td>
                                     </tr>
                                     <tr>
