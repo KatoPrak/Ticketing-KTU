@@ -91,10 +91,10 @@
                 <table class="table table-hover table-sm align-middle mb-0 text-nowrap" style="font-size: 0.75rem;">
                     <thead class="bg-light table-light">
                         <tr>
-                            <th class="ps-3 border-bottom-0">ID</th>
+                            <th class="ps-3 border-bottom-0">Ticket ID</th>
                             <th class="border-bottom-0">Loc</th>
-                            <th class="border-bottom-0">User</th>
-                            <th class="border-bottom-0">Issue</th>
+                            <th class="border-bottom-0">Requester</th>
+                            <th class="border-bottom-0">Desc</th>
                             <th class="border-bottom-0">Sts</th>
                             <th class="border-bottom-0">Prio</th>
                             <th class="border-bottom-0">Date</th>

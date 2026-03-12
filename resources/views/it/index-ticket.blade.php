@@ -61,7 +61,7 @@
                     <tr>
                         <th class="py-3 ps-4 border-0 rounded-start-4">Ticket ID</th>
                         <th class="py-3 border-0">Requester</th>
-                        <th class="py-3 border-0">Problem</th>
+                        <th class="py-3 border-0">Description</th>
                         <th class="py-3 border-0">Status</th>
                         <th class="py-3 border-0">Priority</th>
                         <th class="py-3 border-0">Date</th>
@@ -532,7 +532,7 @@
 
                         {{-- Description --}}
                         <div class="col-12">
-                            <label class="form-label fw-bold small text-uppercase text-muted">Issue Description</label>
+                            <label class="form-label fw-bold small text-uppercase text-muted">Description</label>
                             <textarea name="description" class="form-control" rows="4" placeholder="Describe the problem..." required></textarea>
                         </div>
 

@@ -150,7 +150,7 @@
                     <tr>
                         <th>Ticket ID</th>
                         <th>Name</th>
-                        <th>Problem</th>
+                        <th>Description</th>
                         <th>Category</th>
                         <th>Status</th>
                         <th>Priority</th>

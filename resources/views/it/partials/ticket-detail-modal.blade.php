@@ -71,7 +71,7 @@
                                     </tr>
                                     <tr>
                                         <th class="text-muted align-top ticket-label">
-                                            <i class="fas fa-exclamation-circle me-1"></i>Problem
+                                            <i class="fas fa-exclamation-circle me-1"></i>Description
                                         </th>
                                         <td>
                                             <div id="d_description" class="p-3 rounded bg-white border shadow-sm text-dark ticket-description">
