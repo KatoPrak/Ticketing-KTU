@@ -168,36 +168,38 @@
         </div>
 
         <!-- 📊 Tickets Chart -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3 class="card-title">Tickets Created ({{ $year ?? now()->year }})</h3>
+        <div class="card mb-2">
+            <div class="card-header py-2">
+                <h3 class="card-title fs-5 mb-0">Tickets Created ({{ $year ?? now()->year }})</h3>
             </div>
-            <div class="card-body">
-                <canvas id="ticketsChart" height="100"></canvas>
+            <div class="card-body p-2">
+                <div style="position: relative; height: 220px; width: 100%;">
+                    <canvas id="ticketsChart"></canvas>
+                </div>
             </div>
         </div>
 
         <!-- 🥧 Pie Charts Section -->
         <div class="row mb-5">
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-6 mb-2">
                 <div class="card h-100 shadow-sm border-0 rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-chart-pie text-primary me-2"></i>Status Distribution</h5>
+                    <div class="card-header bg-white border-0 pt-3 px-3 py-2">
+                        <h6 class="fw-bold text-dark mb-0"><i class="fas fa-chart-pie text-primary me-2"></i>Status Distribution</h6>
                     </div>
-                    <div class="card-body p-4 d-flex justify-content-center align-items-center">
-                        <div style="width: 100%; max-width: 300px;">
+                    <div class="card-body p-2 d-flex justify-content-center align-items-center">
+                        <div style="position: relative; height: 180px; width: 100%; max-width: 250px;">
                             <canvas id="statusPieChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-6 mb-2">
                 <div class="card h-100 shadow-sm border-0 rounded-4">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-tags text-success me-2"></i>Tickets by Category</h5>
+                    <div class="card-header bg-white border-0 pt-3 px-3 py-2">
+                        <h6 class="fw-bold text-dark mb-0"><i class="fas fa-tags text-success me-2"></i>Tickets by Category</h6>
                     </div>
-                    <div class="card-body p-4 d-flex justify-content-center align-items-center">
-                        <div style="width: 100%; max-width: 300px;">
+                    <div class="card-body p-2 d-flex justify-content-center align-items-center">
+                        <div style="position: relative; height: 180px; width: 100%; max-width: 250px;">
                             <canvas id="categoryPieChart"></canvas>
                         </div>
                     </div>
@@ -252,7 +254,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: { 
                             beginAtZero: true,

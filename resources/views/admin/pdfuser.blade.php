@@ -380,18 +380,22 @@
         </div>
         <div class="header-info">
             <h2>PT KTU Shipyard</h2>
-            <p>IT Department — Monthly Ticket Report with Feedback</p>
+            <p>IT Department — Monthly Ticket Report</p>
             @if(isset($selectedRegion))
                 <p style="color: #4f46e5; font-weight: bold; font-size: 10px; margin-top: 2px;">Region: {{ $selectedRegion->name }}</p>
             @endif
             <p class="period">Period: 
-                @if(request('year') && request('month'))
-                    {{ DateTime::createFromFormat('!m', request('month'))->format('F') }} {{ request('year') }}
-                @elseif(request('year'))
-                    {{ request('year') }}
-                @else
-                    {{ now()->format('F Y') }}
-                @endif
+                @php
+                    if (!empty($selectedYear) && !empty($selectedMonth)) {
+                        echo \Carbon\Carbon::createFromDate($selectedYear, $selectedMonth, 1)->format('F Y');
+                    } elseif (!empty($selectedYear)) {
+                        echo $selectedYear;
+                    } elseif (!empty($selectedMonth)) {
+                        echo \Carbon\Carbon::createFromDate(now()->year, $selectedMonth, 1)->format('F Y');
+                    } else {
+                        echo now()->format('F Y');
+                    }
+                @endphp
             </p>
         </div>
     </div>

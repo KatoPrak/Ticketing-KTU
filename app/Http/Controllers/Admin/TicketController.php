@@ -93,8 +93,11 @@ class TicketController extends Controller
             $selectedRegion = Region::find($request->region_id);
         }
 
+        $selectedYear = $request->input('year');
+        $selectedMonth = $request->input('month');
+
         // Generate PDF
-        $pdf = Pdf::loadView('admin.pdfuser', compact('tickets', 'selectedRegion'))
+        $pdf = Pdf::loadView('admin.pdfuser', compact('tickets', 'selectedRegion', 'selectedYear', 'selectedMonth'))
             ->setPaper('a4', 'landscape'); // ✅ Landscape untuk kolom lebih banyak
 
         // ✅ Stream PDF untuk preview di browser (bukan langsung download)

@@ -104,14 +104,16 @@
             <div class="content">
                 @yield('content')
             </div>
+
+            <!-- FOOTER -->
+            <div class="mt-auto flex-shrink-0">
+                @include('layouts.footer')
+            </div>
         </div>
     </div>
 
     <!-- ✅ Sidebar Overlay untuk Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-
-    <!-- FOOTER -->
-    @include('layouts.footer')
 
     <!-- JS LIBRARIES -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
