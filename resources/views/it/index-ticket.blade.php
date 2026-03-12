@@ -510,7 +510,7 @@
                         {{-- Category --}}
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-uppercase text-muted">Category</label>
-                            <select name="category_id" class="form-select" required>
+                            <select name="category_id" id="itCategorySelect" class="form-select" required>
                                 <option value="" selected disabled>-- Choose Category --</option>
                                 @foreach($categories as $cat)
                                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
@@ -530,10 +530,71 @@
                             </select>
                         </div>
 
+                        {{-- Meeting Schedule Fields (hidden by default) --}}
+                        <div class="col-12" id="itMeetingFields" style="display: none;">
+                            <div class="card border-primary border-opacity-25 shadow-sm rounded-4 overflow-hidden mb-2">
+                                <div class="card-header bg-primary bg-gradient text-white py-3 border-0">
+                                    <h6 class="card-title fw-bold mb-0 d-flex align-items-center">
+                                        <i class="fas fa-calendar-alt fs-5 me-2"></i> Detail Meeting Schedule
+                                    </h6>
+                                    <p class="mb-0 small text-white-50 mt-1">Silakan lengkapi informasi jadwal meeting di bawah ini.</p>
+                                </div>
+                                <div class="card-body p-4 bg-light bg-opacity-50">
+                                    <div class="row g-4">
+                                        <div class="col-12">
+                                            <label class="form-label fw-bold text-dark small text-uppercase">Topic/Judul Meeting <span class="text-danger">*</span></label>
+                                            <div class="input-group input-group-lg shadow-sm">
+                                                <span class="input-group-text bg-white border-end-0 text-primary">
+                                                    <i class="fas fa-comment-dots"></i>
+                                                </span>
+                                                <input type="text" class="form-control border-start-0 ps-0 it-meeting-field" id="itMeetingTopic" placeholder="Contoh: Weekly Sync, Presentation...">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold text-dark small text-uppercase">Tanggal Meeting <span class="text-danger">*</span></label>
+                                            <div class="input-group shadow-sm">
+                                                <span class="input-group-text bg-white border-end-0 text-primary">
+                                                    <i class="fas fa-calendar-day"></i>
+                                                </span>
+                                                <input type="date" class="form-control border-start-0 ps-0 it-meeting-field" id="itMeetingDate">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold text-dark small text-uppercase">Jam Mulai <span class="text-danger">*</span></label>
+                                            <div class="input-group shadow-sm">
+                                                <span class="input-group-text bg-white border-end-0 text-primary">
+                                                    <i class="fas fa-clock"></i>
+                                                </span>
+                                                <input type="time" class="form-control border-start-0 ps-0 it-meeting-field" id="itMeetingTime">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold text-dark small text-uppercase">Durasi <span class="text-danger">*</span></label>
+                                            <div class="input-group shadow-sm">
+                                                <span class="input-group-text bg-white border-end-0 text-primary">
+                                                    <i class="fas fa-hourglass-half"></i>
+                                                </span>
+                                                <select class="form-select border-start-0 ps-0 it-meeting-field" id="itMeetingDuration">
+                                                    <option value="" selected disabled>Pilih Durasi</option>
+                                                    <option value="30 Menit">30 Menit</option>
+                                                    <option value="1 Jam">1 Jam</option>
+                                                    <option value="1.5 Jam">1.5 Jam</option>
+                                                    <option value="2 Jam">2 Jam</option>
+                                                    <option value="2.5 Jam">2.5 Jam</option>
+                                                    <option value="3 Jam">3 Jam</option>
+                                                    <option value="Lainnya">Lainnya</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Description --}}
                         <div class="col-12">
                             <label class="form-label fw-bold small text-uppercase text-muted">Description</label>
-                            <textarea name="description" class="form-control" rows="4" placeholder="Describe the problem..." required></textarea>
+                            <textarea name="description" id="itDescriptionTextarea" class="form-control" rows="4" placeholder="Describe the problem..." required></textarea>
                         </div>
 
                         {{-- Attachments --}}
@@ -646,6 +707,32 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
             btn.disabled = true;
+
+            // Inject Meeting Schedule data if selected
+            const meetingSelect = document.getElementById('itCategorySelect');
+            if (meetingSelect && meetingSelect.options[meetingSelect.selectedIndex]?.text.trim().toLowerCase() === 'meeting schedule') {
+                const topic = document.getElementById('itMeetingTopic')?.value || '';
+                const date = document.getElementById('itMeetingDate')?.value || '';
+                const time = document.getElementById('itMeetingTime')?.value || '';
+                const duration = document.getElementById('itMeetingDuration')?.value || '';
+
+                let formattedDate = date;
+                if (date) {
+                    const d = new Date(date);
+                    formattedDate = d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                }
+
+                const meetingData = 
+                    `- Topic/Judul Meeting : ${topic}\n` +
+                    `- Tanggal Meeting : ${formattedDate}\n` +
+                    `- Jam Mulai Meeting : ${time}\n` +
+                    `- Durasi : ${duration}\n\n`;
+
+                const itDesc = document.getElementById('itDescriptionTextarea');
+                if (itDesc && !itDesc.value.startsWith('- Topic/Judul Meeting')) {
+                    itDesc.value = meetingData + itDesc.value;
+                }
+            }
 
             const formData = new FormData(this);
 
@@ -795,6 +882,57 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.activeElement && this.contains(document.activeElement)) {
             document.activeElement.blur();
         }
+    });
+
+    // --------------------------------------------------------------------------
+    // MEETING SCHEDULE CATEGORY LOGIC (IT CREATE TICKET)
+    // --------------------------------------------------------------------------
+    const itCategorySelect = document.getElementById('itCategorySelect');
+    const itMeetingFields = document.getElementById('itMeetingFields');
+    const itDescriptionTextarea = document.getElementById('itDescriptionTextarea');
+
+    if (itCategorySelect) {
+        itCategorySelect.addEventListener('change', function() {
+            const selectedText = this.options[this.selectedIndex].text.trim().toLowerCase();
+            const isMeeting = selectedText === 'meeting schedule';
+            const itDescriptionWrapper = itDescriptionTextarea?.parentElement;
+
+            if (isMeeting) {
+                itMeetingFields.style.display = '';
+                if (itDescriptionWrapper) itDescriptionWrapper.style.display = '';
+                
+                itDescriptionTextarea.placeholder = 'Tambahkan keterangan tambahan (opsional)...';
+                itDescriptionTextarea.removeAttribute('required'); // opsional
+                
+                itMeetingFields.querySelectorAll('.it-meeting-field').forEach(f => f.setAttribute('required', true));
+            } else {
+                itMeetingFields.style.display = 'none';
+                if (itDescriptionWrapper) itDescriptionWrapper.style.display = '';
+                
+                itDescriptionTextarea.placeholder = 'Describe the problem...';
+                itDescriptionTextarea.setAttribute('required', true); // wajib
+                itMeetingFields.querySelectorAll('.it-meeting-field').forEach(f => f.removeAttribute('required'));
+            }
+        });
+    }
+
+    // No more intermediate description mapping event listener
+
+    // Reset meeting fields when IT create ticket modal is closed
+    document.getElementById('createTicketModal')?.addEventListener('hidden.bs.modal', function() {
+        if (itMeetingFields) itMeetingFields.style.display = 'none';
+        if (itDescriptionTextarea) {
+            itDescriptionTextarea.removeAttribute('readonly');
+            itDescriptionTextarea.style.backgroundColor = '';
+            itDescriptionTextarea.value = '';
+            itDescriptionTextarea.placeholder = 'Describe the problem...';
+        }
+        if (itCategorySelect) itCategorySelect.value = '';
+        ['itMeetingTopic', 'itMeetingDate', 'itMeetingTime', 'itMeetingDuration'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        itMeetingFields?.querySelectorAll('.it-meeting-field').forEach(f => f.removeAttribute('required'));
     });
 
 });

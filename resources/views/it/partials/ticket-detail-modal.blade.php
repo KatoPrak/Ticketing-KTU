@@ -74,7 +74,7 @@
                                             <i class="fas fa-exclamation-circle me-1"></i>Description
                                         </th>
                                         <td>
-                                            <div id="d_description" class="p-3 rounded bg-white border shadow-sm text-dark ticket-description">
+                                            <div id="d_description" class="p-3 rounded bg-white border shadow-sm text-dark ticket-description text-break" style="word-wrap: break-word; word-break: break-all; white-space: pre-wrap;">
                                                 No description provided
                                             </div>
                                         </td>
@@ -347,6 +347,8 @@
     .ticket-description {
         white-space: pre-wrap;
         font-size: 0.95rem;
+        word-break: break-word; /* Ensure long lines break safely on desktop too */
+        overflow-wrap: break-word;
     }
     
     /* Timeline styling for desktop */

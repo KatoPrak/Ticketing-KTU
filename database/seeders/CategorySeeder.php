@@ -23,6 +23,7 @@ class CategorySeeder extends Seeder
             'Email Issue',
             'Printer/Scanner',
             'Access/Login',
+            'Meeting Schedule',
         ];
 
         foreach ($categories as $name) {
