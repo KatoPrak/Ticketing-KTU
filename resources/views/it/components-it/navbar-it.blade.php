@@ -97,7 +97,7 @@ window.handleLogout = handleLogout;
 <style>
 /* Navbar Base Styles */
 .navbar-custom {
-    background: linear-gradient(135deg, var(--primary-color, #6366f1), #6366f1) !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     height: var(--navbar-height, 60px);
     padding: 0.75rem 1rem;
