@@ -104,7 +104,7 @@
                     <span class="value">{{ $ticket->created_at->format('d M Y, H:i') }} WIB</span>
                 </div>
                 <div style="margin-top:15px; border-top:1px dashed #d1d5db; padding-top:15px;">
-                    <span class="label" style="display:block; margin-bottom:6px;">Issue Description</span>
+                    <span class="label" style="display:block; margin-bottom:6px;">Description</span>
                     <div class="value" style="background:white; padding:12px; border-radius:6px; border:1px solid #e5e7eb; color:#374151; white-space:pre-wrap; font-size:13px;">{{ $ticket->description }}</div>
                 </div>
             </div>
