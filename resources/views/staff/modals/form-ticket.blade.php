@@ -195,12 +195,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const meetingData = 
-                    `- Topic/Judul Meeting : ${topic}\n` +
-                    `- Tanggal Meeting : ${formattedDate}\n` +
-                    `- Jam Mulai Meeting : ${time}\n` +
-                    `- Durasi : ${duration}\n\n`;
+                    `**Topic/Judul Meeting** : ${topic}\n` +
+                    `**Tanggal Meeting** : ${formattedDate}\n` +
+                    `**Jam Mulai Meeting** : ${time}\n` +
+                    `**Durasi** : ${duration}\n\n`;
 
-                if (!staffDescriptionTextarea.value.startsWith('- Topic/Judul Meeting')) {
+                if (!staffDescriptionTextarea.value.includes('Topic/Judul Meeting')) {
                     staffDescriptionTextarea.value = meetingData + staffDescriptionTextarea.value;
                 }
             }
