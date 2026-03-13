@@ -352,8 +352,6 @@
             color: #475569;
             font-size: 6.5px;
             line-height: 1.25;
-            max-height: 50px;
-            overflow: hidden;
         }
 
         .text-muted-custom {
