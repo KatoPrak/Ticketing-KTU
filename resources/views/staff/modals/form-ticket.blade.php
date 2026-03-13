@@ -195,8 +195,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const meetingData = 
-                    `**Topic/Judul Meeting** : ${topic}\n` +
-                    `**Tanggal Meeting** : ${formattedDate}\n` +
+                    `<b>Topic/Judul Meeting</b> : ${topic}\n` +
+                    `Tanggal Meeting** : ${formattedDate}\n` +
                     `**Jam Mulai Meeting** : ${time}\n` +
                     `**Durasi** : ${duration}\n\n`;
 
