@@ -195,12 +195,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const meetingData = 
-                    `<b>Topic/Judul Meeting</b> : ${topic}\n` +
-                    `Tanggal Meeting** : ${formattedDate}\n` +
-                    `**Jam Mulai Meeting** : ${time}\n` +
-                    `**Durasi** : ${duration}\n\n`;
+                    `𝗧𝗼𝗽𝗶𝗰/𝗝𝘂𝗱𝘂𝗹 𝗠𝗲𝗲𝘁𝗶𝗻𝗴 : ${topic}\n` +
+                    `𝗧𝗮𝗻𝗴𝗴𝗮𝗹 𝗠𝗲𝗲𝘁𝗶𝗻𝗴 : ${formattedDate}\n` +
+                    `𝗝𝗮𝗺 𝗠𝘂𝗹𝗮𝗶 𝗠𝗲𝗲𝘁𝗶𝗻𝗴 : ${time}\n` +
+                    `𝗗𝘂𝗿𝗮𝘀𝗶 : ${duration}\n\n`;
 
-                if (!staffDescriptionTextarea.value.includes('Topic/Judul Meeting')) {
+                if (!staffDescriptionTextarea.value.includes('𝗧𝗼𝗽𝗶𝗰/𝗝𝘂𝗱𝘂𝗹 𝗠𝗲𝗲𝘁𝗶𝗻𝗴')) {
                     staffDescriptionTextarea.value = meetingData + staffDescriptionTextarea.value;
                 }
             }
