@@ -258,7 +258,10 @@ $(document).ready(function () {
 
         // ✅ UPDATE RESOLUTION NOTES
         if (ticket.resolution_notes) {
-            $('#d_notes').text(ticket.resolution_notes);
+            // Escape HTML and convert URLs to clickable links
+            const safeNotes = $('<div>').text(ticket.resolution_notes).html();
+            const linkifiedNotes = safeNotes.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary text-decoration-underline" rel="noopener noreferrer">$1</a>');
+            $('#d_notes').html(linkifiedNotes);
             $('#d_row_notes').removeClass('d-none');
         } else {
             $('#d_row_notes').addClass('d-none');

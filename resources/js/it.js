@@ -424,7 +424,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const notesElement = document.getElementById('d_notes');
             if (notesRow && notesElement) {
                 if (ticket.resolution_notes) {
-                    notesElement.innerHTML = `<i class="fas fa-pen me-1"></i>${ticket.resolution_notes}`;
+                    const tempDiv = document.createElement('div');
+                    tempDiv.textContent = ticket.resolution_notes;
+                    let safeNotes = tempDiv.innerHTML;
+
+                    const linkifiedNotes = safeNotes.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary text-decoration-underline" rel="noopener noreferrer">$1</a>');
+                    notesElement.innerHTML = `<i class="fas fa-pen me-1"></i>${linkifiedNotes}`;
                     notesRow.classList.remove('d-none');
                 } else {
                     notesRow.classList.add('d-none');
