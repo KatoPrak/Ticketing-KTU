@@ -17,9 +17,11 @@ use App\Http\Controllers\IT\DepartmentController as ItDepartmentController;
 // -----------------------------
 // PUBLIC LOGIN ROUTES
 // -----------------------------
-Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/', [LoginController::class, 'login'])->name('login.post');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::middleware('guest')->group(function () {
+    Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/', [LoginController::class, 'login'])->name('login.post');
+});
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 // -----------------------------
 // CHANGE PASSWORD (Universal - untuk semua role)

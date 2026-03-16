@@ -21,6 +21,19 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                $user = Auth::guard($guard)->user();
+                $role = strtolower($user->role ?? '');
+                
+                $dashboardRoutes = [
+                    'admin'      => 'admin.dashboard',
+                    'tim it'     => 'it.dashboard',
+                    'user'       => 'staff.dashboard',
+                ];
+
+                if (isset($dashboardRoutes[$role]) && \Illuminate\Support\Facades\Route::has($dashboardRoutes[$role])) {
+                    return redirect()->route($dashboardRoutes[$role]);
+                }
+                
                 return redirect(RouteServiceProvider::HOME);
             }
         }
