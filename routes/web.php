@@ -148,14 +148,6 @@ Route::middleware(['auth', 'roleredirect:admin'])->prefix('admin')->name('admin.
 // -----------------------------
 // DEBUG ROUTE (Temporary)
 // -----------------------------
-Route::get('/clear-cache', function() {
-    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-    \Illuminate\Support\Facades\Artisan::call('route:cache');
-    \Illuminate\Support\Facades\Artisan::call('view:cache');
-    \Illuminate\Support\Facades\Artisan::call('config:cache');
-    return 'Cache telah berhasil dibersihkan! Silakan kembali ke halaman utama.';
-});
-
 Route::get('/test-email-notification', function () {
     try {
         Illuminate\Support\Facades\Mail::raw('Tes Email Server Config Berhasil!', function ($message) {
