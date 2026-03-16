@@ -22,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Jika aplikasi tidak berada dalam environment 'local' (seperti di server produksi)
+        if (config('app.env') !== 'local') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // 🔧 Inject variabel global ke semua view IT & Staff
         View::composer(['it.*', 'staff.*'], function ($view) {
             $view->with([
