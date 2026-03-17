@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Category;
 use App\Models\News; // 📰 tambahkan ini
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\URL; // 🔒 Wajib tambahkan ini agar URL facade terbaca
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS di production
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
+
         // 🔧 Inject variabel global ke semua view IT & Staff
         View::composer(['it.*', 'staff.*'], function ($view) {
             $view->with([
