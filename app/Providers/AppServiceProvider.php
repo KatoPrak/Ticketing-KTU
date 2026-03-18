@@ -23,11 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force HTTPS di production
-        if (config('app.env') === 'production') {
-            URL::forceScheme('https');
-        }
-
         // 🔧 Inject variabel global ke semua view IT & Staff
         View::composer(['it.*', 'staff.*'], function ($view) {
             $view->with([
