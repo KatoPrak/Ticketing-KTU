@@ -306,10 +306,13 @@ class TicketController extends Controller
                 ->exists();
 
             if ($isDuplicate) {
-                 return response()->json([
-                    'success' => false,
-                    'message' => 'Duplicate ticket detected. Please wait a moment before resubmitting.',
-                ], 429);
+                if ($request->wantsJson() || $request->ajax()) {
+                     return response()->json([
+                        'success' => false,
+                        'message' => 'Duplicate ticket detected. Please wait a moment before resubmitting.',
+                    ], 429);
+                }
+                return redirect()->back()->with('error', 'Duplicate ticket detected. Please wait a moment before resubmitting.')->withInput();
             }
 
             // Create ticket
@@ -378,51 +381,56 @@ class TicketController extends Controller
 
 
             // ✅ RESPONSE menggunakan accessor dari Model
-            return response()->json([
-                'success' => true,
-                'message' => 'Ticket successfully created!',
-                'ticket' => [
-                    'id' => $ticket->id,
-                    'ticket_id' => $ticket->ticket_id,
-                    'category' => [
-                        'id' => $ticket->category->id ?? null,
-                        'name' => $ticket->category->name ?? '-',
-                    ],
-                    'department' => [
-                        'id' => $ticket->department->id ?? null,
-                        'name' => $ticket->department->name ?? '-',
-                    ],
-                    'user' => [
-                        'id' => $ticket->user->id,
-                        'name' => $ticket->user->name,
-                        'department' => [
-                            'id' => $ticket->user->department->id ?? null,
-                            'name' => $ticket->user->department->name ?? '-',
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Ticket successfully created!',
+                    'ticket' => [
+                        'id' => $ticket->id,
+                        'ticket_id' => $ticket->ticket_id,
+                        'category' => [
+                            'id' => $ticket->category->id ?? null,
+                            'name' => $ticket->category->name ?? '-',
                         ],
+                        'department' => [
+                            'id' => $ticket->department->id ?? null,
+                            'name' => $ticket->department->name ?? '-',
+                        ],
+                        'user' => [
+                            'id' => $ticket->user->id,
+                            'name' => $ticket->user->name,
+                            'department' => [
+                                'id' => $ticket->user->department->id ?? null,
+                                'name' => $ticket->user->department->name ?? '-',
+                            ],
+                        ],
+                        'status' => ucfirst($ticket->status),
+                        'priority' => ucfirst($ticket->priority),
+                        'description' => $ticket->description,
+                        'attachments' => $filePaths,
+                        'created_at' => $ticket->created_at_formatted,
+                        'created_at_formatted' => $ticket->created_at_formatted,
+                        'updated_at' => $ticket->updated_at ? $ticket->updated_at->timezone('Asia/Jakarta')->format('d M Y, H:i') : null,
+                        'updated_at_formatted' => $ticket->updated_at_formatted,
+                        'resolved_at' => $ticket->resolved_at ? $ticket->resolved_at->timezone('Asia/Jakarta')->format('d M Y, H:i') : null,
+                        'resolved_at_formatted' => $ticket->resolved_at_formatted,
+                        'pending_at_formatted' => $ticket->pending_at_formatted,
+                        'response_date' => $ticket->response_date,
                     ],
-                    'status' => ucfirst($ticket->status),
-                    'priority' => ucfirst($ticket->priority),
-                    'description' => $ticket->description,
-                    'attachments' => $filePaths,
-                    
-                    // ✅ Menggunakan accessor dari Model (auto NULL-safe)
-                    'created_at' => $ticket->created_at_formatted,
-                    'created_at_formatted' => $ticket->created_at_formatted,
-                    'updated_at' => $ticket->updated_at ? $ticket->updated_at->timezone('Asia/Jakarta')->format('d M Y, H:i') : null,
-                    'updated_at_formatted' => $ticket->updated_at_formatted,
-                    'resolved_at' => $ticket->resolved_at ? $ticket->resolved_at->timezone('Asia/Jakarta')->format('d M Y, H:i') : null,
-                    'resolved_at_formatted' => $ticket->resolved_at_formatted,
-                    'pending_at_formatted' => $ticket->pending_at_formatted,
-                    'response_date' => $ticket->response_date,
-                ],
-            ], 201);
+                ], 201);
+            }
+
+            return redirect()->back()->with('success', 'Ticket successfully created!');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed!',
-                'errors' => $e->errors(),
-            ], 422);
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed!',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('Failed to create new ticket', [
                 'error' => $e->getMessage(),
@@ -431,11 +439,15 @@ class TicketController extends Controller
                 'file' => $e->getFile(),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create ticket, please try again later.',
-                'error_detail' => config('app.debug') ? $e->getMessage() : null,
-            ], 500);
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create ticket, please try again later.',
+                    'error_detail' => config('app.debug') ? $e->getMessage() : null,
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Failed to create ticket, please try again later.')->withInput();
         }
     }
 

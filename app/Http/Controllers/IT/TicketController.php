@@ -174,24 +174,33 @@ class TicketController extends Controller
                 Log::warning('Email ticket gagal dikirim', ['error' => $e->getMessage()]);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Ticket created successfully for ' . $targetUser->name,
-                'ticket' => $ticket
-            ], 201);
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Ticket created successfully for ' . $targetUser->name,
+                    'ticket' => $ticket
+                ], 201);
+            }
+            return redirect()->back()->with('success', 'Ticket created successfully for ' . $targetUser->name);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed!',
-                'errors' => $e->errors(),
-            ], 422);
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed!',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('Failed to create ticket', ['error' => $e->getMessage()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create ticket.',
-            ], 500);
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create ticket.',
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to create ticket.')->withInput();
         }
     }
 

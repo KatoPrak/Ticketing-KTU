@@ -159,18 +159,24 @@ class TicketController extends Controller
             $ticket->priority = $request->priority ?? 'low';
             $ticket->save();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Ticket created successfully',
-                'ticket' => $ticket->load('department', 'category'),
-            ]);
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Ticket created successfully',
+                    'ticket' => $ticket->load('department', 'category'),
+                ]);
+            }
+            return redirect()->back()->with('success', 'Ticket created successfully');
 
         } catch (\Exception $e) {
             \Log::error('Admin create ticket error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create ticket'
-            ], 500);
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create ticket'
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to create ticket')->withInput();
         }
     }
 
