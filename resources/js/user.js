@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // =========================================================================
     // VARIABEL GLOBAL UNTUK FILE UPLOAD
     // =========================================================================
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function validateFile(file) {
             const maxSize = 5 * 1024 * 1024;
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/heif','image/jpg'];
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/heif', 'image/jpg'];
 
             if (file.size > maxSize) {
                 alert('File terlalu besar (maksimum 5MB).');
@@ -62,14 +62,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 uploadedFilesDiv.style.display = 'block';
                 uploadedFiles.forEach((file, index) => {
                     const item = document.createElement('div');
-                    item.className = 'file-item d-flex justify-content-between align-items-center p-2 border rounded-3 bg-light mb-2';
+                    item.className = 'file-item d-flex justify-content-between align-items-center p-2 border rounded-3 bg-light mb-2 shadow-sm';
+
+                    // Cek apakah file adalah gambar untuk menampilkan preview (thumbnail)
+                    const isImage = file.type.startsWith('image/');
+                    let filePreview = '';
+
+                    if (isImage) {
+                        // Gunakan URL sementara untuk menampilkan pratinjau lokal
+                        const objectUrl = URL.createObjectURL(file);
+                        filePreview = `<img src="${objectUrl}" alt="preview" class="rounded border me-3" style="width: 50px; height: 50px; object-fit: cover;">`;
+                    } else {
+                        filePreview = `<i class="fas fa-file-alt fa-2x text-info me-3"></i>`;
+                    }
+
                     item.innerHTML = `
-                        <div>
-                            <i class="fas fa-file-alt me-2 text-info"></i>
-                            <span>${file.name}</span>
-                            <small class="text-muted ms-2">(${formatFileSize(file.size)})</small>
+                        <div class="d-flex align-items-center w-100 overflow-hidden">
+                            ${filePreview}
+                            <div class="text-truncate">
+                                <strong class="d-block text-truncate" style="max-width: 200px; font-size: 0.9rem;">${file.name}</strong>
+                                <small class="text-muted">${formatFileSize(file.size)}</small>
+                            </div>
                         </div>
-                        <button type="button" class="btn-close" aria-label="Remove" data-index="${index}"></button>
+                        <button type="button" class="btn-close ms-2" aria-label="Remove" data-index="${index}"></button>
                     `;
                     filesList.appendChild(item);
                 });
@@ -158,10 +173,10 @@ function closeSidebar() {
 function adaptTableForMobile() {
     const table = document.querySelector('.table');
     if (!table) return;
-    
+
     const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
     const rows = table.querySelectorAll('tbody tr');
-    
+
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
         cells.forEach((cell, index) => {
@@ -172,7 +187,7 @@ function adaptTableForMobile() {
     });
 }
 // Panggil fungsi saat load dan resize
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     adaptTableForMobile();
     window.addEventListener('resize', adaptTableForMobile);
 });
