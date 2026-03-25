@@ -31,6 +31,14 @@ class Handler extends ExceptionHandler
     // app/Exceptions/Handler.php
 public function render($request, Throwable $exception)
 {
+    // Tangani error 419 (Page Expired / Token Mismatch)
+    if ($exception instanceof \Illuminate\Session\TokenMismatchException) {
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Session expired. Please refresh the page.'], 419);
+        }
+        return redirect()->route('login')->with('error', 'Sesi Anda telah berakhir, silakan login kembali.');
+    }
+
     if ($request->expectsJson()) {
         if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
