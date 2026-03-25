@@ -19,7 +19,7 @@
                 <div id="d_content" class="d-none">
                     <div class="row">
                         {{-- LEFT COLUMN: Ticket Info --}}
-                        <div class="col-md-7 mb-4 mb-md-0">
+                        <div class="col-lg-7 mb-4 mb-lg-0" style="min-width: 0;">
                             <div class="ticket-info-section">
                                 <table class="table table-borderless mb-0 ticket-detail-table">
                                     <tr>
@@ -60,14 +60,14 @@
                                     </tr>
                                     <tr id="d_row_pending_notes" class="d-none">
                                         <th class="text-muted align-top">Pending Reason</th>
-                                        <td>
-                                            <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning text-break" style="--bs-bg-opacity: .1; white-space: pre-wrap; word-wrap: break-word;">No reason provided</div>
+                                        <td style="max-width: 0;">
+                                            <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning" style="--bs-bg-opacity: .1; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">No reason provided</div>
                                         </td>
                                     </tr>
                                     <tr id="d_row_notes" class="d-none">
                                         <th class="text-muted align-top">Resolution Notes</th>
-                                        <td>
-                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border text-break" style="white-space: pre-wrap; word-wrap: break-word;">No notes available</div>
+                                        <td style="max-width: 0;">
+                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border" style="white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">No notes available</div>
                                         </td>
                                     </tr>
                                     <tr>
@@ -82,7 +82,7 @@
                             </div>
                         </div>
                         {{-- RIGHT COLUMN: Timeline --}}
-                        <div class="col-md-5">
+                        <div class="col-lg-5" style="min-width: 0;">
                             <div class="card bg-light border-0 timeline-card">
                                 <div class="card-body">
                                     <h6 class="fw-bold mb-3 timeline-header">
@@ -263,8 +263,8 @@
     font-size: 14px;
     vertical-align: top;
     word-wrap: break-word;
-    word-break: break-word;
-    overflow-wrap: break-word;
+    word-break: break-all;
+    overflow-wrap: anywhere;
 }
 
 /* ========================================

@@ -23,7 +23,7 @@
                 <div id="d_content" class="d-none">
                     <div class="row">
                         {{-- LEFT COLUMN: Ticket Info --}}
-                        <div class="col-md-7 mb-4 mb-md-0">
+                        <div class="col-lg-7 mb-4 mb-lg-0" style="min-width: 0;">
                             <div class="ticket-info-section">
                                 <table class="table table-borderless mb-0 ticket-detail-table">
                                     <tr>
@@ -91,8 +91,8 @@
                                         <th class="text-muted align-top ticket-label">
                                             <i class="fas fa-pause-circle me-1"></i>Pending Reason
                                         </th>
-                                        <td>
-                                            <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning text-break" style="--bs-bg-opacity: .1;">
+                                        <td style="max-width: 0;">
+                                            <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning" style="--bs-bg-opacity: .1; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">
                                                 No reason provided
                                             </div>
                                         </td>
@@ -101,8 +101,8 @@
                                         <th class="text-muted align-top ticket-label">
                                             <i class="fas fa-lightbulb me-1"></i>Solution
                                         </th>
-                                        <td>
-                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border text-break">
+                                        <td style="max-width: 0;">
+                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border" style="white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">
                                                 No notes available
                                             </div>
                                         </td>
@@ -122,7 +122,7 @@
                         </div>
 
                         {{-- RIGHT COLUMN: Timeline --}}
-                        <div class="col-md-5">
+                        <div class="col-lg-5" style="min-width: 0;">
                             <div class="card bg-light border-0 timeline-card">
                                 <div class="card-body">
                                     <h6 class="fw-bold mb-3 timeline-header">
@@ -347,8 +347,8 @@
     .ticket-description {
         white-space: pre-wrap;
         font-size: 0.95rem;
-        word-break: break-word; /* Ensure long lines break safely on desktop too */
-        overflow-wrap: break-word;
+        word-break: break-all; /* Ensure long lines break safely on desktop too */
+        overflow-wrap: anywhere;
     }
     
     /* Timeline styling for desktop */
