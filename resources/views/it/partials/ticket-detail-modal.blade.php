@@ -89,7 +89,7 @@
                                     </tr>
                                     <tr id="d_row_pending_notes" class="d-none">
                                         <th class="text-muted align-top ticket-label">
-                                            <i class="fas fa-pause-circle me-1"></i>Pending Reason
+                                            <i class="fas fa-pause-circle me-1"></i>Pending Reason Sesuatu
                                         </th>
                                         <td class="w-100">
                                             <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning" style="--bs-bg-opacity: .1; max-width: 100%; display: block; white-space: normal !important; word-wrap: break-word; overflow-wrap: break-word;">
