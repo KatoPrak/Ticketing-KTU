@@ -91,8 +91,8 @@
                                         <th class="text-muted align-top ticket-label">
                                             <i class="fas fa-pause-circle me-1"></i>Pending Reason
                                         </th>
-                                        <td style="max-width: 200px;">
-                                            <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning" style="--bs-bg-opacity: .1; white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere;">
+                                        <td class="w-100" style="max-width: 150px; overflow: hidden;">
+                                            <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning text-break" style="--bs-bg-opacity: .1; white-space: pre-wrap; word-break: break-word;">
                                                 No reason provided
                                             </div>
                                         </td>
@@ -101,8 +101,8 @@
                                         <th class="text-muted align-top ticket-label">
                                             <i class="fas fa-lightbulb me-1"></i>Solution
                                         </th>
-                                        <td style="max-width: 200px;">
-                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border" style="white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere;">
+                                        <td class="w-100" style="max-width: 150px; overflow: hidden;">
+                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border text-break" style="white-space: pre-wrap; word-break: break-word;">
                                                 No notes available
                                             </div>
                                         </td>

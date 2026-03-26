@@ -60,14 +60,14 @@
                                     </tr>
                                     <tr id="d_row_pending_notes" class="d-none">
                                         <th class="text-muted align-top">Pending Reason</th>
-                                        <td style="max-width: 200px;">
-                                            <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning" style="--bs-bg-opacity: .1; white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere;">No reason provided</div>
+                                        <td class="w-100" style="max-width: 150px; overflow: hidden;">
+                                            <div id="d_pending_notes" class="text-muted fst-italic bg-warning p-2 rounded border border-warning text-break" style="--bs-bg-opacity: .1; white-space: pre-wrap; word-break: break-word;">No reason provided</div>
                                         </td>
                                     </tr>
                                     <tr id="d_row_notes" class="d-none">
                                         <th class="text-muted align-top">Resolution Notes</th>
-                                        <td style="max-width: 200px;">
-                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border" style="white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere;">No notes available</div>
+                                        <td class="w-100" style="max-width: 150px; overflow: hidden;">
+                                            <div id="d_notes" class="text-muted fst-italic bg-light p-2 rounded border text-break" style="white-space: pre-wrap; word-break: break-word;">No notes available</div>
                                         </td>
                                     </tr>
                                     <tr>
