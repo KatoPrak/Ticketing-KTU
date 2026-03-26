@@ -239,7 +239,8 @@
 ======================================== */
 .ticket-detail-table {
     table-layout: fixed;
-    width: 100%;
+    width: 100% !important;
+    min-width: 0 !important; /* Wajib! Mengalahkan .table { min-width: 700px; } dari CSS halaman list tiket utama */
 }
 
 .ticket-detail-table tr {
