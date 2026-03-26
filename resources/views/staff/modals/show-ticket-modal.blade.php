@@ -256,6 +256,7 @@
     font-size: 14px;
     width: 30%; /* Force width */
     vertical-align: top;
+    white-space: normal !important;
 }
 
 .ticket-detail-table td {
@@ -265,6 +266,7 @@
     word-wrap: break-word;
     word-break: break-all;
     overflow-wrap: anywhere;
+    white-space: normal !important;
 }
 
 /* ========================================

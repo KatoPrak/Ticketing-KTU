@@ -247,6 +247,7 @@
         display: block;
         width: 100% !important;
         padding: 0.25rem 0 !important;
+        white-space: normal !important;
     }
     
     .ticket-detail-table th.ticket-label {
