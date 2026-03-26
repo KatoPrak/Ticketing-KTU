@@ -28,7 +28,7 @@
                                 <table class="table table-borderless mb-0 ticket-detail-table">
                                     <tr>
                                         <th class="text-muted ticket-label">
-                                            <i class="fas fa-hashtag me-1"></i>Ticket ID ID IDI IDIDIDIID
+                                            <i class="fas fa-hashtag me-1"></i>Ticket ID
                                         </th>
                                         <td>
                                             <span id="d_ticket_id" class="fw-bold text-primary">
