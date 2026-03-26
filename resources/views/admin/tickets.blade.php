@@ -940,7 +940,7 @@
                                 @endif
                             </td>
                                                         <td>
-                                @if($ticket->status === 'pending' && $ticket->pending_at)
+                                @if($ticket->pending_at)
                                     <div class="datetime-cell">
                                         <span class="date-part">{{ \Carbon\Carbon::parse($ticket->pending_at)->format('d M Y') }}</span>
                                         <span class="time-part">{{ \Carbon\Carbon::parse($ticket->pending_at)->format('H:i:s') }}</span>
@@ -950,7 +950,7 @@
                                 @endif
                             </td>
                             <td>
-                                @if($ticket->status === 'pending' && $ticket->pending_reason)
+                                @if($ticket->pending_reason)
                                     <div class="marking-cell" title="{{ $ticket->pending_reason }}">
                                         {{ Str::limit($ticket->pending_reason, 30) }}
                                     </div>
