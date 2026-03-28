@@ -97,7 +97,7 @@ class TicketController extends Controller
         $selectedMonth = $request->input('month');
 
         // Generate PDF
-        $pdf = Pdf::loadView('admin.pdfuser', compact('tickets', 'selectedRegion', 'selectedYear', 'selectedMonth'))
+        $pdf = Pdf::loadView('admin.users-pdf', compact('tickets', 'selectedRegion', 'selectedYear', 'selectedMonth'))
             ->setPaper('a4', 'landscape'); // ✅ Landscape untuk kolom lebih banyak
 
         // ✅ Stream PDF untuk preview di browser (bukan langsung download)
@@ -112,7 +112,7 @@ class TicketController extends Controller
         $users = User::with('department')->get();
         $departments = Department::all();
 
-        return view('admin.management-pengguna', compact('users', 'departments'));
+        return view('admin.user-management', compact('users', 'departments'));
     }
 
     /**

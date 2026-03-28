@@ -59,7 +59,7 @@ class ManageUserController extends Controller
         
         $locations = $locations->orderBy('name')->get();
         
-        return view('it.manage-user', compact('users', 'departments', 'locations'));
+        return view('it.user-management', compact('users', 'departments', 'locations'));
     }
 
     public function store(Request $request)

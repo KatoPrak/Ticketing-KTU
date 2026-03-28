@@ -63,7 +63,7 @@ class AdminController extends Controller
         ->take(5)
         ->get();
 
-    return view('admin.Admin', compact(
+    return view('admin.dashboard', compact(
         'totalUsers',
         'newUsersThisMonth',
         'totalTickets',
@@ -94,7 +94,7 @@ public function showUsers()
     $locations = \App\Models\Location::orderBy('name')->get();
     $regions = \App\Models\Region::orderBy('name')->get();
 
-    return view('admin.management-pengguna', compact('users', 'departments', 'locations', 'regions'));
+    return view('admin.user-management', compact('users', 'departments', 'locations', 'regions'));
 }
 
 
@@ -536,7 +536,7 @@ public function showUsers()
             }
 
             // pastikan view-nya sesuai file kamu
-            return view('admin.Admin', compact(
+            return view('admin.dashboard', compact(
                 'totalUsers',
                 'totalTickets',
                 'pendingTickets',

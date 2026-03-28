@@ -78,7 +78,7 @@ class TicketController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('it.index-ticket', compact('categories', 'tickets', 'users', 'locations'));
+        return view('it.tickets', compact('categories', 'tickets', 'users', 'locations'));
     }
 
     // ============================================================
@@ -556,7 +556,7 @@ class TicketController extends Controller
             ->paginate(10)
             ->appends($request->query());
 
-        return view('it.riwayat-ticket', compact('categories', 'tickets'));
+        return view('it.ticket-history', compact('categories', 'tickets'));
     }
 
     // ============================================================
@@ -605,7 +605,7 @@ class TicketController extends Controller
             ->take(5)
             ->get();
 
-        return view('it.IT', compact(
+        return view('it.dashboard', compact(
             'activeTickets',
             'pendingTickets',
             'completedTickets',

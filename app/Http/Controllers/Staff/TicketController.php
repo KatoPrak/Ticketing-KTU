@@ -79,7 +79,7 @@ class TicketController extends Controller
             ->orderBy('resolved_at','desc')
             ->paginate(10, ['*'], 'history_page');
 
-        return view('staff.list-tiket', compact('tickets', 'historyTickets'));
+        return view('staff.tickets', compact('tickets', 'historyTickets'));
     }
 
     /**

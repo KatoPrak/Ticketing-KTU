@@ -9,7 +9,7 @@ class DashboardController extends Controller
 {
     public function admin()
     {
-        return view('admin.Admin');
+        return view('admin.dashboard');
     }
 
     public function it()
@@ -44,7 +44,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('it.IT', compact(
+        return view('it.dashboard', compact(
             'activeTickets',
             'pendingTickets',
             'completedTickets',
@@ -67,14 +67,14 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
-        return view('staff.staff', compact('categories', 'news'));
+        return view('staff.dashboard', compact('categories', 'news'));
     }
 
 
     public function index()
 {
     $categories = \App\Models\Category::all();
-    return view('staff.staff', compact('categories'));
+    return view('staff.dashboard', compact('categories'));
 }
 
 }

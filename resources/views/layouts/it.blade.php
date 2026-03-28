@@ -21,8 +21,8 @@
 </head>
 
 <body>
-    @include('it.components-it.sidebar-it')
-    @include('it.components-it.navbar-it')
+    @include('it.partials.sidebar')
+    @include('it.partials.navbar')
 
 <main class="main-content">
     <div class="content-wrapper">

@@ -25,9 +25,9 @@ class ChangePasswordController extends Controller
                 return redirect()->route('it.password.form'); // redirect ke form IT
             case 'staff':
             case 'user':
-                return view('auth.change_password'); // Default untuk staff/user
+                return view('auth.change-password'); // Default untuk staff/user
             default:
-                return view('auth.change_password'); // Fallback
+                return view('auth.change-password'); // Fallback
         }
     }
 

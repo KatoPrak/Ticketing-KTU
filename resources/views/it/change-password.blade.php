@@ -88,8 +88,8 @@
     </div>
 </div>
 
-@include('it.components-it.sidebar-it')
-@include('it.components-it.navbar-it')
+@include('it.partials.sidebar')
+@include('it.partials.navbar')
 
 <div class="notification-custom" id="notification"></div>
 @endsection
