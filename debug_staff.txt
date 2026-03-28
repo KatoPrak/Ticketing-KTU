@@ -1,1 +1,0 @@
-[{"ID":3,"Name":"Ferdinal Sukman Nur","Region":"Regional Sagulung (ID: 2)","Email":"ferdinal.sukman@ktushipyard.com","Role":"tim it"},{"ID":436,"Name":"Marunda IT","Region":"Regional Jakarta (ID: 1)","Email":"irvanjr190@gmail.com","Role":"tim it"},{"ID":437,"Name":"IT Tanjung Riau - Sekupang","Region":"Regional Sekupang (ID: 3)","Email":"wakuwakuuu70@gmail.com","Role":"tim it"}]
