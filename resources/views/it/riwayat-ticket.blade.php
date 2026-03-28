@@ -162,7 +162,7 @@
                 <tbody id="riwayatTbody">
                 @forelse($tickets as $ticket)
                     <tr>
-                        <td>#{{ $ticket->ticket_id }}</td>
+                        <td>{{ $ticket->ticket_id }}</td>
                         <td>{{ $ticket->user->name ?? 'Unknown' }}</td>
                         <td>{{ Str::limit($ticket->description, 50) }}</td>
                         <td>{{ $ticket->category->name ?? '-' }}</td>
