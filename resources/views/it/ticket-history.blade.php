@@ -4,6 +4,16 @@
 
 
 @section('content')
+@php
+if (!function_exists('remove_filter_url')) {
+    function remove_filter_url($filterName) {
+        $currentUrl = request()->fullUrl();
+        $url = preg_replace('/([?&])'.$filterName.'=[^&]+(&|$)/', '$1', $currentUrl);
+        $url = rtrim($url, '?&');
+        return $url;
+    }
+}
+@endphp
 @push('styles')
     @vite('resources/css/it-ticket-history.css')
 @endpush
@@ -210,19 +220,6 @@
         </div>
     </div>
 </div>
-
-
-
-@php
-if (!function_exists('remove_filter_url')) {
-    function remove_filter_url($filterName) {
-        $currentUrl = request()->fullUrl();
-        $url = preg_replace('/([?&])'.$filterName.'=[^&]+(&|$)/', '$1', $currentUrl);
-        $url = rtrim($url, '?&');
-        return $url;
-    }
-}
-@endphp
 
 @include('it.partials.ticket-detail-modal')
 
