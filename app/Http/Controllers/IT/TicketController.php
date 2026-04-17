@@ -64,6 +64,11 @@ class TicketController extends Controller
                                  ->where('region_id', $currentUser->region_id);
                     });
                 }
+
+                // 4. AND tickets they created or transferred
+                $query->orWhereHas('transferLogs', function ($q) use ($currentUser) {
+                          $q->where('transferred_by', $currentUser->id);
+                      });
             })
             ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
             ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->category_id))
@@ -513,7 +518,7 @@ class TicketController extends Controller
         $categories = Category::all();
         $currentUser = Auth::user();
 
-        $tickets = Ticket::with(['category', 'user', 'department'])
+        $tickets = Ticket::with(['category', 'user', 'department', 'transferLogs'])
             ->where('status', 'closed')
             // ✅ FILTER LOCATION/ASSIGNED
             ->where(function ($query) use ($currentUser) {
@@ -522,6 +527,9 @@ class TicketController extends Controller
                 // 2. OR the ticket user is in their location (and it wasn't exclusively assigned to someone else, though for history usually we want to see all location history)
                 // Let's stick to the "Location Visibility" rule for history + Assigned
                 $query->where('assigned_to', $currentUser->id)
+                      ->orWhereHas('transferLogs', function ($q) use ($currentUser) {
+                           $q->where('transferred_by', $currentUser->id);
+                      })
                       ->orWhereHas('user', function ($q) use ($currentUser) {
                            $q->where('location_id', $currentUser->location_id);
                       });
@@ -575,6 +583,9 @@ class TicketController extends Controller
             }
 
             $query->where('assigned_to', $currentUser->id)
+                  ->orWhereHas('transferLogs', function ($q) use ($currentUser) {
+                      $q->where('transferred_by', $currentUser->id);
+                  })
                   ->orWhere(function ($subQuery) use ($currentUser) {
                       $subQuery->whereNull('assigned_to')
                                ->where('region_id', $currentUser->region_id);
@@ -596,6 +607,9 @@ class TicketController extends Controller
                 }
                 
                 $query->where('assigned_to', $currentUser->id)
+                      ->orWhereHas('transferLogs', function ($q) use ($currentUser) {
+                          $q->where('transferred_by', $currentUser->id);
+                      })
                       ->orWhere(function ($subQuery) use ($currentUser) {
                           $subQuery->whereNull('assigned_to')
                                    ->where('region_id', $currentUser->region_id);

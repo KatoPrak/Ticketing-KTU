@@ -172,7 +172,16 @@ if (!function_exists('remove_filter_url')) {
                 <tbody id="riwayatTbody">
                 @forelse($tickets as $ticket)
                     <tr>
-                        <td>{{ $ticket->ticket_id }}</td>
+                        <td>
+                            {{ $ticket->ticket_id }}
+                            @if($ticket->transferLogs->count() > 0)
+                                <div class="mt-1">
+                                    <span class="badge bg-info text-dark" style="font-size: 0.7em;">
+                                        <i class="fas fa-exchange-alt me-1"></i>Transferred
+                                    </span>
+                                </div>
+                            @endif
+                        </td>
                         <td>{{ $ticket->user->name ?? 'Unknown' }}</td>
                         <td>{{ Str::limit($ticket->description, 50) }}</td>
                         <td>{{ $ticket->category->name ?? '-' }}</td>
