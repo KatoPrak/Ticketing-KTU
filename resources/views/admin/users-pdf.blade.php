@@ -371,6 +371,17 @@
 </head>
 <body>
 
+@php
+    if (!function_exists('cleanPdfText')) {
+        function cleanPdfText($text) {
+            if (empty($text)) return '';
+            $text = html_entity_decode(strip_tags($text), ENT_QUOTES, 'UTF-8');
+            // Hanya izinkan teks ASCII standar dan spasi/enter. Ubah tanda aneh menjadi spasi.
+            return preg_replace('/[^\x20-\x7E\x0A\x0D\x09]/u', ' ', $text);
+        }
+    }
+@endphp
+
 <header>
     <div class="header-content">
         <div class="header-logo">
@@ -448,7 +459,7 @@
                     <td>{{ $ticket->category->name ?? 'N/A' }}</td>
                     <td>
                         <div class="ticket-desc">
-                            {{ $ticket->description }}
+                            {{ cleanPdfText($ticket->description) }}
                         </div>
                     </td>
                     <td>
@@ -501,7 +512,7 @@
                     <td>
                         @if($ticket->pending_reason)
                             <div class="solution-cell">
-                                {{ Str::limit($ticket->pending_reason, 30) }}
+                                {{ Str::limit(cleanPdfText($ticket->pending_reason), 30) }}
                             </div>
                         @else
                             <span class="text-muted-custom">-</span>
@@ -521,7 +532,7 @@
                     <td>
                         @if($ticket->resolution_notes)
                             <div class="solution-cell">
-                                {{ $ticket->resolution_notes }}
+                                {{ cleanPdfText($ticket->resolution_notes) }}
                             </div>
                         @else
                             <span class="text-muted-custom">-</span>
