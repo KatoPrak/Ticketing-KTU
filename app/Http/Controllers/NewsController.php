@@ -12,8 +12,17 @@ class NewsController extends Controller
      */
     public function index(Request $request)
     {
-        $news = News::latest()->get();
+        $news = News::whereNull('expired_at')->orWhere('expired_at', '>', now())->latest()->get();
         return view('it.news.index', compact('news'));
+    }
+
+    /**
+     * READ: Menampilkan semua data history news.
+     */
+    public function history(Request $request)
+    {
+        $news = News::whereNotNull('expired_at')->where('expired_at', '<=', now())->latest()->get();
+        return view('it.news.history', compact('news'));
     }
 
     /**
@@ -32,10 +41,11 @@ class NewsController extends Controller
     {
         $request->validate([
             'message' => 'required|string|min:10',
-            'location_id' => 'nullable|exists:locations,id'
+            'location_id' => 'nullable|exists:locations,id',
+            'expired_at' => 'nullable|date'
         ]);
 
-        News::create($request->only('message', 'location_id'));
+        News::create($request->only('message', 'location_id', 'expired_at'));
 
         return redirect()->route('it.news.index')->with('success', 'News berhasil ditambahkan!');
     }
@@ -48,10 +58,11 @@ class NewsController extends Controller
     {
         $request->validate([
             'message' => 'required|string|min:10',
-            'location_id' => 'nullable|exists:locations,id'
+            'location_id' => 'nullable|exists:locations,id',
+            'expired_at' => 'nullable|date'
         ]);
 
-        $news->update($request->only('message', 'location_id'));
+        $news->update($request->only('message', 'location_id', 'expired_at'));
 
         return redirect()->route('it.news.index')->with('success', 'News berhasil diupdate!');
     }

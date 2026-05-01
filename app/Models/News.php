@@ -9,7 +9,11 @@ class News extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['message', 'location_id'];
+    protected $fillable = ['message', 'location_id', 'expired_at'];
+
+    protected $casts = [
+        'expired_at' => 'datetime',
+    ];
 
     public function location()
     {

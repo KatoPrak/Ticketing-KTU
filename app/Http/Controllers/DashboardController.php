@@ -63,6 +63,10 @@ class DashboardController extends Controller
                 $q->whereNull('location_id')
                   ->orWhere('location_id', $user->location_id);
             })
+            ->where(function($q) {
+                $q->whereNull('expired_at')
+                  ->orWhere('expired_at', '>', now());
+            })
             ->latest()
             ->take(3)
             ->get();

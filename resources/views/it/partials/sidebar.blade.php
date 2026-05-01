@@ -34,8 +34,13 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('it.news.index') }}" class="{{ request()->routeIs('it.news.*') ? 'active' : '' }}">
+                <a href="{{ route('it.news.index') }}" class="{{ (request()->routeIs('it.news.*') && !request()->routeIs('it.news.history')) ? 'active' : '' }}">
                     <i class="fas fa-newspaper me-2"></i> <span>News</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('it.news.history') }}" class="{{ request()->routeIs('it.news.history') ? 'active' : '' }}">
+                    <i class="fas fa-archive me-2"></i> <span>History News</span>
                 </a>
             </li>
             <li>

@@ -76,6 +76,7 @@ Route::middleware(['auth', 'roleredirect:staff,user'])->prefix('staff')->name('s
 // -----------------------------
 Route::middleware(['auth', 'roleredirect:tim it'])->prefix('it')->name('it.')->group(function () {
     
+    Route::get('news/history', [NewsController::class, 'history'])->name('news.history');
     Route::resource('news', NewsController::class);
     Route::post('/departments', [ItDepartmentController::class, 'store'])->name('departments.store');
     Route::get('/staff', [ManageUserController::class, 'index'])->name('staff.index');

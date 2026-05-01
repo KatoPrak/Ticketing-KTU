@@ -9,21 +9,13 @@
     <div class="page-header-animated mb-4">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div class="header-title-group">
-                <div class="icon-wrapper">
-                    <i class="fas fa-newspaper"></i>
+                <div class="icon-wrapper bg-secondary">
+                    <i class="fas fa-archive"></i>
                 </div>
                 <div>
-                    <h2 class="page-title mb-1">News Management</h2>
-                    <p class="page-subtitle mb-0">Manage all announcements and updates</p>
+                    <h2 class="page-title mb-1">History News</h2>
+                    <p class="page-subtitle mb-0">View expired announcements and updates</p>
                 </div>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{{ route('it.news.history') }}" class="btn btn-outline-secondary btn-add">
-                    <i class="fas fa-archive me-2"></i>History News
-                </a>
-                <a href="{{ route('it.news.create') }}" class="btn btn-primary btn-add">
-                    <i class="fas fa-plus-circle me-2"></i>Add News
-                </a>
             </div>
         </div>
     </div>
@@ -43,15 +35,15 @@
 
     {{-- News Table Card --}}
     <div class="card border-0 shadow-lg table-card">
-        <div class="card-header-custom">
+        <div class="card-header-custom bg-secondary">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="mb-1"><i class="fas fa-list me-2"></i>All Announcements</h5>
-                    <p class="text-muted small mb-0">View and manage your news items</p>
+                    <h5 class="mb-1"><i class="fas fa-archive me-2"></i>Expired Announcements</h5>
+                    <p class="text-muted small mb-0 text-white">View your past news items</p>
                 </div>
                 <div class="search-box d-none d-md-block">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search news...">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search history...">
                 </div>
             </div>
         </div>
@@ -90,17 +82,6 @@
                         </td>
                         <td class="text-center">
                             <div class="action-buttons">
-                                <button type="button"
-                                    class="btn btn-sm btn-warning-modern"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editModal"
-                                    data-bs-url="{{ route('it.news.update', $item->id) }}"
-                                    data-news='@json(["id" => $item->id, "message" => $item->message, "expired_at" => $item->expired_at ? $item->expired_at->format("Y-m-d\TH:i") : ""])'
-                                    title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                    <span class="btn-text">Edit</span>
-                                </button>
-
                                 <button type="button" 
                                     class="btn btn-sm btn-danger-modern" 
                                     data-bs-toggle="modal" 
@@ -120,11 +101,8 @@
                                 <div class="empty-icon">
                                     <i class="fas fa-inbox"></i>
                                 </div>
-                                <h5 class="empty-title">No Announcements Yet</h5>
-                                <p class="empty-subtitle">Start by creating your first news announcement</p>
-                                <a href="{{ route('it.news.create') }}" class="btn btn-primary mt-3">
-                                    <i class="fas fa-plus-circle me-2"></i>Create First Announcement
-                                </a>
+                                <h5 class="empty-title">No History Yet</h5>
+                                <p class="empty-subtitle">There are no expired announcements</p>
                             </div>
                         </td>
                     </tr>
@@ -135,54 +113,7 @@
     </div>
 </div>
 
-{{-- Edit Modal --}}
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content modern-modal">
-            <div class="modal-header-modern bg-warning">
-                <div class="d-flex align-items-center">
-                    <div class="modal-icon">
-                        <i class="fas fa-edit"></i>
-                    </div>
-                    <div>
-                        <h5 class="modal-title mb-0">Edit Announcement</h5>
-                        <p class="modal-subtitle mb-0">Update your announcement message</p>
-                    </div>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="editForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-body-modern">
-                    <div class="form-group-modern">
-                        <label for="editMessage" class="form-label-modern">
-                            <i class="fas fa-comment-alt me-2"></i>Message
-                            <span class="text-danger">*</span>
-                        </label>
-                        <textarea name="message" id="editMessage" class="form-control-modern" rows="5" required placeholder="Enter your message here..."></textarea>
-                        <div class="char-counter-edit mt-2 mb-3">
-                            <i class="fas fa-keyboard me-1"></i>
-                            <span id="editCharCount">0</span> characters
-                        </div>
-                        <label for="editExpiredAt" class="form-label-modern mt-3">
-                            <i class="far fa-calendar-times me-2"></i>Expiration Date (Optional)
-                        </label>
-                        <input type="datetime-local" name="expired_at" id="editExpiredAt" class="form-control-modern">
-                    </div>
-                </div>
-                <div class="modal-footer-modern">
-                    <button type="button" class="btn btn-light btn-cancel" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Cancel
-                    </button>
-                    <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-save me-2"></i>Save Changes
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
 
 {{-- Delete Modal --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
@@ -908,9 +839,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (editCharCount) {
                     editCharCount.textContent = news.message.length;
                 }
-            }
-            if (document.getElementById('editExpiredAt') && news) {
-                document.getElementById('editExpiredAt').value = news.expired_at || '';
             }
         });
 

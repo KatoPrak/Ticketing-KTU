@@ -59,6 +59,22 @@
                             </div>
 
                             <div class="form-group-modern">
+                                <label for="expired_at" class="form-label-modern">
+                                    <i class="far fa-calendar-times me-2"></i>Expiration Date (Optional)
+                                </label>
+                                <input type="datetime-local" class="form-control-modern @error('expired_at') is-invalid @enderror" 
+                                    id="expired_at" name="expired_at" value="{{ old('expired_at') }}">
+                                <div class="form-text text-muted mt-1">
+                                    <i class="fas fa-info-circle me-1"></i>Leave blank if the news never expires.
+                                </div>
+                                @error('expired_at')
+                                    <div class="invalid-feedback d-block">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group-modern">
                                 <label for="message" class="form-label-modern">
                                     <i class="fas fa-comment-alt me-2"></i>Announcement Message
                                     <span class="text-danger">*</span>
