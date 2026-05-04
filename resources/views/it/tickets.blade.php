@@ -454,7 +454,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="text-muted small">Please provide notes for changing the status to Pending/Solved.</p>
+                <p class="text-muted small">Please provide notes for changing the status (optional for Solved).</p>
                 <textarea id="resolutionNotes" class="form-control" rows="4"
                     placeholder="Write ticket completion notes..."></textarea>
             </div>

@@ -431,6 +431,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const linkifiedNotes = safeNotes.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary text-decoration-underline" rel="noopener noreferrer">$1</a>');
                     notesElement.innerHTML = `<i class="fas fa-pen me-1"></i>${linkifiedNotes}`;
                     notesRow.classList.remove('d-none');
+                } else if (ticket.status === 'resolved' || ticket.status === 'closed') {
+                    notesElement.innerHTML = `<i class="fas fa-pen me-1"></i>-`;
+                    notesRow.classList.remove('d-none');
                 } else {
                     notesRow.classList.add('d-none');
                 }
@@ -532,13 +535,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const modal = new bootstrap.Modal(modalEl);
             const notesTextarea = document.getElementById('resolutionNotes');
-
-            notesTextarea.value = '';
+            if (notesTextarea) {
+                notesTextarea.value = '';
+                if (value === 'resolved') {
+                    notesTextarea.placeholder = 'Write ticket completion notes (Optional)...';
+                } else {
+                    notesTextarea.placeholder = 'Write ticket completion notes...';
+                }
+            }
 
             const statusLabel = (value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ')).replace('Resolved', 'Solved');
             const modalTitle = modalEl.querySelector('.modal-title');
             if (modalTitle) {
-                modalTitle.textContent = `Add Remark - ${statusLabel} `;
+                if (value === 'resolved') {
+                    modalTitle.textContent = `Add Remark - ${statusLabel} (Optional)`;
+                } else {
+                    modalTitle.textContent = `Add Remark - ${statusLabel}`;
+                }
             }
 
             modal.show();
@@ -582,7 +595,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const notesTextarea = document.getElementById('resolutionNotes');
             const notes = notesTextarea.value.trim();
 
-            if (!notes) {
+            if (!notes && pendingUpdate.value !== 'resolved') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Remark Required',

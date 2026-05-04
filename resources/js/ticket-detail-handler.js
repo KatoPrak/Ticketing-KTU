@@ -263,6 +263,9 @@ $(document).ready(function () {
             const linkifiedNotes = safeNotes.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary text-decoration-underline" rel="noopener noreferrer">$1</a>');
             $('#d_notes').html(linkifiedNotes);
             $('#d_row_notes').removeClass('d-none');
+        } else if (ticket.status === 'resolved' || ticket.status === 'closed') {
+            $('#d_notes').html('-');
+            $('#d_row_notes').removeClass('d-none');
         } else {
             $('#d_row_notes').addClass('d-none');
         }

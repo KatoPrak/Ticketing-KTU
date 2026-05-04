@@ -416,6 +416,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const linkifiedNotes = safeNotes.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary text-decoration-underline" rel="noopener noreferrer">$1</a>');
                     notesElement.innerHTML = linkifiedNotes;
                     notesRow.classList.remove('d-none');
+                } else if (ticket.status === 'resolved' || ticket.status === 'closed') {
+                    notesElement.innerHTML = '-';
+                    notesRow.classList.remove('d-none');
                 } else {
                     notesRow.classList.add('d-none');
                 }
