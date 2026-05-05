@@ -454,9 +454,14 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="text-muted small">Please provide notes for changing the status (optional for Solved).</p>
+                <p class="text-muted small">Please provide a remark or an attachment to update the status.</p>
                 <textarea id="resolutionNotes" class="form-control" rows="4"
                     placeholder="Write ticket completion notes..."></textarea>
+                <div class="mt-3">
+                    <label class="form-label fw-bold small text-uppercase text-muted">Attachments (Optional)</label>
+                    <input type="file" id="resolutionAttachments" class="form-control" multiple accept="image/*">
+                    <div class="form-text extra-small">Max 5MB per file. Formats: JPG, PNG, HEIC.</div>
+                </div>
             </div>
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

@@ -140,7 +140,7 @@ class TicketController extends Controller
                 'category_id'   => $validated['category_id'],
                 'priority'      => strtolower($validated['priority']),
                 'description'   => $validated['description'],
-                'attachments'   => json_encode($filePaths),
+                'attachments'   => $filePaths,
                 'status'        => 'waiting',
                 'region_id'     => $regionId,
                 'assigned_to'   => null,
@@ -218,13 +218,22 @@ class TicketController extends Controller
         // Muat semua relasi yang dibutuhkan
         $ticket->load(['user', 'category', 'department']);
 
-        // Logika untuk memastikan attachments selalu berupa array
+        // Logika untuk memastikan attachments (Staff) selalu berupa array
         $attachments = $ticket->attachments;
         if (is_string($attachments)) {
             $decoded = json_decode($attachments, true);
             $attachments = is_array($decoded) ? $decoded : [];
         } elseif (!is_array($attachments)) {
             $attachments = [];
+        }
+
+        // Logika untuk memastikan resolution_attachments (IT) selalu berupa array
+        $resAttachments = $ticket->resolution_attachments;
+        if (is_string($resAttachments)) {
+            $decoded = json_decode($resAttachments, true);
+            $resAttachments = is_array($decoded) ? $decoded : [];
+        } elseif (!is_array($resAttachments)) {
+            $resAttachments = [];
         }
 
         return response()->json([
@@ -235,6 +244,7 @@ class TicketController extends Controller
             'status' => $ticket->status,
             'assigned_to' => $ticket->assigned_to, 
             'attachments' => $attachments,
+            'resolution_attachments' => $resAttachments,
             'resolution_notes' => $ticket->resolution_notes ?? '',
             'pending_reason' => $ticket->pending_reason ?? '',
             'transfer_logs' => $ticket->transferLogs->map(function($log) {
@@ -310,7 +320,8 @@ class TicketController extends Controller
         $validator = Validator::make($request->all(), [
             'field' => 'required|in:status,priority',
             'value' => 'required|string',
-            'resolution_notes' => 'nullable|string|max:2000'
+            'resolution_notes' => 'nullable|string|max:2000',
+            'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,heic,heif',
         ]);
 
         if ($validator->fails()) {
@@ -324,6 +335,35 @@ class TicketController extends Controller
         $validated = $validator->validated();
         $field = $validated['field'];
         $value = $validated['value'];
+
+        // ✅ Dual Validation: Must have notes OR attachments for specific status updates
+        if ($field === 'status' && in_array($value, ['resolved', 'pending'])) {
+            if (empty($request->resolution_notes) && !$request->hasFile('attachments')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please provide either a Remark or an Attachment.'
+                ], 422);
+            }
+        }
+
+        // ✅ Handle new attachments (Resolution Attachments)
+        if ($request->hasFile('attachments')) {
+            $newFiles = [];
+            foreach ($request->file('attachments') as $file) {
+                $newFiles[] = $file->store('tickets', 'public');
+            }
+            
+            // Save to resolution_attachments instead of merging with staff attachments
+            $existingResFiles = $ticket->resolution_attachments;
+            if (is_string($existingResFiles)) {
+                $existingResFiles = json_decode($existingResFiles, true) ?: [];
+            }
+            if (!is_array($existingResFiles)) {
+                $existingResFiles = [];
+            }
+
+            $ticket->resolution_attachments = array_merge($existingResFiles, $newFiles);
+        }
 
         if ($field === 'status') {
             $ticket->status = $value;

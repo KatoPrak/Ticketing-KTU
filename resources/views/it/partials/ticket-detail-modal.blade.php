@@ -109,12 +109,18 @@
                                     </tr>
                                     <tr>
                                         <th class="text-muted align-top ticket-label">
-                                            <i class="fas fa-paperclip me-1"></i>Attachments
+                                            <i class="fas fa-paperclip me-1"></i>Staff Attachments
                                         </th>
                                         <td id="d_attachments">
-                                            <span class="text-muted">
-                                                No attachments
-                                            </span>
+                                            <span class="text-muted">No attachments</span>
+                                        </td>
+                                    </tr>
+                                    <tr id="d_row_resolution_attachments" class="d-none">
+                                        <th class="text-muted align-top ticket-label">
+                                            <i class="fas fa-check-double me-1"></i>Resolution Attachments
+                                        </th>
+                                        <td id="d_resolution_attachments">
+                                            <span class="text-muted">No resolution attachments</span>
                                         </td>
                                     </tr>
                                 </table>

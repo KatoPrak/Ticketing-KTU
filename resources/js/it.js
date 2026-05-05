@@ -43,19 +43,91 @@ function formatEmptyData(value, defaultText = 'Not Available', defaultIcon = 'qu
 
 function renderAttachments(attachments) {
     try {
-        if (!attachments || attachments.length === 0) {
+        console.log("📎 [DEBUG] attachments raw data:", attachments);
+        let files = attachments;
+        // Robust parsing: Loop parsing if we get a string that looks like JSON
+        while (typeof files === 'string' && files.trim() !== '') {
+            if (files === 'null' || files === '[]') break;
+            try {
+                const parsed = JSON.parse(files);
+                if (parsed === files) break; 
+                files = parsed;
+            } catch (e) {
+                break;
+            }
+        }
+
+        if (!files || !Array.isArray(files) || files.length === 0) {
             return '<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>';
         }
-        return attachments.map(file => {
-            const fileUrl = `/storage/${file}`;
-            const fileName = file.split("/").pop();
-            const isImage = /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(fileName);
-            return isImage
-                ? `<a href="${fileUrl}" target="_blank"><img src="${fileUrl}" alt="Attachment" class="img-thumbnail" style="max-height:100px;"></a>`
-                : `<a href="${fileUrl}" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fas fa-paperclip me-1"></i> ${fileName}</a>`;
-        }).join("");
+
+        const cacheBuster = new Date().getTime();
+
+        return '<div class="d-flex flex-wrap gap-3 mt-2">' + files.map(file => {
+            if (typeof file !== 'string') return '';
+            
+            // Remove 'public/' prefix if exists (legacy check)
+            const cleanPath = file.replace(/^public\//, '');
+            const fileUrl = `/storage/${cleanPath}?t=${cacheBuster}`;
+            const fileName = cleanPath.split("/").pop();
+            const ext = fileName.split(".").pop().toLowerCase();
+            
+            // HEIC/HEIF are NOT natively supported in browsers, treat as files
+            const isNativeImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+            const isHEIC = ['heic', 'heif'].includes(ext);
+
+            if (isNativeImage) {
+                return `
+                    <div class="attachment-wrapper">
+                        <a href="${fileUrl}" target="_blank" class="d-block border rounded overflow-hidden shadow-sm hover-shadow transition" style="width: 110px; height: 110px; background: #eee;">
+                            <img src="${fileUrl}" alt="Attachment" class="w-100 h-100" style="object-fit: cover;" onerror="this.onerror=null; this.src='https://placehold.co/110?text=Broken+Link';">
+                        </a>
+                    </div>
+                `;
+            } else {
+                // Determine icon based on extension
+                let icon = 'fa-file-alt';
+                let color = 'text-secondary';
+                let typeLabel = ext.toUpperCase();
+
+                if (isHEIC) {
+                    icon = 'fa-image';
+                    color = 'text-info';
+                    typeLabel = 'HEIC/HEIF';
+                } else if (ext === 'pdf') {
+                    icon = 'fa-file-pdf';
+                    color = 'text-danger';
+                } else if (['xlsx', 'xls', 'csv'].includes(ext)) {
+                    icon = 'fa-file-excel';
+                    color = 'text-success';
+                } else if (['docx', 'doc'].includes(ext)) {
+                    icon = 'fa-file-word';
+                    color = 'text-primary';
+                } else if (['pptx', 'ppt'].includes(ext)) {
+                    icon = 'fa-file-powerpoint';
+                    color = 'text-warning';
+                } else if (['zip', 'rar', '7z'].includes(ext)) {
+                    icon = 'fa-file-archive';
+                    color = 'text-dark';
+                }
+
+                return `
+                    <div class="attachment-wrapper">
+                        <a href="${fileUrl}" target="_blank" class="btn btn-light btn-sm d-flex align-items-center justify-content-center border rounded shadow-sm hover-shadow transition p-0" style="width: 110px; height: 110px; flex-direction: column; background: #fcfcfc;">
+                            <div class="d-flex align-items-center justify-content-center flex-grow-1 w-100">
+                                <i class="fas ${icon} fa-3x ${color}"></i>
+                            </div>
+                            <div class="bg-light border-top w-100 py-1 px-2 text-center rounded-bottom">
+                                <div class="text-truncate fw-bold text-dark" style="font-size: 9px;" title="${fileName}">${fileName}</div>
+                                <div class="text-muted" style="font-size: 8px;">${typeLabel} File</div>
+                            </div>
+                        </a>
+                    </div>
+                `;
+            }
+        }).join("") + '</div>';
     } catch (err) {
-        console.error("Attachment parse error:", err);
+        console.error("Attachment render error:", err);
         return '<span class="text-danger">Error loading attachments</span>';
     }
 }
@@ -249,7 +321,29 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const modal = new bootstrap.Modal(modalEl);
+        // --- CLEAR PREVIOUS DATA TO PREVENT DOUBLING/LEAKAGE ---
+        const idsToClear = [
+            'd_ticket_id', 'd_user', 'd_location', 'd_department', 'd_category', 
+            'd_description', 'd_attachments', 'd_resolution_attachments', 'd_notes', 'd_pending_notes', 
+            'd_timeline_transfers', 'd_transferred_badge'
+        ];
+        idsToClear.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '';
+        });
+        // Reset markers
+        ['d_response_marker', 'd_pending_marker', 'd_resolved_marker'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('bg-warning', 'bg-success', 'bg-info');
+                el.classList.add('bg-muted');
+            }
+        });
+
+        let modal = bootstrap.Modal.getInstance(modalEl);
+        if (!modal) {
+            modal = new bootstrap.Modal(modalEl);
+        }
         const loader = document.getElementById('d_loader');
         const content = document.getElementById('d_content');
 
@@ -431,9 +525,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     const linkifiedNotes = safeNotes.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary text-decoration-underline" rel="noopener noreferrer">$1</a>');
                     notesElement.innerHTML = `<i class="fas fa-pen me-1"></i>${linkifiedNotes}`;
                     notesRow.classList.remove('d-none');
-                } else if (ticket.status === 'resolved' || ticket.status === 'closed') {
-                    notesElement.innerHTML = `<i class="fas fa-pen me-1"></i>-`;
-                    notesRow.classList.remove('d-none');
                 } else {
                     notesRow.classList.add('d-none');
                 }
@@ -474,10 +565,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-            // ✅ Handle attachments
+            // ✅ Handle Staff attachments
             const attachmentsContainer = document.getElementById('d_attachments');
             if (attachmentsContainer) {
                 attachmentsContainer.innerHTML = renderAttachments(ticket.attachments || []);
+            }
+
+            // ✅ Handle Resolution attachments
+            const resAttachmentsContainer = document.getElementById('d_resolution_attachments');
+            const resAttachmentsRow = document.getElementById('d_row_resolution_attachments');
+            if (resAttachmentsContainer && resAttachmentsRow) {
+                const resFiles = ticket.resolution_attachments || [];
+                if (resFiles.length > 0) {
+                    resAttachmentsContainer.innerHTML = renderAttachments(resFiles);
+                    resAttachmentsRow.classList.remove('d-none');
+                } else {
+                    resAttachmentsRow.classList.add('d-none');
+                }
             }
 
             // Hide loader, show content
@@ -538,20 +642,21 @@ document.addEventListener("DOMContentLoaded", () => {
             if (notesTextarea) {
                 notesTextarea.value = '';
                 if (value === 'resolved') {
-                    notesTextarea.placeholder = 'Write ticket completion notes (Optional)...';
+                    notesTextarea.placeholder = 'Write ticket completion notes...';
                 } else {
                     notesTextarea.placeholder = 'Write ticket completion notes...';
                 }
             }
 
+            const attachmentsInput = document.getElementById('resolutionAttachments');
+            if (attachmentsInput) {
+                attachmentsInput.value = '';
+            }
+
             const statusLabel = (value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ')).replace('Resolved', 'Solved');
             const modalTitle = modalEl.querySelector('.modal-title');
             if (modalTitle) {
-                if (value === 'resolved') {
-                    modalTitle.textContent = `Add Remark - ${statusLabel} (Optional)`;
-                } else {
-                    modalTitle.textContent = `Add Remark - ${statusLabel}`;
-                }
+                modalTitle.textContent = `Add Remark - ${statusLabel}`;
             }
 
             modal.show();
@@ -594,12 +699,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const notesTextarea = document.getElementById('resolutionNotes');
             const notes = notesTextarea.value.trim();
+            const attachmentsInput = document.getElementById('resolutionAttachments');
+            const files = attachmentsInput ? attachmentsInput.files : [];
 
-            if (!notes && pendingUpdate.value !== 'resolved') {
+            if (!notes && files.length === 0) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Remark Required',
-                    text: 'Please provide notes before updating the status.',
+                    title: 'Requirement Missing',
+                    text: 'Please provide either a Remark or an Attachment before updating.',
                     confirmButtonColor: '#3085d6'
                 });
                 return;
@@ -617,7 +724,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     pendingUpdate.field,
                     pendingUpdate.value,
                     pendingUpdate.old,
-                    notes
+                    notes,
+                    files
                 );
 
                 const modalEl = document.getElementById('resolutionModal');
@@ -652,8 +760,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const notesTextarea = document.getElementById('resolutionNotes');
+            const attachmentsInput = document.getElementById('resolutionAttachments');
             if (notesTextarea) {
                 notesTextarea.value = '';
+            }
+            if (attachmentsInput) {
+                attachmentsInput.value = '';
             }
         });
     }
@@ -661,26 +773,34 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================
     // FUNCTION UPDATE FIELD WITH NOTES
     // ==========================
-    async function updateFieldWithNotes(select, id, field, value, old, notes) {
+    async function updateFieldWithNotes(select, id, field, value, old, notes, files = []) {
         select.disabled = true;
 
         try {
-            const payload = { field, value };
+            const formData = new FormData();
+            formData.append('field', field);
+            formData.append('value', value);
 
             if (notes) {
-                payload.resolution_notes = notes;
+                formData.append('resolution_notes', notes);
             }
 
-            console.log('📤 Sending update:', payload);
+            if (files && files.length > 0) {
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('attachments[]', files[i]);
+                }
+            }
+
+            console.log('📤 Sending update (FormData)');
 
             const res = await fetch(`${BASE_URL}/${id}/update-field`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify(payload)
+                body: formData
             });
 
             const data = await res.json();

@@ -23,11 +23,13 @@ class Ticket extends Model
         'assigned_to',
         'region_id', // ✅ Added region_id
         'pending_at', // ✅ Added pending_at
-        'pending_reason' // ✅ Added pending_reason
+        'pending_reason', // ✅ Added pending_reason
+        'resolution_attachments' // ✅ Added resolution_attachments
     ];
 
     protected $casts = [
         'attachments' => 'array',
+        'resolution_attachments' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'resolved_at' => 'datetime',
@@ -184,6 +186,8 @@ class Ticket extends Model
                 in_array($oldStatus, ['resolved', 'closed']) && 
                 !in_array($currentStatus, ['resolved', 'closed'])) {
                 $ticket->resolved_at = null;
+                $ticket->resolution_notes = null;
+                $ticket->resolution_attachments = null;
             }
 
             // ✅ RULE 5: Status kembali dari pending

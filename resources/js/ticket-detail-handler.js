@@ -42,43 +42,82 @@ $(document).ready(function () {
 
     function renderAttachments(attachments) {
         try {
-            // Robust parsing: Handle if API returns JSON string instead of array
-            if (typeof attachments === 'string') {
-                if (attachments.trim() === '' || attachments === 'null') return '<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>';
+            let files = attachments;
+            // Robust parsing: Loop parsing if we get a string that looks like JSON
+            while (typeof files === 'string' && files.trim() !== '') {
+                if (files === 'null' || files === '[]') break;
                 try {
-                    attachments = JSON.parse(attachments);
+                    const parsed = JSON.parse(files);
+                    if (parsed === files) break; 
+                    files = parsed;
                 } catch (e) {
-                    console.warn("Failed to parse attachments JSON string:", e);
-                    return '<span class="text-danger">Invalid attachment format</span>';
+                    break;
                 }
             }
 
-            if (!attachments || !Array.isArray(attachments) || attachments.length === 0) {
+            if (!files || !Array.isArray(files) || files.length === 0) {
                 return '<span class="text-muted"><i class="fas fa-paperclip me-1"></i>No attachments</span>';
             }
 
-            return '<div class="d-flex flex-wrap gap-2">' + attachments.map(file => {
+            const cacheBuster = new Date().getTime();
+
+            return '<div class="d-flex flex-wrap gap-3 mt-2">' + files.map(file => {
+                if (typeof file !== 'string') return '';
+                
                 // Remove 'public/' prefix if exists (legacy check)
                 const cleanPath = file.replace(/^public\//, '');
-                const fileUrl = `/storage/${cleanPath}`;
+                const fileUrl = `/storage/${cleanPath}?t=${cacheBuster}`;
                 const fileName = cleanPath.split('/').pop();
-                const isImage = /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(fileName);
+                const ext = fileName.split('.').pop().toLowerCase();
+                
+                // HEIC/HEIF are NOT natively supported in browsers, treat as files
+                const isNativeImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+                const isHEIC = ['heic', 'heif'].includes(ext);
 
-                if (isImage) {
+                if (isNativeImage) {
                     return `
-                        <div class="attachment-item position-relative group">
-                            <a href="${fileUrl}" target="_blank" class="d-block border rounded overflow-hidden shadow-sm transition-transform hover:scale-105" style="width: 100px; height: 100px;" title="${fileName}">
-                                <img src="${fileUrl}" alt="${fileName}" class="w-100 h-100" style="object-fit: cover;">
+                        <div class="attachment-wrapper">
+                            <a href="${fileUrl}" target="_blank" class="d-block border rounded overflow-hidden shadow-sm hover-shadow transition" style="width: 110px; height: 110px; background: #eee;">
+                                <img src="${fileUrl}" alt="Attachment" class="w-100 h-100" style="object-fit: cover;" onerror="this.onerror=null; this.src='https://placehold.co/110?text=Broken+Link';">
                             </a>
                         </div>
                     `;
                 } else {
+                    // Determine icon based on extension
+                    let icon = 'fa-file-alt';
+                    let color = 'text-secondary';
+                    let typeLabel = ext.toUpperCase();
+
+                    if (isHEIC) {
+                        icon = 'fa-image';
+                        color = 'text-info';
+                        typeLabel = 'HEIC/HEIF';
+                    } else if (ext === 'pdf') {
+                        icon = 'fa-file-pdf';
+                        color = 'text-danger';
+                    } else if (['xlsx', 'xls', 'csv'].includes(ext)) {
+                        icon = 'fa-file-excel';
+                        color = 'text-success';
+                    } else if (['docx', 'doc'].includes(ext)) {
+                        icon = 'fa-file-word';
+                        color = 'text-primary';
+                    } else if (['pptx', 'ppt'].includes(ext)) {
+                        icon = 'fa-file-powerpoint';
+                        color = 'text-warning';
+                    } else if (['zip', 'rar', '7z'].includes(ext)) {
+                        icon = 'fa-file-archive';
+                        color = 'text-dark';
+                    }
+
                     return `
-                        <div class="attachment-item">
-                            <a href="${fileUrl}" target="_blank" class="btn btn-outline-light text-dark border d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px;" title="${fileName}">
-                                <div class="text-center overflow-hidden w-100 px-1">
-                                    <i class="fas fa-file-alt text-secondary mb-1 fa-2x"></i><br>
-                                    <small class="d-block text-truncate w-100" style="font-size: 0.7rem;">${fileName}</small>
+                        <div class="attachment-wrapper">
+                            <a href="${fileUrl}" target="_blank" class="btn btn-light btn-sm d-flex align-items-center justify-content-center border rounded shadow-sm hover-shadow transition p-0" style="width: 110px; height: 110px; flex-direction: column; background: #fcfcfc;">
+                                <div class="d-flex align-items-center justify-content-center flex-grow-1 w-100">
+                                    <i class="fas ${icon} fa-3x ${color}"></i>
+                                </div>
+                                <div class="bg-light border-top w-100 py-1 px-2 text-center rounded-bottom">
+                                    <div class="text-truncate fw-bold text-dark" style="font-size: 9px;" title="${fileName}">${fileName}</div>
+                                    <div class="text-muted" style="font-size: 8px;">${typeLabel} File</div>
                                 </div>
                             </a>
                         </div>
@@ -99,6 +138,20 @@ $(document).ready(function () {
 
         const content = $('#d_content');
         const loader = $('#d_loader');
+
+        // --- CLEAR PREVIOUS DATA TO PREVENT DOUBLING/LEAKAGE ---
+        const idsToClear = [
+            'd_ticket_id', 'd_user', 'd_location', 'd_department', 'd_category', 
+            'd_description', 'd_attachments', 'd_resolution_attachments', 'd_notes', 'd_pending_notes', 
+            'd_timeline_transfers', 'd_transferred_badge'
+        ];
+        idsToClear.forEach(id => {
+            $(`#${id}`).empty();
+        });
+        // Reset markers
+        $('#d_response_marker, #d_pending_marker, #d_resolved_marker')
+            .removeClass('bg-warning bg-success bg-info')
+            .addClass('bg-muted');
 
         // Hide loader, show content
         loader.addClass('d-none');
@@ -278,8 +331,17 @@ $(document).ready(function () {
             $('#d_row_pending_notes').addClass('d-none');
         }
 
-        // ✅ UPDATE ATTACHMENTS
+        // ✅ UPDATE STAFF ATTACHMENTS
         $('#d_attachments').html(renderAttachments(ticket.attachments || []));
+
+        // ✅ UPDATE RESOLUTION ATTACHMENTS
+        const resFiles = ticket.resolution_attachments || [];
+        if (resFiles.length > 0) {
+            $('#d_resolution_attachments').html(renderAttachments(resFiles));
+            $('#d_row_resolution_attachments').removeClass('d-none');
+        } else {
+            $('#d_row_resolution_attachments').addClass('d-none');
+        }
     }
 
     // ========================
