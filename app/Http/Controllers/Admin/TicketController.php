@@ -61,47 +61,62 @@ class TicketController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        // ✅ Tambahkan 'feedback', 'assignedTo', dan 'region' relation
-        $query = Ticket::query()->with([
-            'user.department', 
-            'user.location', 
-            'category', 
-            'department', 
-            'feedback',
-            'assignedTo',
-            'region',
-            'transferLogs'
-        ]);
+        try {
+            // Prevent memory limit or execution time issues during PDF generation
+            ini_set('memory_limit', '512M');
+            set_time_limit(120);
 
-        if ($request->filled('year')) {
-            $query->whereYear('created_at', $request->year);
+            // ✅ Tambahkan 'feedback', 'assignedTo', dan 'region' relation
+            $query = Ticket::query()->with([
+                'user.department', 
+                'user.location', 
+                'category', 
+                'department', 
+                'feedback',
+                'assignedTo',
+                'region',
+                'transferLogs'
+            ]);
+
+            if ($request->filled('year')) {
+                $query->whereYear('created_at', $request->year);
+            }
+
+            if ($request->filled('month')) {
+                $query->whereMonth('created_at', $request->month);
+            }
+
+            if ($request->filled('region_id')) {
+                $query->where('region_id', $request->region_id);
+            }
+
+            $tickets = $query->latest()->get();
+
+            // Ambil info region jika difilter
+            $selectedRegion = null;
+            if ($request->filled('region_id')) {
+                $selectedRegion = Region::find($request->region_id);
+            }
+
+            $selectedYear = $request->input('year');
+            $selectedMonth = $request->input('month');
+
+            // Generate PDF
+            $pdf = Pdf::loadView('admin.users-pdf', compact('tickets', 'selectedRegion', 'selectedYear', 'selectedMonth'))
+                ->setPaper('a4', 'landscape'); // ✅ Landscape untuk kolom lebih banyak
+
+            // ✅ Stream PDF untuk preview di browser (bukan langsung download)
+            return $pdf->stream('tickets-report-' . date('Y-m-d') . '.pdf');
+        } catch (\Throwable $e) {
+            \Log::error('PDF Export Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => explode("\n", $e->getTraceAsString())
+            ], 500);
         }
-
-        if ($request->filled('month')) {
-            $query->whereMonth('created_at', $request->month);
-        }
-
-        if ($request->filled('region_id')) {
-            $query->where('region_id', $request->region_id);
-        }
-
-        $tickets = $query->latest()->get();
-
-        // Ambil info region jika difilter
-        $selectedRegion = null;
-        if ($request->filled('region_id')) {
-            $selectedRegion = Region::find($request->region_id);
-        }
-
-        $selectedYear = $request->input('year');
-        $selectedMonth = $request->input('month');
-
-        // Generate PDF
-        $pdf = Pdf::loadView('admin.users-pdf', compact('tickets', 'selectedRegion', 'selectedYear', 'selectedMonth'))
-            ->setPaper('a4', 'landscape'); // ✅ Landscape untuk kolom lebih banyak
-
-        // ✅ Stream PDF untuk preview di browser (bukan langsung download)
-        return $pdf->stream('tickets-report-' . date('Y-m-d') . '.pdf');
     }
 
     /**

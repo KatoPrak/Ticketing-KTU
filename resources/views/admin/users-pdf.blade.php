@@ -395,12 +395,15 @@
             @endif
             <p class="period">Period: 
                 @php
-                    if (!empty($selectedYear) && !empty($selectedMonth)) {
-                        echo \Carbon\Carbon::createFromDate($selectedYear, $selectedMonth, 1)->format('F Y');
-                    } elseif (!empty($selectedYear)) {
+                    $hasYear = is_numeric($selectedYear);
+                    $hasMonth = is_numeric($selectedMonth) && $selectedMonth >= 1 && $selectedMonth <= 12;
+
+                    if ($hasYear && $hasMonth) {
+                        echo \Carbon\Carbon::createFromDate((int)$selectedYear, (int)$selectedMonth, 1)->format('F Y');
+                    } elseif ($hasYear) {
                         echo $selectedYear;
-                    } elseif (!empty($selectedMonth)) {
-                        echo \Carbon\Carbon::createFromDate(now()->year, $selectedMonth, 1)->format('F Y');
+                    } elseif ($hasMonth) {
+                        echo \Carbon\Carbon::createFromDate(now()->year, (int)$selectedMonth, 1)->format('F Y');
                     } else {
                         echo now()->format('F Y');
                     }
