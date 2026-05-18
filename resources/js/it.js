@@ -786,8 +786,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (files && files.length > 0) {
+                const compressionOptions = {
+                    maxSizeMB: 0.8,
+                    maxWidthOrHeight: 1600,
+                    useWebWorker: true,
+                    initialQuality: 0.7
+                };
+                
                 for (let i = 0; i < files.length; i++) {
-                    formData.append('attachments[]', files[i]);
+                    const file = files[i];
+                    if (file.type.startsWith('image/') && typeof imageCompression !== 'undefined') {
+                        try {
+                            const compressedFile = await imageCompression(file, compressionOptions);
+                            const finalFile = new File([compressedFile], file.name, { type: file.type });
+                            formData.append('attachments[]', finalFile);
+                            console.log(`✅ Compressed ${file.name}: ${(file.size/1024/1024).toFixed(2)}MB -> ${(compressedFile.size/1024/1024).toFixed(2)}MB`);
+                        } catch (error) {
+                            console.error('❌ Compression error:', error);
+                            formData.append('attachments[]', file);
+                        }
+                    } else {
+                        formData.append('attachments[]', file);
+                    }
                 }
             }
 
