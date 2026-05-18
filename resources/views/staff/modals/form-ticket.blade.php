@@ -118,9 +118,9 @@
                         <div class="col-12">
                             <label class="form-label fw-semibold">
                                 <i class="fas fa-paperclip me-1 text-secondary"></i> File Attachments
-                                <small class="text-muted">(optional, .jpg .png .jpeg .heif)</small>
+                                <small class="text-muted">(optional, .jpg .jpeg .png .heic .heif)</small>
                             </label>
-                            <input type="file" name="attachments[]" multiple accept="image/*" class="form-control">
+                            <input type="file" name="attachments[]" multiple accept=".jpg,.jpeg,.png,.heic,.heif" class="form-control">
                         </div>
                     </div>
                 </div>

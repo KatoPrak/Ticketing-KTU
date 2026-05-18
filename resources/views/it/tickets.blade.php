@@ -459,8 +459,8 @@
                     placeholder="Write ticket completion notes..."></textarea>
                 <div class="mt-3">
                     <label class="form-label fw-bold small text-uppercase text-muted">Attachments (Optional)</label>
-                    <input type="file" id="resolutionAttachments" class="form-control" multiple accept="image/*">
-                    <div class="form-text extra-small">Max 5MB per file. Formats: JPG, PNG, HEIC.</div>
+                    <input type="file" id="resolutionAttachments" class="form-control" multiple accept=".jpg,.jpeg,.png,.heic,.heif">
+                    <div class="form-text extra-small">Max 5MB per file. Formats: JPG, JPEG, PNG, HEIC, HEIF.</div>
                 </div>
             </div>
             <div class="modal-footer bg-light">
@@ -605,8 +605,8 @@
                         {{-- Attachments --}}
                         <div class="col-12">
                             <label class="form-label fw-bold small text-uppercase text-muted">Attachments (Optional)</label>
-                            <input type="file" name="attachments[]" class="form-control" multiple accept="image/*">
-                            <div class="form-text small">Max 5MB per file. Formats: JPG, PNG, HEIC.</div>
+                            <input type="file" name="attachments[]" class="form-control" multiple accept=".jpg,.jpeg,.png,.heic,.heif">
+                            <div class="form-text small">Max 5MB per file. Formats: JPG, JPEG, PNG, HEIC, HEIF.</div>
                         </div>
                     </div>
                 </div>
