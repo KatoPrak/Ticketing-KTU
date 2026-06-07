@@ -70,14 +70,15 @@ class TicketController extends Controller
         }
 
         // Render Blade
-        $tickets = $query->paginate(5);
+        $tickets = $query->paginate(5)->withQueryString();
 
         // HISTORY TICKETS dengan Feedback Relation
         $historyTickets = Ticket::with(['user.department', 'category', 'feedback'])
             ->where('user_id', Auth::id())
             ->whereIn('status', ['closed', 'resolved'])
             ->orderBy('resolved_at','desc')
-            ->paginate(10, ['*'], 'history_page');
+            ->paginate(10, ['*'], 'history_page')
+            ->withQueryString();
 
         return view('staff.tickets', compact('tickets', 'historyTickets'));
     }
